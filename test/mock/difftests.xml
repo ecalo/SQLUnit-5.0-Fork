@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: difftests.xml,v 1.7 2005/06/07 01:13:39 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/difftests.xml,v $
+  Desc: Input specification for running SQLUnit tests against a mock database.
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <diff name="Testing diff with exact equality">
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>aSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Diffing different result set/always matcher">
+    <match resultset-id="1" row-id="*" col-id="*"
+        matcher="net.sourceforge.sqlunit.matchers.AllOrNothingMatcher">
+      <arg name="match" value="true" />
+    </match>
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>anotherSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Diffing different result set/range matcher">
+    <match resultset-id="1" row-id="*" col-id="*"
+        matcher="net.sourceforge.sqlunit.matchers.RangeMatcher">
+      <arg name="tolerance" value="1" />
+    </match>
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>anotherSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Diffing different result set/pc-range matcher">
+    <match resultset-id="1" row-id="*" col-id="*"
+        matcher="net.sourceforge.sqlunit.matchers.PercentageRangeMatcher">
+      <arg name="pc-tolerance" value="100" />
+    </match>
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>anotherSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Diffing different result set/pc-match/range">
+    <match col-id="1-1"
+        matcher="net.sourceforge.sqlunit.matchers.PercentageRangeMatcher">
+      <arg name="pc-tolerance" value="100" />
+    </match>
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>anotherSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Diffing different result set/pc-match/enum">
+    <match col-id="1,1"
+        matcher="net.sourceforge.sqlunit.matchers.PercentageRangeMatcher">
+      <arg name="pc-tolerance" value="100" />
+    </match>
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>anotherSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Testing Typeless matching">
+    <match resultset-id="*" row-id="*" col-id="*"
+        matcher="net.sourceforge.sqlunit.matchers.TypelessMatcher" />
+    <call><stmt>multipleResults</stmt></call>
+    <call><stmt>anotherMultipleResultsDifferentTypes</stmt></call>
+  </diff>
+
+  <!-- :NOTE: this needs some matcher magic to remain here
+  <diff name="Diffing a resultset and exception">
+    <call><stmt>exceptionResult</stmt></call>
+    <call><stmt>aSimpleResult</stmt></call>
+  </diff>
+  -->
+
+  <teardown />
+
+</sqlunit>

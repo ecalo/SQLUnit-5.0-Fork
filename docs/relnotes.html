@@ -1,0 +1,219 @@
+<!-- $Id: relnotes.html,v 1.17 2006/06/25 23:19:23 spal Exp $ -->
+<!-- $Source: /cvsroot/sqlunit/sqlunit/docs/relnotes.html,v $ -->
+<!-- Desc: Contains release notes for the SQLUnit project -->
+<table cellspacing="3" cellpadding="0" border="0">
+  <tr>
+    <td valign="top"><b>June 25, 2006</b></td>
+    <td valign="top"><b>Version 5.0 released. </b>This version contains numerous bug fixes and feature enhancements contributed by users. Andrew Arch contributed new data type mappings for SQL Server, Brent Herbert contributed a fix for jarfile-url handling for the SQLUnit tools, Ivan Ivanov has enhanced SQLUnit reporting to be able to configure multiple reporters in a single SQLUnit test run, Paul King has contributed a patch to allow referencing and manipulation of Ant property variables from within SQLUnit and has refactored the code to make it less Unix specific and work against the latest library JARs, Andreas Kutschera contributed a patch to allow an optional name attribute for the sqlunit element, Lenggi has contributed a patch to make SQLUnit work with MySQL 5 stored procedures, Douglas Kvidera has provided a patch to allow OUTPARAMs as nested UDTs, and Chabatox has provided a bug fix for problems with implicit symbol resolution in OUTPARAMs. Many thanks to Sathi Chowdhury and others who reported problems with the code. SQLUnit has also been made to compile with Java 1.5, and going forward, SQLUnit will be distributed as a Java 1.5 JAR file. The current code should also compile under Java 1.4, so you can rebuild the JAR locally with Java 1.4 if you choose, but upcoming versions may not.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>July 20, 2005</b></td>
+    <td valign="top"><b>Version 4.9 released. </b>This version includes new tags for classifying tests into categories (classifiers) and skipping (skip) them based on a parameter, contributed by Ivan Ivanov, two new matchers contributed by Tim Cull, and a toolset to convert test output from the Canoo reporter to HTML contributed by James Henderson. Please see the user guide for more details. It also contains a bug fix to allow the caller to specify a type (class) name for user defined types, contributed by Greg Vatman. This release also contains fixes to correctly match outparams by id instead of by position and to have the include handler respect the transactional property of the Connection object it uses. Both these bugs were pointed out by James Henderson. SQLUnit also throws a full stack trace when it encounters an exception, regardless of whether it is in debug mode or not. This functionality was requested by Tim Cull.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>May 24, 2005</b></td>
+    <td valign="top"><b>Version 4.8 released. </b>This version fixes problems with the partial attribute not working in the last release, because matching was done by position rather than index, pointed out by Meghanath and Chris Snow. The same fix has been applied for the assertion "outparams-equal", pointed out by Greg Vatman. A new attribute "echo" has been added to the result tag to make it easier to debug problems in tests. Two new assertions, "none" and "not-exception", which assert nothing and that no exception occured respectively, have been added, both requested by Meghanath. The ExpressionMatcher is also new in this release, which allows the caller to provide a <a href="http://jakarta.apache.org/commons/jexl/reference/index.html">JEXL</a> expression in the match tag. This was built in response to a request for LessThan/GreaterThan matchers from Craeg Strong. The commons-jexl-1.0 and commons-logging libraries have been added to the distribution as a result. There is also a new TransformTool which allows callers to convert SQL information stored in proprietary XML to SQLUnit test XML files using XSLT, which was requested by Meghanath. Finally, based on a request from Greg Vatman to use SQLUnit in a web application environment, sqlunit.dtd is now shipped within the JAR file and is loaded as a resource. So the DOCTYPE for the SQLUnit tests can be specified simply by name and no longer needs to be specified as a relative or absolute URL, although the URL form will also work.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>May 04, 2005</b></td>
+    <td valign="top"><b>Version 4.7 released. </b>This version fixes bugs in variable substitution from Ant build file for non-default connections, pointed out by Che, and a bug in handling of the setup element, where the set tags were being executed twice, pointed out by Mark Niggemann. This release introduces a new transaction-support attribute "implicit", to fix a backward compatibility issue introduced in version 4.6 (see warning below) pointed out by Mark Niggemann. It also introduces a new attribute "partial" for the resultset and row elements, to indicate to SQLUnit that the expected resultset and row are partially specified, and that it should attempt to match only what is specified. This feature was requested by Chris Snow. A special value "NONE" for the resultset attribute order-by has been introduced to tell SQLUnit not to sort the rows in the resultset. Another new feature, requested by Chris Snow, is the ability to specify value sets in the value list format of the foreach tag, where a set of values can be specified per element of the value list and referenced later by index.<br />
+    <font color="red"><b>Warning: </b></font>Fixes to the transaction-support mode in version 4.6 may have created backward incompatible behavior for SQLUnit tests on Sybase and Microsoft SQL Server that run with transaction-support=off and CHAINED/IMPLICIT transaction mode. Please change the transaction-support attribute to "implicit" for these tests with SQLUnit 4.7 and later.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>April 13, 2005</b></td>
+    <td valign="top"><b>Version 4.6 released. </b>SQLUnit now has access to properties defined in the build.xml file for the calling SQLUnit Ant task when called from Ant. This feature was requested by Che. This version also contains fixes for bugs involving scaling for NUMERIC and DECIMAL data, first pointed out by James Henderson in version 4.4, problems with NULL values in the outparam and col tags, reported by James Henderson and Che, problems in SQLUnit when running without transaction-support, pointed out by Bern Holmes with a fix suggested by Jason Wilder, problems with debug information showing up in running in non-debug mode, pointed out by Oliver Hopton, and problems in autosorting NULL values, pointed out by James Henderson. In addition, xercesImpl.jar has been added to the lib directory in the distribution, and changes have been made to the build.xml to generate JavaCC artefacts into the src/net/sourceforge/sqlunit/parsers directory instead of src-gen/, mainly to make the code compile within the Eclipse IDE. Finally, the test.class parameter has been changed to testclass in the ant junit-test target to maintain parity with the testfile parameter for the sqlunit-flat target.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>March 05, 2005</b></td>
+    <td valign="top"><b>Version 4.5 released. </b>This version fixes bugs in exception handling which caused SQLUnit to fail on a test which was designed to thrown an exception, and where user variables were carried through to subsequent suites instead of being localized to a single suite. Both bugs were reported by Kumar Krishnan</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>January 29, 2005</b></td>
+    <td valign="top"><b>Version 4.4 released. </b>This contains five new tags (echo, funcdef, func, subdef and sub) contributed by Victor Alekseev. It also contains code changes to make the process of adding new tags simpler, also suggested by Victor. The new version also has a more efficient version of SymbolTable.replaceVariables(), in response to concerns from Victor. It contains a fix for a bug in handling connections within a transactional context, pointed out by David Fishburn and Victor from different perspectives. It contains numerous small packaging improvements designed to make building SQLUnit from source and using SQLUnit locally, all suggested by David Fishburn. Finally, it contains a new assertion "resultset-types-equal" which allows you to match types only (ignoring value) when matching the results of a test. See the release notes for more information.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>December 06, 2004</b></td>
+    <td valign="top"><b>Version 4.3 released. </b>This release fixes bugs with scaling issues in NUMERIC and DECIMAL datatypes, include file parsing problems for IF statements, and problems with reusing variables set as an lvalue from a SQL call, also reported. The first one was reported by James Henderson and the last two by David Fishburn. New features for this release include a completely rewritten GUITool from Arun Viswanath, a code contribution from Mark Niggemann which allows a user to set variables in SQLUnit from the results of Java method calls, and allowing the prepare tag within the diff tag. The mapping by which SQLUnit handles various datatypes from the database has been modified to conform to Sun's recommendations, so users dont have to make unnecessary type overrides. Thanks to James Henderson for pointing this out and supplying the link to the document.<br /><br />
+    <font color="red"><b>Warning: </b></font>Since the mappings have changed, you may have to do some overriding if your tests were depending on the incorrect mappings. Here are the mappings which have changed.<br />
+    <table cellspacing="0" cellpadding="0" border="1">
+      <tr>
+        <td><b>Data Type</b></td>
+        <td><b>Old Mapping</b></td>
+        <td><b>New Mapping</b></td>
+      </tr>
+      <tr>
+        <td>FLOAT</td>
+        <td>FloatType (java.lang.Float)</td>
+        <td>DoubleType (java.lang.Double)</td>
+      </tr>
+      <tr>
+        <td>NUMERIC</td>
+        <td>DoubleType (java.lang.Double)</td>
+        <td>BigDecimalType (java.math.BigDecimal)</td>
+      </tr>
+      <tr>
+        <td>VARBINARY</td>
+        <td>BinaryType (java.io.InputStream)</td>
+        <td>ByteArrayType (byte[])</td>
+      </tr>
+    </table><br />
+    As a result, the overrides for adaptive_server_anywhere.NUMERIC, adaptive_server_enterprise.NUMERIC, sybase_sql_server.NUMERIC, oracle.NUMERIC, postgresql.NUMERIC and mysql.FLOAT have been removed, since the mapping overrides are the same as the base mappings.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>November 30, 2004</b></td>
+    <td valign="top"><b>Arun Viswanath joins the project. </b>Arun has completely rewritten the SQLUnit GUITool to make it more user-friendly. He will go on to investigate possibilities of building SQLUnit plug-ins for different IDE environments.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>November 04, 2004</b></td>
+    <td valign="top"><b>Version 4.2 released. </b>This release supports an improved syntax for SQLUnit include files, a feature requested by Satish Chitnis. It also contains a fix for a bug when programatically supplying a Connection to SQLUnit with the Canoo Web Test Reporter plugin, pointed out and fixed by Jan Schroeder. It also adds type mappings for NUMERIC and SMALLINT for the JConnect and jTDS Sybase JDBC drivers, contributed by Mark Niggemann.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>September 30, 2004</b></td>
+    <td valign="top"><b>Version 4.1 released. </b>This release fixes some bugs pointed out by Chris Watts, Arun Viswanath and Jojo Agye, as well as some noticed during refactoring (see release notes). It contains a new matcher, the TypelessPercentageMatcher, contributed by Chris Watts. SQLUnit now supports putting match elements within test tags as well as diff tags, as well as a new assertion "resultset-values-equal", which ignores the type of the variable. This feature was requested by Chris Watts. SQLUnit now also allows terminating a SQL statement in included files with a trailing semi-colon. This feature was requested by Sathis Chitnis. The user-guide has gone back to the multi-page format, but based on a request from Brian E Dick, it provides links to a printable (single page HTML) and a downloadable version of the user guide. The documentation has been updated and new sections added. Some new SQLUnit mock tests have been added. Some more refactoring work has been done, and the source tree (src/) is now Checkstyle-compliant.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>September 08, 2004</b></td>
+    <td valign="top"><b>Version 4.0 released. </b>This release provides automatic sorting of resultsets by their natural order by default, and allows users to specify a non-default sort order if desired. This feature was requested by Jorge Orgarza. It also contains changes to the set tag to allow non-scalar sets using an embedded SQL or stored procedure call, a feature requested by James Henderson. SQLUnit now also allows custom asserts by specifying an assert attribute in the test, diff and batchtest tags. This feature was inspired by a chance remark from Matthew McEachen. David Fishburn has added a new suite of SQLUnit tests for Sybase ASA for this release. This release also contains some bug fixes for bugs reported by James Henderson when trying to run the MySQL tests. In addition, there has been a lot of refactoring, and the documentation has been considerably updated.<br />
+    <font color="red"><b>Warning: </b></font>The IJavaObject interface which users had to implement when trying to simulate Java Objects in BLOBs with the java-object-support feature turned on is now deprecated and has been removed, please implement the java.io.Serializable interface instead.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>August 18, 2004</b></td>
+    <td valign="top"><b>Version 3.9 released. </b>This release contains a new User-defined Type feature which was requested and initiated by Ralph Brendler, fixes and patches for bugs pointed out by Omer Suleman, Ken Kress and James Henderson (see release notes for details), and lots of refactoring to make the code more maintainable and to add support for sortable resultsets (which is still not implemented). This release allows specifying static variables in the SQL in the sql and call tags which will be replaced with values of variables defined earlier in the test, a feature requested by James Henderson. It also adds two new attributes expected-duration-millis and percentage-tolerance to the test tag to allow the caller to specify a time that the test should take (which is validated to be within the percentage-tolerance), a feature requested by Jorge Orgarza.</tr>
+  </tr>
+  <tr>
+    <td valign="top"><b>July 08, 2004</b></td>
+    <td valign="top"><b>David Fishburn joins the project</b>. David has suggested various improvements and found bugs, and is now working on the demo test suite for Sybase ASA.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>July 07, 2004</b></td>
+    <td valign="top"><b>Version 3.8 released</b>. This release contains:<br /> 
+    - Two new handlers, MethodInvokerHandler and DynamicSqlHandler, developed by Mario Laureti.<br />
+    - A new connection tag attribute @reconnect-on-failure which, when turned on, will destroy and recreate the connection in the event of a failure or exception in one of the tests. This feature was requested by David Fishburn, to work around a bug in the Sybase ASA JDBC driver which leaves the Connection in an inconsistent state when an exception occurs.<br />
+    - SQLUnit now uses Jalopy to specify the preferred format for SQLUnit code. You can run ant jalopy-format to reformat the code in the contrib directory. This was mostly due to work done by Mario Laureti.<br />
+    - Improvements to the Mock testing framework and a fairly complete mock regression test suite for SQLUnit.<br />
+    - Bug fixes for LOB handling with MD5, and in the foreach tag which were discovered when trying to run the mock tests.<br />
+    - Some more refactoring work has been done in order to make the code easier to read and maintain. Some new classes have been added as a result of the refactoring.<br />
+  </tr>
+  <tr>
+    <td valign="top"><b>June 11, 2004</b></td>
+    <td valign="top"><b>Version 3.7 released</b>. This release contains fixes for bugs reported with getting Connections using JNDI reported by Satheesh Donthy. Satheesh has also contributed a patch to fix a bug getting Connections using information from an external properties file. He has also contributed a sample SQLUnit test file for Oracle. This release also adds an extra name attribute for the param element for better readability, a feature requested by Satheesh. The release also contains some tweaks to the build.xml file to allow the user's CLASSPATH to be preserved when executing tasks from within the supplied build.xml file, a feature requested by David Fishburn and Ezra Epstein. To assist in debugging SQLUnit, both Satheesh and David requested that SQLUnit throw a stack trace when erroring out abnormally, and this feature has been added as well. David has also suggested numerous improvements in the process of making his tests run under SQLUnit, all of which have been implemented. This release also fixes some bugs with result matching, which was pointed out by Ezra Epstein. This release also allows testing cases where a return code and an exception is returned from a stored procedure, a feature requested by Ken Bowen. Finally, this version includes a Mock Testing framework for SQLUnit using the <a href="http://mockrunner.sourceforge.net">MockRunner project</a> which allows the SQLUnit team to field SQLUnit bugs on databases we do not own.
+    <br />
+  </tr>
+  <tr>
+    <td valign="top"><b>May 27, 2004</b></td>
+    <td valign="top"><b>SQLUnit Website gets a facelift</b>. The design was contributed by Jamie Harrop of <a href="http://www.wy-media.co.uk">WY Media</a> to the <a href="http://www.oswd.org">Open Source Web Design</a> site, where I got the template from. The content on this page is the same as before.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>May 26, 2004</b></td>
+    <td valign="top"><b>Version 3.6 released</b>. This version contains numerous patches and feature enhancements contributed by many people. Ken Kress contributed a patch to fix a bug that was causing SQLUnit to process tests that followed a failed test incorrectly. Rob Nielson and Paul King contributed a patch to decouple the reporting functionality and allowing plug-in reporters for other test frameworks. They also contributed the plug-in for <a href="http://webtest.canoo.com">Canoo Web Test</a>. It also contains a fix for a bug with the GUI tool reported by Dave Fishburn.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>May 19, 2004</b></td>
+    <td valign="top"><b>Mario Laureti joins the project.</b> Mario has already contributed some patches to improve on the feature enhancement he requested that became available in version 3.5. These improvements will be available in version 3.6. He is currently working on adding a new handler to generate dynamic SQL statements for SQLUnit to test.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>May 10, 2004</b></td>
+    <td valign="top"><b>Version 3.5 released</b>. This version fixes bugs with the incorrect handling of nested param elements within a foreach element, reported by Mario Laureti. It fixes another bug, reported by Ken Bowen, where Sybase stored procedures involving an identity column would return an unexpected update count value, which was causing SQLUnit to report incorrect results under certain testing scenarios. This version also adds the capability to use variables created using the set tag in all tags except the result tag.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>March 08, 2004</b></td>
+    <td valign="top"><b>Version 3.4 released</b>. This version adds the log4j.properties file to the distribution, pointed out by Damon Torgerson. The web site adds a user-contributed FAQ and some documentation corrections and improvements pointed out by Damon Torgerson and Timothy Howe.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>February 24, 2004</b></td>
+    <td valign="top"><b>Version 3.3 released</b>. This version contains a bug fix for comparing "large" objects such as BLOBs, CLOBs, LONGVARBINARY and LONGVARCHAR objects, against external files. The bug was reported by Damon Torgerson.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>February 05, 2004</b></td>
+    <td valign="top"><b>Version 3.2 released</b>. This version does some general refactoring of the code, removing unnecessary import statements, etc. The debug option also behaves differently now, it uses log4j to output a very verbose trace on the console, to aid in future remote debugging efforts. It adds a Foreach tag which allows you to run a batch of SQL statements with replaceable parameters which take their value from the current element in the foreach sequence. The Foreach element was suggested by Andrei Grigoriev, who later found a way to do this with native Oracle PL/SQL. The release also contains some feature enhancements requested by Andrei to make it more convenient to run large suites of tests, such as making SQLUnit throw its stack trace when a test fails, and outputting the name of the current test file being parsed. The release also contains bug fixes for bugs pointed out by Damon Torgerson relating to matching with results contained in operating system files.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>January 16, 2004</b></td>
+    <td valign="top"><b>Version 3.1 released</b>. This version fixes bugs, reported by Andrei Grigoriev, related to Oracle CURSOR handling in SQLUnit outparam tags. Andrei has also run SQLUnit through some very extensive testing with Oracle for this release. This version also has support for multiple include tags in the teardown tag, a feature requested by Damon Torgerson, which was missed in the previous release.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>January 08, 2004</b></td>
+    <td valign="top"><b>Version 3.0 released</b>. This version removes the IHandler.process(Element,Connection) method deprecated in version 2.7. This version also contains a new handler for the prepare tag used for per test setup, contributed by Andrei Grigoriev. It also allows specifying connection information outside the test specification XML files, in Java property files, a feature requested by Andrei to allow for running the same test suite against multiple database environments. This feature also allows specifying multiple include tags within the setup tag, a feature requested by Damon Torgerson.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>December 09, 2003</b></td>
+    <td valign="top"><b>Version 2.9 released</b>. This version adds one new but very important feature. SQLUnit now has the ability to get Connection objects from JDBC JAR files which are not in the CLASSPATH but whose location can be specified using the Connection.Jarfile-Url element. Thanks to Campbell Boucher-Burnet for suggesting the solution.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>November 24, 2003</b></td>
+    <td valign="top"><b>Version 2.8 released</b>. This version adds a multi-threaded option to the Diff element, which allows the two calls to execute in parallel and build the results, resulting in time savings when running complex SQL queries. It also adds the ability for SQLUnit to get Connection objects by looking up pre-defined DataSource objects from JNDI servers. The first feature was requested by Simon J Gibbs and the second one is in response to a requirement from Campbell Boucher-Burnet.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>November 20, 2003</b></td>
+    <td valign="top"><b>Version 2.7 released</b>. This version adds functionality for multiple connections in the same SQLUnit test, a new Diff tag to compare results issued from two different stored procedure calls or SQL statements, and a Match tag for user-defined matching criteria. These changes are backwards compatible, so existing SQLUnit scripts will still work without change. The Diff and Match tags were driven off feature requests made by Simon J Gibbs.<br />
+    <font color="red"><b>Warning: </b></font>Tools which use the SQLUnit API directly will also work, the use of the IHandler.process(Element,Connection) has been deprecated and replaced with IHandler.process(Element). The deprecated method currently delegates to the newer method, since all Handlers that need a Connection can now pull it out of the ConnectionRegistry. The deprecated method will be removed starting with version 3.0</br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>November 12, 2003</b></td>
+    <td valign="top"><b>Version 2.6 released</b>. This version adds functionality to SQLUnit to support JDBC batch execution, in response to a request from Campbell Boucher-Burnet.</br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>October 31, 2003</b></td>
+    <td valign="top"><b>Sahib Singh Wadhwa joins the project.</b> Sahib is working on the Oracle port for SQLUnit. He has already submitted several bug fixes, and is actively working to make SQLUnit run with his Oracle PL/SQL stored procedures.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>October 29, 2003</b></td>
+    <td valign="top"><b>Version 2.5 released</b>. This version contains a working version of the SQLUnit GUI Tool and a generic SQLUnit TUI Tool. The original version of the GUI Tool was contributed by Mohan Iyer. The original version of the TUI tool was contributed by Sahib Singh Wadhwa. There are also some bug fixes pointed out by Sahib Singh Wadhwa, and fixes for bugs reported by Alexa Kirk and Campbell Boucher-Burnet.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>October 16, 2003</b></td>
+    <td valign="top"><b>Version 2.4 released</b>. This version fixes some bugs reported by Sowmya Shetty with the input tag handling. It also introduces experimental support for Oracle CURSOR types requested by Sahib Singh Wadhwa as resultset elements within outparam elements. This release also contains an experimental Text UI for SQLUnit contributed by Sahib.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>October 11, 2003</b></td>
+    <td valign="top"><b>Version 2.3 released</b>. This version fixes some more bugs in the outparam handling and the include statement reported by Sowmya Shetty and Lakshmi..<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>October 8, 2003</b></td>
+    <td valign="top"><b>Version 2.2 released</b>. This version fixes some more outparam bugs reported by Sowmya Shetty and Lakshmi. It also contains a patch contributed by James C E Johnson to make SQLUnit callable from clients other than ant. This version of SQLUnit also has logging compatible with Ant logging instead of dumping output to STDERR, so standard Ant loggers can be used to capture the output of SQLUnit tests. This feature was requested by Jan Schroeder.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>September 29, 2003</b></td>
+    <td valign="top"><b>Version 2.1 released</b>. This version fixes some bugs in the SQLUnit DTD, and fixes persistent bugs in the outparam and variable handling. It also adds a new attribute is-null to the param element so the caller can specify NULL parameters to stored procedure calls. These changes were driven by bugs and feature requests from Sowmya Shetty.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>September 26, 2003</b></td>
+    <td valign="top"><b>Version 2.0 released</b>. This version fixes a bug in the SQLUnit DTD and the handling of symbols in outparam elements. These bugs were found by Sowmya Shetty.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>September 24, 2003</b></td>
+    <td valign="top"><b>Version 1.9 released</b>. This version contains a patch for null outparams contributed by Atilla Doroszlai, and a bug fix for invalid handling of null output found by Cassiano Sombrio. It also contains a feature request submitted by James C E Johnson for a failure message tag.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>September 05, 2003</b></td>
+    <td valign="top"><b>Version 1.8 released</b>. This version extends the Ant SQLUnit task to support more configuration options. The features were requested by James C E Johnson; he also helped with ideas for their implementation.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>July 25, 2003</b></td>
+    <td valign="top"><b>Version 1.7 released</b>. This version fixes some bugs in LOB handling and Java Object Support feature introduced in version 1.51<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>July 3, 2003</b></td>
+    <td valign="top"><b>Version 1.51 released</b>. This version adds support for non-native Java Objects and Large Objects (BLOB/CLOB) in SQLUnit.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>May 27, 2003</b></td>
+    <td valign="top"><b>Version 1.4 released</b>. This version adds testing hooks for stored procedure output parameters, adds timing information to the SQLUnit test output and fixes a packaging bug (no DTD in binary download) pointed out by Arjen Stolk.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>May 24, 2003</b></td>
+    <td valign="top"><b>Version 1.3 released</b>. This version adds Sybase support and few minor bug fixes in the CallHandler module. SQLUnit now has configurable transaction support and the ability to parse empty resultsets.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>May 20, 2003</b></td>
+    <td valign="top"><b>Brian Ball joins the project.</b> Brian is working on the Oracle port for SQLUnit.</td>
+  </tr>
+  <tr>
+    <td valign="top"><b>May 6, 2003</b></td>
+    <td valign="top"><b>Version 1.1 released</b>. This version adds the SQLUnit custom task for Ant and adds more information to the user guide.<br /></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>May 4, 2003</b></td>
+    <td valign="top"><b>Version 1.0 released</b>. This is a full-featured release but has only been tested on PostgreSQL and to some extent on MySQL. Future versions will be certified on other commercial databases as they become available to the project team.<br /></td>
+  </tr>
+</table>

@@ -1,0 +1,121 @@
+# $Id: README,v 1.1 2004/07/09 03:12:44 dfishburn Exp $
+# $Source: /cvsroot/sqlunit/sqlunit/test/asa/README,v $
+# $Revision: 1.1 $
+
+Background Information
+----------------------
+
+This test was setup using Sybase Adaptive Server Anywhere 9.0.1.1883.
+Please read the "Choosing a JDBC Driver section below".
+
+
+System Description
+------------------
+The test suite simulates a Human Resources (HR) department.
+You can create new departments (IT, HR), then create new employees and 
+assign them to a given department.  When adding employees, you can specify
+hourly rates, birthdate and social insurance number.  Employee hour rates can
+be updated.
+
+Employees can add daily timesheets and monthly reports can be run for
+each department summarizing the timesheets.
+
+
+How to run the test
+-------------------
+1. Create a new ASA database:
+        dbinit asatest.db
+
+2. Start the database:
+        dbeng9 asatest.db
+        
+3. The creation of the schema and data is performed during the test.
+   Each time the test is run, the tables are dropped and recreated via the
+   <setup> section of test.xml.  The database DDL is provided in the
+   schema.sql.  The test models a very simple-minded Human Resources database
+   with only three tables: department, employee and timecard.
+
+4. Database Schema
+
+   Database Tables:
+     schema.sql - Contains the schema for the HR application.
+
+   Stored Procedures:
+     add_dept.sql           - adds a named department to the department table.
+     add_employee.sql       - adds a named employee to the employee table.
+                              and assigns him to the named department.
+     add_timecard.sql       - adds a timecard for a given employee and a 
+                              given date. Rudimentary checking is done, 
+                              eg, 0 < logged_time < 24.
+     get_depts.sql          - returns a list of departments.
+                              If a department id is supplied, only the details
+                              for that department are returned.
+     get_emp_in_dept.sql    - returns a list of all employees in a named
+                              department.
+     get_emp_by_name.sql    - returns the employee record for a named 
+                              employee.
+     get_mthly_dept_rpt.sql - returns a report of hours worked by employee
+                              for a given department and a given date range.
+     upd_rate.sql           - updates the hourly rate for a particular employee.
+
+5. The test.xml file contains the test suite. You can run it with the
+   following command at the command prompt from the sqlunit root directory:
+     ant sqlunit -Dtestfile=test/asa/test.xml
+
+
+Choosing a JDBC Driver
+----------------------
+
+The test suite by default uses the iAnywhere JDBC driver to connect
+to the ASA database, you must be using version 9.0.1.1883 or above of ASA
+for the test to work as expected.  It is also possible to use the
+Sun JDBC-ODBC bridge.  To change which JDBC driver the test suite uses
+read the <connection> section in the test.xml file.
+
+--------------------------------------------------------------------------------
+ASA Programming Guide 
+    JDBC Programming 
+        JDBC overview 
+            Choosing a JDBC driver
+--------------------------------------------------------------------------------
+
+Two JDBC drivers are provided for Adaptive Server Anywhere:
+
+jConnect    
+    This driver is a 100% pure Java driver. It communicates with Adaptive
+    Server Anywhere using the TDS client/server protocol.
+
+    For jConnect documentation, see  http://sybooks.sybase.com/jc.html.
+
+iAnywhere JDBC driver    
+    This driver communicates with Adaptive Server Anywhere using the Command
+    Sequence client/server protocol. Its behavior is consistent with ODBC,
+    embedded SQL, and OLE DB applications. 
+
+When choosing which driver to use, you may want to consider the following
+factors:
+
+Features    
+    Both drivers are JDK 2 compliant. The iAnywhere JDBC driver provides
+    fully-scrollable cursors, which are not available in jConnect. 
+
+Pure Java    
+    The jConnect driver is a pure Java solution. The iAnywhere JDBC driver
+    requires the Adaptive Server Anywhere ODBC driver and is not a pure Java
+    solution. 
+
+Performance    
+    The iAnywhere JDBC driver provides better performance for most purposes
+    than the jConnect driver. 
+
+Compatibility    
+    The TDS protocol used by the jConnect driver is shared with Adaptive Server
+    Enterprise. Some aspects of the driver's behavior are governed by this
+    protocol, and are configured to be compatible with Adaptive Server
+    Enterprise. 
+
+Both drivers are available on Windows 95/98/Me and Windows NT/2000/XP, as well
+as supported UNIX and Linux operating systems. They are not available on
+NetWare or Windows CE.
+
+

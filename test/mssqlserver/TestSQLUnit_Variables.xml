@@ -1,0 +1,346 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd" [
+    <!ENTITY jdbc-url SYSTEM "file:test/mssqlserver/jdbc-url.txt">
+]>
+<!-- $Id: TestSQLUnit_Variables.xml,v 1.2 2005/06/07 01:13:40 spal Exp $ -->
+<!-- $Source: /cvsroot/sqlunit/sqlunit/test/mssqlserver/TestSQLUnit_Variables.xml,v $ -->
+<sqlunit>
+    <!-- ********************************************************************************     //-->
+    <!--                                                                                   //-->
+    <!-- Test Case:    TestSQLUnit_Variables                                            //-->
+    <!--                                                                                   //-->
+    <!-- Purpose:        This test will perform usage tests of variables within            //-->
+    <!--                    SQLUnit.                                                                //-->
+    <!--                                                                                   //-->
+    <!--    Issue:                                                                                //-->
+    <!--        http://sourceforge.net/forum/forum.php?thread_id=1125543&forum_id=265576    //-->
+    <!--                                                                                            //-->
+    <!--    Fixed in:    SQLUnit 3.9, 4.0                                                    //-->
+    <!-- ********************************************************************************     //-->
+    <!-- *****************************    **    //-->
+    <!--  Connection set-up information    //-->
+    <!-- *****************************    **    //-->
+    <connection server-name="microsoft_sql_server">
+        <driver>com.microsoft.jdbc.sqlserver.SQLServerDriver</driver>
+        &jdbc-url;
+        <user>sqlunit</user>
+        <password>sqlunit</password>
+    </connection>
+    <!-- ********    //-->
+    <!-- Set up     //-->
+    <!-- ********    //-->
+    <setup>
+        <!-- Define variables as constants -->
+        <set name="${FALSE}" value="0"/>
+        <set name="${TRUE}" value="1"/>
+        <!-- Set a variable using the non-scalar form of the set tag -->
+        <set name="${SetByQueryVar}">
+            <sql>
+                <stmt>select 5 + 2 - 3 * 4 / 1</stmt>
+            </sql>
+            <result>
+                <resultset id="1">
+                    <row id="1">
+                        <col id="1" type="INTEGER">${col1}</col>
+                    </row>
+                </resultset>
+            </result>
+        </set>
+        <!-- Create a temp table for testing -->
+        <sql>
+            <stmt>
+                create table dbo.#tblTest
+                (
+                    id                integer    identity,
+                    intvalue        integer
+                )
+            </stmt>
+        </sql>
+        <!-- Load temp table with some data -->
+        <sql>
+            <stmt>
+                insert into dbo.#tblTest 
+                    (intvalue)
+                values 
+                    (1)
+            </stmt>
+        </sql>
+        <sql>
+            <stmt>
+                insert into dbo.#tblTest 
+                    (intvalue)
+                values 
+                    (2)
+            </stmt>
+        </sql>
+        <sql>
+            <stmt>
+                insert into dbo.#tblTest
+                    (intvalue)
+                values 
+                    (3)
+            </stmt>
+        </sql>
+    </setup>
+    <!-- *****************    //-->
+    <!-- Tests to perform    //-->
+    <!-- *****************    //-->
+    <!-- The following test always returns false as 0 and the test should fail, since ${FALSE} has already been set and     -->
+    <!-- should now be treated as an rvalue                                                                -->
+    <test name="Test SQLUnit Variables_1: Using RValues as constants" assert="not-equal">
+        <sql>
+            <stmt>
+                select    intvalue 
+                from        dbo.#tblTest
+                where        id=1
+            </stmt>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">${FALSE}</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_2: Test value of variable set using the non-scalar form of the set tag">
+        <sql>
+            <stmt>select ?</stmt>
+            <param id="1" type="INTEGER">${SetByQueryVar.col1}</param>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">-5</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_3: Positive test for variable used as RValue parameter (i.e., a constant) within select statement">
+        <sql>
+            <stmt>
+                select    intvalue
+                from        dbo.#tblTest
+                where        id &gt; ${TRUE}
+            </stmt>
+        </sql>
+        <result id="1">
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">2</col>
+                </row>
+                <row id="1">
+                    <col id="1" type="INTEGER">3</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_4: Positive test for variable used as RValue (i.e., a constant)">
+        <sql>
+            <stmt>select 1</stmt>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">${TRUE}</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_5: Test for variable used as an LValue (i.e., value of variable set for the first time)">
+        <sql>
+            <stmt>select 123</stmt>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">${TestResult}</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_6: Ensure that variable used as LValue has the expected value (Part 1)">
+        <sql>
+            <stmt>select dbo.SQLUnit_TestValueMatch(123,?)</stmt>
+            <param id="1" type="INTEGER">${TestResult}</param>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">${TRUE}</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_7: Ensure that variable used as LValue has the expected value (Part 2)">
+        <sql>
+            <stmt>select dbo.SQLUnit_TestValueMatch(456,?)</stmt>
+            <param id="1" type="INTEGER">${TestResult}</param>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">${FALSE}</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_8: Test variables using foreach tag">
+        <prepare>
+            <foreach param="myvar" start="1" stop="3" step="1">
+                <sql>
+                    <stmt>
+                        update    dbo.#tblTest
+                        set        intvalue=${myvar}*3
+                        where        id=${myvar}
+                    </stmt>
+                </sql>
+            </foreach>
+        </prepare>
+        <sql>
+            <stmt>
+                select intvalue from dbo.#tblTest
+            </stmt>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">3</col>
+                </row>
+                <row id="2">
+                    <col id="1" type="INTEGER">6</col>
+                </row>
+                <row id="3">
+                    <col id="1" type="INTEGER">9</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_9: Test variables using variable as parameter within UPDATE statement">
+        <sql>
+            <stmt>
+                update     dbo.#tblTest
+                set        intvalue=?
+                where        id=1
+            </stmt>
+            <param id="1" type="INTEGER">${TestResult}</param>
+        </sql>
+        <result>
+            <updatecount>1</updatecount>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_10: Validate results of previous test">
+        <sql>
+            <stmt>
+                select    intvalue 
+                from        dbo.#tblTest
+                where        id=1
+            </stmt>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">123</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_11: Test variables using variable directly within UPDATE statement">
+        <sql>
+            <stmt>
+                update dbo.#tblTest
+                set        intvalue=${TestResult}*2
+                where        id=1
+            </stmt>
+        </sql>
+        <result>
+            <updatecount>1</updatecount>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_12: Validate results of previous test">
+        <sql>
+            <stmt>
+                select    intvalue 
+                from        dbo.#tblTest
+                where        id=1
+            </stmt>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">246</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_13: Test variables using variable as parameter within INSERT statement">
+        <sql>
+            <stmt>
+                insert into    dbo.#tblTest
+                    (intvalue)
+                values
+                    (?)
+            </stmt>
+            <param id="1" type="INTEGER">${TestResult}</param>
+        </sql>
+        <result>
+            <updatecount>1</updatecount>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_14: Validate results of previous test">
+        <sql>
+            <stmt>
+                select    intvalue 
+                from        dbo.#tblTest
+                where        id=4
+            </stmt>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">123</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_15: Test variables using variable directly within INSERT statement">
+        <sql>
+            <stmt>
+                insert into    dbo.#tblTest
+                    (intvalue)
+                values
+                    (${TestResult}*3)
+            </stmt>
+        </sql>
+        <result>
+            <updatecount>1</updatecount>
+        </result>
+    </test>
+    <test name="TestSQLUnit_Variables_16: Validate results of previous test">
+        <sql>
+            <stmt>
+                select    intvalue 
+                from        dbo.#tblTest
+                where        id=5
+            </stmt>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">369</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <!-- *******    //-->
+    <!-- Cleanup    //-->
+    <!-- *******    //-->
+    <teardown>
+        <!-- Drop the temporary table.  (Not required, since it will be done automatically.) -->
+        <sql>
+            <stmt>
+                drop table dbo.#tblTest
+            </stmt>
+        </sql>
+    </teardown>
+</sqlunit>

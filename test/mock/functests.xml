@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: functests.xml,v 1.5 2005/06/07 01:13:40 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/functests.xml,v $
+  Desc: Input specifications for mock testing the func element.
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <!-- Defining the funcs -->
+
+  <setup>
+    <funcdef name="dbname1def" query="selectDatabase"
+        description="Defining a func without parameters" />
+    <funcdef name="dbname2def" query="select${0}"
+        description="Defining a func with parameters" />
+  </setup>
+
+  <!-- 
+    Run the funcs and echo the result (compare automatically by setting
+    value attributes)
+  -->
+
+  <func name="dbname1" lookup="dbname1def" />
+
+  <echo name="result for dbname1" text="Got result from dbname1: ${dbname1}"
+      value="Got result from dbname1: mockdatabase" />
+
+  <func name="dbname2" lookup="dbname2def" param0="Database" />
+
+  <echo name="result for dbname2" text="Got result from dbname2: ${dbname2}"
+      value="Got result from dbname2: mockdatabase" />
+      
+  <!--
+  <echo name="bad result for dbname2" text="Got result from dbname2: ${dbname2}"
+      value="Retrieved result from dbname2: mockdatabase" />
+  -->
+
+  <teardown />
+
+</sqlunit>

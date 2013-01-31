@@ -1,0 +1,40 @@
+# $Id: README,v 1.3 2003/07/25 19:40:13 spal Exp $
+# $Source: /cvsroot/sqlunit/sqlunit/test/mysql/README,v $
+Does not strictly belong to a test suite, since MySQL does not support
+stored procedures, but included here to demonstrate that SQLUnit is not
+limited to regression testing stored procedures only. In case you need
+to do development for SQLUnit and dont have access to a database that
+supports stored procedures, you can use a strategy similar to the one I 
+used.
+
+Running the LOB tests
+
+There are two XML files in this directory. The first, test.xml, tests for
+the behavior of BLOBS and CLOBS and verifies that the implementation for
+the File and MD5 stuff is correct. The second, test-jos.xml, tests
+specifically for the Java Object Support functionality described in the
+user guide.
+
+To run these tests, first make sure that you have a schema similar to the
+one I tested with. The details can be found in the schema.sql file. Then
+you need to populate your database. In addition to running the ant compile
+task to compile the SQLUnit proper, you will need to run a second target:
+
+ant compile-test
+
+to compile the MySQL test classes relating to LOB support and Java Object
+support. Finally you will need to run:
+
+ant lob-test -Dengine=mysql
+
+to populate the database with blob columns and to generate .ser and .xml 
+files for the Java objects to test with later. You will probably need to 
+change the test somewhat to replace the md5 checksums with the ones 
+generated on your box. To get the md5 checksum for test#3 in test.xml,
+simply run:
+
+md5sum /tmp/Dictionary-Larry.ser
+
+and replace the md5sum generated in the text portion of the <col id=2> element
+for tests 3, 4, 5 and 6.
+

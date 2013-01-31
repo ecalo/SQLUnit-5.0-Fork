@@ -1,0 +1,30 @@
+Directions to extract the files
+1. Run "gunzip <filename>" on all the files.   Eg. lnx_920_disk1.cpio.gz
+2. Extract the cpio archives with the command "cpio -idmv < <filename>"   Eg. cpio -idmv <lnx_920_disk1.cpio
+Important Note: Some browsers will uncompress the files but leave the extension the same (gz) when downloading.  If the above steps do not work for you, try skipping step 1 and go directly to step 2 without changing the filename. Eg. "cpio -idmv <Linux9i_Disk1.cpio.gz"
+
+Get Oracle Software on CD
+OTN TechTracks are a 1 year subscription to Oracle9i software on CD.  You also get access to KnowledgeBase, an online resource of technical support information updated daily by Oracle's support organization. Go here to learn more about the tracks and start a subscription.
+
+# $Id: README,v 1.1 2003/10/14 00:58:43 spal Exp $
+# $Source: /cvsroot/sqlunit/sqlunit/test/oracle/README,v $
+# This file contains additional datatypes defined by Oracle which are not
+# part of the regular JDBC data types. Since SQLUnit aims to be database
+# agnostic, this creates a problem since for Oracle stored procedures to 
+# run, we need to include the Oracle JDBC driver. Changes to the Oracle
+# datatypes will may require redefinition of constants in this file.
+#
+JAVA_STRUCT=2008
+BFILE=-13
+TIMESTAMPTZ=-101
+NUMBER=2
+FIXED_CHAR=999
+TIMESTAMPNS=-100
+TIMESTAMPLTZ=-102
+PLSQL_INDEX_TABLE=-14
+ROWID=-8
+RAW=-2
+CURSOR=-10
+INTERVALDS=-104
+OPAQUE=2007
+INTERVALYM=-103

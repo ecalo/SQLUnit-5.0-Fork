@@ -1,0 +1,609 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd" [
+    <!ENTITY jdbc-url SYSTEM "file:test/mssqlserver/jdbc-url.txt">
+]>
+<!-- $Id: TestSQLUnit_TestNumericDecimal.xml,v 1.2 2005/06/07 01:13:40 spal Exp $ -->
+<!-- $Source: /cvsroot/sqlunit/sqlunit/test/mssqlserver/TestSQLUnit_TestNumericDecimal.xml,v $ -->
+<sqlunit>
+    <!-- ********************************************************************************     //-->
+    <!--                                                                                   //-->
+    <!-- Test Case:    TestSQLUnit_TestNumericDecimal                                //-->
+    <!--                                                                                   //-->
+    <!-- Purpose:        This test will perform usage tests of NUEMRIC and             //-->
+    <!--                    DECIMAL parameter types within SQLUnit.                    //-->
+    <!--                                                                                   //-->
+    <!--    Issue:                                                                                //-->
+    <!--        http://sourceforge.net/forum/forum.php?thread_id=1176084&forum_id=265576    //-->
+    <!--                                                                                            //-->
+    <!--    See Also:                                                                            //-->
+    <!--        "Error with BigDecimal used as stored procedure parameter" topic in        //-->
+    <!--        microsoft.public.sqlserver.jdbcdriver                                    //-->
+    <!--                                                                                            //-->
+    <!--    Fixed in:    SQLUnit 4.6                                                            //-->
+    <!-- ********************************************************************************     //-->
+    <!-- *************************************************************************     //-->
+    <!-- *****************************    **    //-->
+    <!--  Connection set-up information    //-->
+    <!-- *****************************    **    //-->
+    <connection server-name="microsoft_sql_server">
+        <driver>com.microsoft.jdbc.sqlserver.SQLServerDriver</driver>
+        &jdbc-url;
+        <user>sqlunit</user>
+        <password>sqlunit</password>
+    </connection>
+    <test name="TestSQLUnit_TestNumericDecimal_1: Testing NUMERIC and DECIMAL data types ">
+        <sql>
+            <stmt> 
+                select    cast('300.12' AS NUMERIC(5,2)) as "numeric_value",                 
+                            cast('301.13' AS DECIMAL(5,2)) as "decimal_value" 
+            </stmt>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="01" name="numeric_value" type="NUMERIC">300.12</col>
+                    <col id="02" name="decimal_value" type="DECIMAL">301.13</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_2: Testing SQLUnit_TestNumericDecimal with param1 = NULL, output-only NUMERIC, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <!--    Need to adjust the scale, if you want 5.26 as the outparam value, otherwise the scale defaults to    -->
+            <!--    the scale of the value associated with the output-only parameter before the stored proc call.        -->
+            <!--    In this case, the parameter    has a value of NULL, which provides a scale of 0.                 -->
+            <param id="1" type="NUMERIC" inout="out" is-null="true" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">5</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_3: Testing SQLUnit_TestNumericDecimal with param1 = NULL, output-only NUMERIC, scale='2'">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="NUMERIC" inout="out" is-null="true" scale="2" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">5.26</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_4: Testing SQLUnit_TestNumericDecimal with param1 = 1.0, as output-only NUMERIC, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <!--    Need to adjust the scale, if you want 5.26 as the outparam value, otherwise the scale defaults to    -->
+            <!--    the scale of the value associated with the output-only parameter before the stored proc call.        -->
+            <!--    In this case, the parameter    has a value of 1.0, which provides a scale of 1.  THIS WILL CAUSE         -->
+            <!--    ROUNDING ISSUES.                                                                             -->
+            <param id="1" type="NUMERIC" inout="out" is-null="false" name="param1">1.0</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">5.3</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_5: Testing SQLUnit_TestNumericDecimal with param1 = 1.0, as output-only NUMERIC, scale='2'">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="NUMERIC" inout="out" is-null="false" scale="2" name="param1">1.0</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">5.26</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_6: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, output-only NUMERIC, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <!--    The 'scale' attribute does not need to be specified.  The scale will default to the scale of the    -->
+            <!--    value associated with the output-only parameter before the stored proc call.                -->
+            <!--    In this case, the parameter    has a value of 300.00, which provides a scale of 2.                  -->
+            <param id="1" type="NUMERIC" inout="out" is-null="false" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">5.26</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_7: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, output-only NUMERIC, scale='3'">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <!--    Ask for MORE precision than the scale of the value associated with the output-only parameter has    -->
+            <param id="1" type="NUMERIC" inout="out" is-null="false" scale="3" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">5.260</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_8: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, output-only NUMERIC, scale='1'">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <!--    Ask for LESS precision than the scale of the value associated with the output-only parameter has    -->
+            <param id="1" type="NUMERIC" inout="out" is-null="false" scale="1" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">5.3</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_9: Testing SQLUnit_TestNumericDecimal with param1 = NULL, inout NUMERIC, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="NUMERIC" inout="inout" is-null="true" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">5</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_10: Testing SQLUnit_TestNumericDecimal with param1 = NULL, inout NUMERIC, scale='2'">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="NUMERIC" inout="inout" is-null="true" scale="2" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">5.26</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_11: Testing SQLUnit_TestNumericDecimal with param1 = 1.0, inout NUMERIC, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="NUMERIC" inout="inout" is-null="false" name="param1">1.0</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">1.0</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">1.01</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <!--    
+        ******************************************************************************************
+        The following test exposes a flaw in the MS JDBC Driver (currently SP3 as of 06-Apr-2005).
+        Once the flaw in the driver has been repaired, the asset shouldbe removed from the test.
+        ******************************************************************************************
+    -->
+    <test name="TestSQLUnit_TestNumericDecimal_12: Testing SQLUnit_TestNumericDecimal with param1 = 1.0, inout NUMERIC, scale='2'" assert="not-equal">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="NUMERIC" inout="inout" is-null="false" scale="2" name="param1">1.0</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">1.01</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">1.01</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_13: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, inout NUMERIC, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="NUMERIC" inout="inout" is-null="false" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">300.11</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">300.11</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <!--    
+        ******************************************************************************************
+        The following test exposes a flaw in the MS JDBC Driver (currently SP3 as of 06-Apr-2005).
+        Once the flaw in the driver has been repaired, the asset shouldbe removed from the test.
+        ******************************************************************************************
+    -->
+    <test name="TestSQLUnit_TestNumericDecimal_14: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, inout NUMERIC, scale='3'" assert="not-equal">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="NUMERIC" inout="inout" is-null="false" scale="3" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">300.010</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">300.01</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_15: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, inout NUMERIC, scale='1'">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="NUMERIC" inout="inout" is-null="false" scale="1" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">300.1</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">300.11</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <!-- ****************************************************************    -->
+    <!--    For tests 16-33, the data type within the result set is NUMERIC    -->
+    <!--    since the parameter is declared as NUMERIC within the stored proc     -->
+    <!-- ****************************************************************    -->
+    <test name="TestSQLUnit_TestNumericDecimal_16: Testing SQLUnit_TestNumericDecimal with param1 = NULL, output-only DECIMAL, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="out" is-null="true" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">5</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_17: Testing SQLUnit_TestNumericDecimal with param1 = NULL, output-only DECIMAL, scale='2'">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="out" is-null="true" scale="2" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">5.26</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_18: Testing SQLUnit_TestNumericDecimal with param1 = 1.0, output-only DECIMAL, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="out" is-null="false" name="param1">1.0</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">5.3</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_19: Testing SQLUnit_TestNumericDecimal with param1 = 1.0, output-only DECIMAL, scale='2'">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="out" is-null="false" scale="2" name="param1">1.0</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">5.26</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_20: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, output only DECIMAL, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="out" is-null="false" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">5.26</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_21: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, output only DECIMAL, scale='3'">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="out" is-null="false" scale="3" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">5.260</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_22: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, output only DECIMAL, scale='1'">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="out" is-null="false" scale="3" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">5.3</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_23: Testing SQLUnit_TestNumericDecimal with param1 = NULL, inout DECIMAL, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="inout" is-null="true" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">5</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_24: Testing SQLUnit_TestNumericDecimal with param1 = NULL, inout DECIMAL, scale='2'">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="inout" is-null="true" scale="2" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">5.26</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_25: Testing SQLUnit_TestNumericDecimal with param1 = 1.0, inout DECIMAL, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="inout" is-null="false" name="param1">1.0</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">1.0</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">1.01</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <!--    
+        ******************************************************************************************
+        The following test exposes a flaw in the MS JDBC Driver (currently SP3 as of 06-Apr-2005).
+        Once the flaw in the driver has been repaired, the asset shouldbe removed from the test.
+        ******************************************************************************************
+    -->
+    <test name="TestSQLUnit_TestNumericDecimal_26: Testing SQLUnit_TestNumericDecimal with param1 = 1.0, inout DECIMAL, scale='2'" assert="not-equal">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="inout" is-null="false" scale="2" name="param1">1.0</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">1.01</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">1.01</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_27: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, inout DECIMAL, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="inout" is-null="false" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">300.11</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">300.11</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <!--    
+        ******************************************************************************************
+        The following test exposes a flaw in the MS JDBC Driver (currently SP3 as of 06-Apr-2005).
+        Once the flaw in the driver has been repaired, the asset shouldbe removed from the test.
+        ******************************************************************************************
+    -->
+    <test name="TestSQLUnit_TestNumericDecimal_28: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, inout DECIMAL, scale='3'" assert="not-equal">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="inout" is-null="false" scale="3" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">300.110</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">300.11</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <!--    
+        ******************************************************************************************
+        The following test exposes a flaw in the MS JDBC Driver (currently SP3 as of 06-Apr-2005).
+        Once the flaw in the driver has been repaired, the asset shouldbe removed from the test.
+        ******************************************************************************************
+    -->
+    <test name="TestSQLUnit_TestNumericDecimal_29: Testing SQLUnit_TestNumericDecimal with param1 = 300.10, inout DECIMAL, scale='1'" assert="not-equal">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="inout" is-null="false" scale="3" name="param1">300.10</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">300.1</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">300.11</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_30: Testing SQLUnit_TestNumericDecimal with is-NULL='true', inout='inout', param1 = 0.00 as NUMERIC, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="NUMERIC" inout="inout" is-null="true" name="param1">0.00</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">5.26</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_31: Testing SQLUnit_TestNumericDecimal with is-NULL='true', inout='inout', param1 = 0.00 as DECIMAL, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="inout" is-null="true" name="param1">0.00</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">5.26</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">5.26</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_32: Testing SQLUnit_TestNumericDecimal with is-NULL='false', inout='inout', param1 = 0.00 as NUMERIC, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="NUMERIC" inout="inout" is-null="false" name="param1">0.00</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="NUMERIC">0.01</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">0.01</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNumericDecimal_33: Testing SQLUnit_TestNumericDecimal with is-NULL='false', inout='inout', param1 = 0.00 as DECIMAL, scale=default">
+        <call>
+            <stmt> 
+                {call SQLUnit_TestNumericDecimal(?)} 
+            </stmt>
+            <param id="1" type="DECIMAL" inout="inout" is-null="false" name="param1">0.00</param>
+        </call>
+        <result>
+            <outparam id="1" name="param1" type="DECIMAL">0.01</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">0.01</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <teardown/>
+</sqlunit>

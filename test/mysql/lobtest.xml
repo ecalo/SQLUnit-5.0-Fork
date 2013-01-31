@@ -1,0 +1,198 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: lobtest.xml,v 1.6 2004/09/08 01:06:58 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mysql/lobtest.xml,v $
+  Desc: This is an alternate spec for my laptop which does not have
+  PostgreSQL installed.
+-->
+<sqlunit>
+  <connection>
+    <driver>com.mysql.jdbc.Driver</driver>
+    <url>jdbc:mysql://localhost:3306/sqlunitdb</url>
+    <user>defaultuser</user>
+    <password>defaultuser</password>
+  </connection>
+
+  <setup>
+    <sql><stmt>delete from customer where 1=1</stmt></sql>
+    <sql><stmt>insert into customer values(1,'Sujit Pal','secret','en_US',null,0,now())</stmt></sql>
+  </setup>
+
+  <test name="Checking returned value from customer"
+          failure-message="Returned value check for customer failed">
+    <sql>
+      <stmt>select custId from customer where custId=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="custId" type="INTEGER">${deptId_HR}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing bad column name passed to database"
+          failure-message="Bad column name test failed">
+    <sql>
+      <stmt>select myname from customer where custId=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <result>
+      <exception>
+        <code>1054</code>
+        <message>Unknown column 'myname' in 'field list'</message>
+      </exception>
+    </result>
+  </test>
+
+  <!-- :NOTE: MySQL JDBC driver apparently does not distinguish between
+       a LONGVARBINARY and a BLOB, so we set the type to LONGVARBINARY
+       MySQL JDBC driver also thinks a CLOB (or TEXT) field is
+       a LONGVARCHAR, so we set the type to that -->
+  <test name="Testing LOB implementation with LOB and md5"
+          failure-message="LOB and MD5 Test failed">
+    <sql>
+      <stmt>select user, permission, securekey, certificate from lobtest where user=?</stmt>
+      <param id="1" type="VARCHAR">Larry</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="user" type="VARCHAR">Larry</col>
+          <col id="2" name="permission" type="LONGVARBINARY">md5:008e72585293c044a32370a2e0f1c78d</col>
+          <col id="3" name="securekey" type="LONGVARBINARY">md5:774cb14b70080573906bbd26df7a9c58</col>
+          <col id="4" name="certificate" type="LONGVARCHAR">md5:86372ece75f98a82cc71e2f22c1e86a7</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing LOB implementation with LOB and File"
+          failure-message="LOB and File Test failed">
+    <sql>
+      <stmt>select user, permission, securekey, certificate from lobtest where user=?</stmt>
+      <param id="1" type="VARCHAR">Larry</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="user" type="VARCHAR">Larry</col>
+          <col id="2" name="permission" type="LONGVARBINARY">file:/tmp/Dictionary-Larry.ser</col>
+          <col id="3" name="securekey" type="LONGVARBINARY">file:/bin/ls</col>
+          <col id="4" name="certificate" type="LONGVARCHAR">file:test/java/LOBLoader.java</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing LOB w/Java Support implementation with LOB and md5" 
+          java-object-support="on"
+          failure-message="LOB and MD5 with Java Support option failed">
+    <sql>
+      <stmt>select user, permission, securekey, certificate from lobtest where user=?</stmt>
+      <param id="1" type="VARCHAR">Larry</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="user" type="VARCHAR">Larry</col>
+          <col id="2" name="permission" type="LONGVARBINARY">obj:Dictionary:{ToolX=&gt;'false',ToolY=&gt;'true',ToolZ=&gt;'false'}</col>
+          <col id="3" name="securekey" type="LONGVARBINARY">md5:774cb14b70080573906bbd26df7a9c58</col>
+          <col id="4" name="certificate" type="LONGVARCHAR">md5:86372ece75f98a82cc71e2f22c1e86a7</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing LOB w/Java Support implementation with LOB and File" 
+          java-object-support="on"
+          failure-message="LOB and File test with Java Support option failed">
+    <sql>
+      <stmt>select user, permission, securekey, certificate from lobtest where user=?</stmt>
+      <param id="1" type="VARCHAR">Larry</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="user" type="VARCHAR">Larry</col>
+          <col id="2" name="permission" type="LONGVARBINARY">obj:Dictionary:{ToolX=&gt;'false',ToolY=&gt;'true',ToolZ=&gt;'false'}</col>
+          <col id="3" name="securekey" type="LONGVARBINARY">file:/bin/ls</col>
+          <col id="4" name="certificate" type="LONGVARCHAR">file:test/java/LOBLoader.java</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <!-- Testing functionality of updatecount tag, test#1 -->
+  <test name="Deleting the offending customer">
+    <sql>
+      <stmt>delete from customer where custId=?</stmt>
+      <param id="1" type="INTEGER" inout="in" is-null="false">1</param>
+    </sql>
+    <result>
+      <updatecount>1</updatecount>
+    </result>
+  </test>
+  
+  <!-- Testing functionality of updatecount tag, test#2 -->
+  <test name="Inserting him back again">
+    <sql>
+      <stmt>insert into customer(custId) values(?)</stmt>
+      <param id="1" type="INTEGER" inout="in" is-null="false">1</param>
+    </sql>
+    <result>
+      <updatecount>1</updatecount>
+    </result>
+  </test>
+  
+  <!-- Testing functionality of updatecount tag, test#3 -->
+  <test name="Checking returned value from customer">
+    <sql>
+      <stmt>select custId from customer where custId=?</stmt>
+      <param id="1" type="INTEGER" inout="in" is-null="false">2</param>
+    </sql>
+    <result>
+      <resultset id="1" />
+    </result>
+  </test>
+
+  <!-- Testing empty exception element -->
+  <test name="Testing empty exception element">
+    <sql>
+      <stmt>select cust_id from cust_omer where cust_id=?</stmt>
+      <param id="1" type="INTEGER" inout="in" is-null="false">1</param>
+    </sql>
+    <result>
+      <exception />
+    </result>
+  </test>
+
+  <!-- Testing unexpected exception -->
+  <!-- this cannot be automatically tested with current framework
+  <test name="Testing for unexpected exception">
+    <sql>
+      <stmt>select cust_id from cust_omer where cust_id=?</stmt>
+      <param id="1" type="INTEGER" inout="in" is-null="false">1</param>
+    </sql>
+    <result>
+      <resultset id="1" />
+    </result>
+  </test>
+  -->
+
+  <!-- Testing rowcount override -->
+  <test name="Testing for rowcount override">
+    <sql>
+      <stmt>select custId from customer where custId=?</stmt>
+      <param id="1" type="INTEGER" inout="in" is-null="false">1</param>
+    </sql>
+    <result>
+      <resultset id="1" rowcount="1" />
+    </result>
+  </test>
+  <teardown />
+
+</sqlunit>

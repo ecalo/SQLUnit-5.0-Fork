@@ -1,0 +1,480 @@
+<!--
+  $Id: build.xml,v 1.116 2006/06/25 23:19:23 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/build.xml,v $
+-->
+<project name="sqlunit" default="help" basedir=".">
+  <path id="system.class.path">
+    <fileset dir="lib">
+      <include name="**.jar" />
+      <include name="**.zip" />
+    </fileset>
+    <pathelement location="build/" />
+    <pathelement location="." />
+    <pathelement location="etc/" />
+    <pathelement location="docs/" />
+  </path>
+  <path id="class.path">
+    <path refid="system.class.path" />
+    <pathelement location="${user.class.path}" />
+  </path>
+<!-- Setting up environment variables -->
+  <target name="init">
+    <property file="local.build.properties"/>
+    <property file="build.properties"/>
+    <property name="tmp.dir" value="/tmp" />
+    <property name="source.dir" value="src" />
+    <property name="etc.dir" value="etc" />
+    <property name="src-gen.dir" value="src/net/sourceforge/sqlunit/parsers" />
+    <property name="package.path" value="net/sourceforge/sqlunit" />
+    <property name="webtest.style" value="canoo2html_result_transform" />
+    <property name="build.dir" value="build" />
+    <property name="test.dir" value="test" />
+    <property name="doc.dir" value="docs" />
+    <property name="lib.dir" value="lib" />
+    <property name="dist.dir" value="dist" />
+    <property name="contrib.dir" value="contrib" />
+    <property name="output.dir" value="output" />
+    <property name="output.file" value="" />
+    <property name="log.format" value="default" />
+    <property name="testclass" 
+        value="net.sourceforge.sqlunit.test.SQLUnitTestSuite" />
+    <property name="tui.mode" value="offline" />
+    <property name="tui.rcfile" value="${etc.dir}/tuirc.properties" />
+    <property name="gui.rcfile" value="${etc.dir}/guirc.properties" />
+    <property environment="env" />
+    <property name="user.class.path" value="${env.CLASSPATH}" />
+    <property name="rel.ver" value="5.0" />
+    <property name="debug" value="false" />
+    <condition property="dev.mode">
+      <not><available file="${lib.dir}/sqlunit-${rel.ver}.jar" /></not>
+    </condition>
+    <condition property="output.dir.exists">
+      <available file="${output.dir}" />
+    </condition>
+    <basename property="stripped.output.file" file="${output.file}"
+        suffix=".xml" />
+    <!-- To test out setting variables from ant properties -->
+    <property name="mock.driver.class"
+      value="net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver" />
+    <property name="mock.jdbc.url"
+      value="jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase" />
+    <property name="sqlunit.severity.threshold" value="WARN" />
+    <property name="sqlunit.category" value="GroupTestCategory" />
+  </target>
+<!-- Setting up the taskdef for the sqlunit ant task -->
+  <target name="def">
+    <taskdef name="sqlunit" 
+        classname="net.sourceforge.sqlunit.ant.SqlunitTask">
+      <classpath refid="class.path" />
+    </taskdef>
+  </target>
+<!-- Setting up the taskdef for the Jalopy ant task -->
+  <target name="jalopy-def">
+    <taskdef name="jalopy"
+        classname="de.hunsicker.jalopy.plugin.ant.AntPlugin">
+      <classpath>
+        <fileset dir="${jalopy.lib}">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+    </taskdef>
+  </target>
+<!-- Setting up the taskdef for the Checkstyle task -->
+  <target name="checkstyle-def">
+    <taskdef name="checkstyle" 
+        classname="com.puppycrawl.tools.checkstyle.CheckStyleTask"
+        classpath="${checkstyle.jar}" />
+  </target>
+<!-- Display help message -->
+  <target name="help" depends="init">
+    <echo message="SQLUnit version ${rel.ver}" />
+    <echo message="Targets:" />
+    <echo message="  help - display this message" />
+    <echo message="  clean - removes all files from the build directory" />
+    <echo message="  distclean - removes all files from the dist directory" />
+    <echo message="  precompile - convert .jj grammar files to .java" />
+    <echo message="  compile - compile all the java files" />
+    <echo message="  compile-test - compiles java files needed for testing" />
+    <echo message="  test - runs the mock database tests" />
+    <echo message="  junit-test -Dtestclass=classname - runs JUnit test" />
+    <echo message="  reformat - formats sources in contrib with Jalopy" />
+    <echo message="  checkstyle - check code style using CheckStyle" />
+    <echo message="  uninstall - remove current version of SQLUnit.jar" />
+    <echo message="  install - creates the jar files in the dist directory" />
+    <echo message="  sqlunit-flat -Dtestfile=file.xml - runs SQLUnit" />
+    <echo message="  sqlunit-nested -Dtestdir=dir - runs SQLUnit w/FileSet" />
+    <echo message="  test-doc - set up documentation skeleton for tests" />
+    <echo message="  canoo2html - converts Canoo XML test output to XHTML" />
+    <echo message="  javadoc - creates the project javadocs" />
+    <echo message="  doclet - generates Docbook XML for sqlunit tags" />
+    <echo message="  jjdoc - generates grammar documentation for parser" />
+    <echo message="  htdoc - creates tarball for website" />
+    <echo message="  package - creates tarball for download" />
+    <echo message="  gui - start up the SQLUnit GUI Tool" />
+    <echo message="  tui - runs the SQLUnit TUI Tool for testing" />
+    <echo message="  transform - converts XML data to SQLUnit test data" />
+  </target>
+<!-- Clean up work before compiling -->
+  <target name="clean" depends="init" if="dev.mode">
+    <delete dir="${build.dir}" />
+    <mkdir dir="${build.dir}" />
+    <delete>
+      <fileset dir="${src-gen.dir}">
+        <include name="**/*.java" />
+      </fileset>
+    </delete>
+    <delete dir="${dist.dir}" />
+    <delete dir="${output.dir}" />
+  </target>
+<!-- Precompiling the parser -->
+  <target name="precompile" depends="init" if="dev.mode">
+    <javacc target="${source.dir}/${package.path}/parsers/IncludeFileParser.jj"
+        outputdirectory="${src-gen.dir}"
+        javacchome="${lib.dir}" />
+    <javacc target="${source.dir}/${package.path}/parsers/SymbolParser.jj"
+        outputdirectory="${src-gen.dir}"
+        javacchome="${lib.dir}" />
+  </target>
+<!-- Compiling the source -->
+  <target name="compile" depends="init,precompile" if="dev.mode">
+    <javac srcdir="${src-gen.dir}" destdir="${build.dir}" debug="true">
+      <classpath refid="class.path" />
+    </javac>
+    <javac srcdir="${source.dir}" destdir="${build.dir}" debug="true">
+      <classpath refid="class.path" />
+    </javac>
+    <copy todir="${build.dir}/${package.path}">
+      <fileset dir="${etc.dir}">
+        <include name="**/*.properties" />
+      </fileset>
+    </copy>
+  </target>
+<!-- Compile any test files as well -->
+  <target name="compile-test" depends="compile" if="dev.mode">
+    <javac srcdir="${test.dir}" destdir="${build.dir}" debug="true">
+      <classpath refid="class.path" />
+    </javac>
+    <copy file="${test.dir}/java/dbengine.properties"
+        todir="${build.dir}/${package.path}/test" />
+  </target>
+<!-- Testing SQLUnit using flat form of sqlunit call -->
+  <target name="sqlunit-flat" depends="compile,def">
+    <sqlunit testfile="${testfile}" haltOnFailure="true" debug="${debug}"
+        logfile="${output.file}" logformat="${log.format}" />
+  </target>
+<!-- Testing SQLUnit using nested form of sqlunit call -->
+  <target name="sqlunit-nested" depends="compile,def">
+    <sqlunit haltOnFailure="false" debug="${debug}"
+        logfile="${output.file}" logformat="${log.format}">
+      <fileset dir="${test.dir}/${testdir}">
+        <include name="**/*.xml" />
+      </fileset>
+    </sqlunit>
+  </target>
+<!-- Reformat code under the contrib/ directory -->
+  <target name="reformat" depends="compile,jalopy-def">
+    <jalopy fileformat="unix"
+        convention="docs/sqlunitCodeConventions.xml"
+        history="file"
+        historymethod="adler32"
+        loglevel="info"
+        threads="2"
+        classpathref="class.path">
+      <fileset dir="${contrib.dir}">
+        <include name="**/*.java" />
+      </fileset>
+    </jalopy>
+  </target>
+<!-- Checking code style conformance -->
+  <target name="checkstyle" depends="init,checkstyle-def">
+    <checkstyle config="${doc.dir}/sqlunitCodingStyleChecks.xml">
+      <fileset dir="${source.dir}" includes="**/*.java" />
+      <fileset dir="${test.dir}" includes="**/*.java" />
+      <classpath refid="class.path" />
+    </checkstyle>
+  </target>
+<!-- Generating the JavaDoc documentation locally -->
+  <target name="javadoc" depends="init">
+    <javadoc packagenames="net.sourceforge.*" 
+        destdir="${doc.dir}/javadoc" author="true" version="true" use="true"
+        windowtitle="SQLUnit API JavaDocs">
+      <fileset dir="${source.dir}" />
+      <fileset dir="${test.dir}/java" />
+      <classpath refid="class.path" />
+    </javadoc>
+  </target>
+<!-- Cleaning up before doing a distribution -->
+  <target name="distclean" depends="init">
+    <delete dir="${dist.dir}" />
+    <mkdir dir="${dist.dir}" />
+    <delete file="${doc.dir}/sqlunit-errors.xml" />
+    <delete file="${doc.dir}/sqlunit-tags.xml" />
+    <delete file="${doc.dir}/sqlunit-tag-top.xml" />
+    <delete dir="${doc.dir}/sqlunit-book-dir" />
+  </target>
+<!-- Deleting current jar file before running install -->
+  <target name="uninstall" depends="init">
+    <delete file="${lib.dir}/sqlunit-${rel.ver}.jar" />
+    <property name="dev.mode" value="false" />
+  </target>
+<!-- Installing the source as a standalone jar file -->
+  <target name="install" depends="uninstall,clean,compile,compile-test">
+    <copy file="${doc.dir}/sqlunit.dtd" todir="${build.dir}" />
+    <jar jarfile="${lib.dir}/sqlunit-${rel.ver}.jar" 
+        basedir="${build.dir}" />
+    <echo message="File sqlunit-${rel.ver}.jar in ${lib.dir}" />
+  </target>
+<!-- Run XDoclet against the Handler classes to generate tag documentation -->
+  <target name="doclet" depends="clean,compile,compile-test">
+    <taskdef name="xdoclet" classname="xdoclet.DocletTask">
+      <classpath refid="class.path" />
+      <classpath>
+        <fileset dir="${xdoclet.lib}">
+          <include name="**.jar" />
+        </fileset>
+      </classpath>
+    </taskdef>
+    <echo message="Generating Tag Documentation" />
+    <xdoclet destDir="${doc.dir}" force="true">
+      <fileset dir="${source.dir}">
+        <include name="**/SQLUnit.java" />
+      </fileset>
+      <template templateFile="${doc.dir}/sqlunit-tags.j"
+          destinationfile="sqlunit-tag-top.xml" />
+    </xdoclet>
+    <xdoclet destDir="${doc.dir}" force="true">
+      <fileset dir="${source.dir}">
+        <include name="**/*Handler.java" />
+        <exclude name="**/IHandler.java" />
+      </fileset>
+      <template templateFile="${doc.dir}/sqlunit-tags.j" 
+          destinationfile="sqlunit-tags.xml.tmp" />
+    </xdoclet>
+    <exec dir="${doc.dir}" executable="/bin/sed" os="Linux" 
+        output="${doc.dir}/sqlunit-tags.xml">
+      <arg value="-f" />
+      <arg value="fixcdata.sed" />
+      <arg value="sqlunit-tags.xml.tmp" />
+    </exec>
+    <delete file="${doc.dir}/sqlunit-tags.xml.tmp" />
+    <echo message="Generating Error Documentation" />
+    <xdoclet destDir="${doc.dir}" force="true">
+      <fileset dir="${source.dir}">
+        <include name="**/IErrorCodes.java" />
+      </fileset>
+      <template templateFile="${doc.dir}/sqlunit-errors.j"
+          destinationfile="sqlunit-errors.xml" />
+    </xdoclet>
+    <echo message="Generating Types Documentation" />
+    <xdoclet destDir="${doc.dir}" force="true">
+      <fileset dir="${source.dir}">
+        <include name="**/*Type.java" />
+        <exclude name="**/IType.java" />
+      </fileset>
+      <template templateFile="${doc.dir}/sqlunit-types.j"
+          destinationfile="sqlunit-types.xml" />
+    </xdoclet>
+    <echo message="Generating Assertion Documentation" />
+    <xdoclet destDir="${doc.dir}" force="true">
+      <fileset dir="${source.dir}">
+        <include name="**/Assertions.java" />
+      </fileset>
+      <template templateFile="${doc.dir}/sqlunit-asserts.j"
+          destinationfile="sqlunit-asserts.xml" />
+    </xdoclet>
+    <echo message="Generating Matcher Documentation" />
+    <xdoclet destDir="${doc.dir}" force="true">
+      <fileset dir="${source.dir}">
+        <include name="**/matchers/*.java" />
+      </fileset>
+      <template templateFile="${doc.dir}/sqlunit-matchers.j"
+          destinationfile="sqlunit-matchers.xml" />
+    </xdoclet>
+    <echo message="Generating Reporter Documentation" />
+    <xdoclet destDir="${doc.dir}" force="true">
+      <fileset dir="${source.dir}">
+        <include name="**/reporters/*.java" />
+      </fileset>
+      <template templateFile="${doc.dir}/sqlunit-reporters.j"
+          destinationfile="sqlunit-reporters.xml" />
+    </xdoclet>
+    <echo message="Done" />
+  </target>
+  <target name="jjdoc" depends="init">
+    <jjdoc target="${source.dir}/${package.path}/parsers/IncludeFileParser.jj"
+        outputfile="${doc.dir}/jjdoc.out"
+        javacchome="${lib.dir}" text="true" onetable="true" />
+    <exec dir="${doc.dir}" executable="/bin/sed" os="Linux" 
+        output="${doc.dir}/IncludeFileParser.jjdoc">
+      <arg value="-f" />
+      <arg value="fixtext.sed" />
+      <arg value="jjdoc.out" />
+    </exec>
+    <delete file="${doc.dir}/jjdoc.out" />
+  </target>
+<!-- Creating web site documentation from the stuff in doc -->
+  <target name="htdoc" depends="distclean,javadoc,doclet,jjdoc">
+      <delete dir="${dist.dir}/htdoc" />
+      <mkdir dir="${dist.dir}/htdoc" />
+      <mkdir dir="${dist.dir}/htdoc/javadoc" />
+      <mkdir dir="${dist.dir}/htdoc/stylesheet-images" />
+      <copy file="${doc.dir}/index.html" todir="${dist.dir}/htdoc" />
+      <copy file="${doc.dir}/relnotes.html" todir="${dist.dir}/htdoc" />
+      <exec dir="${doc.dir}" os="Linux" executable="docbook2html">
+        <arg value="--dcl" /><arg value="/usr/share/sgml/xml.dcl" />
+        <arg value="--output" /><arg value="sqlunit-book-dir" />
+        <arg value="sqlunit-book.xml" />
+      </exec>
+      <exec dir="${doc.dir}" os="Linux" executable="docbook2html">
+        <arg value="--nochunks" />
+        <arg value="--dcl" /><arg value="/usr/share/sgml/xml.dcl" />
+        <arg value="--output" /><arg value="sqlunit-book-dir" />
+        <arg value="sqlunit-book.xml" />
+      </exec>
+      <delete file="${doc.dir}/sqlunit-errors.xml" />
+      <delete file="${doc.dir}/sqlunit-tags.xml" />
+      <delete file="${doc.dir}/sqlunit-tag-top.xml" />
+      <delete file="${doc.dir}/sqlunit-types.xml" />
+      <delete file="${doc.dir}/sqlunit-asserts.xml" />
+      <delete file="${doc.dir}/sqlunit-matchers.xml" />
+      <delete file="${doc.dir}/sqlunit-reporters.xml" />
+      <delete file="${doc.dir}/IncludeFileParser.jjdoc" />
+      <copy todir="${dist.dir}/htdoc">
+        <fileset dir="${doc.dir}/sqlunit-book-dir">
+          <include name="**/*.html" />
+        </fileset>
+      </copy>
+      <copy todir="${dist.dir}/htdoc/stylesheet-images">
+        <fileset dir="/usr/share/sgml/docbook/dsssl-stylesheets/images">
+          <include name="**/*.gif" />
+        </fileset>
+        <fileset dir="${doc.dir}">
+          <include name="**/*.png" />
+        </fileset>
+      </copy>
+      <copy todir="${dist.dir}/htdoc/javadoc">
+        <fileset dir="${doc.dir}/javadoc" />
+      </copy>
+      <tar tarfile="${dist.dir}/htdoc.tar" basedir="${dist.dir}/htdoc" 
+        excludes="sqlunit-${rel.ver}/**,**/*tar.gz" />
+      <gzip src="${dist.dir}/htdoc.tar" zipfile="${dist.dir}/htdoc.tar.gz" />
+      <delete file="${dist.dir}/htdoc.tar" />
+      <echo message="File htdoc.tar.gz available in ${dist.dir}" />
+  </target>
+<!-- Packaging the source for download -->
+  <target name="package"
+          depends="clean,compile,compile-test,javadoc,distclean,install">
+     <delete dir="${dist.dir}/sqlunit-${rel.ver}" />
+     <mkdir dir="${dist.dir}/sqlunit-${rel.ver}" />
+     <mkdir dir="${dist.dir}/sqlunit-${rel.ver}/docs" />
+     <mkdir dir="${dist.dir}/sqlunit-${rel.ver}/src" />
+     <mkdir dir="${dist.dir}/sqlunit-${rel.ver}/test" />
+     <mkdir dir="${dist.dir}/sqlunit-${rel.ver}/lib" />
+     <mkdir dir="${dist.dir}/sqlunit-${rel.ver}/etc" />
+     <copy file="build.xml" todir="${dist.dir}/sqlunit-${rel.ver}" />
+     <copy todir="${dist.dir}/sqlunit-${rel.ver}/docs">
+       <fileset dir="docs" />
+     </copy>
+     <copy todir="${dist.dir}/sqlunit-${rel.ver}/src">
+       <fileset dir="src" />
+     </copy>
+     <copy todir="${dist.dir}/sqlunit-${rel.ver}/test">
+       <fileset dir="test">
+         <exclude name="**/informix/demodb.dbs/*" />
+         <exclude name="**/ibmdb2/*" />
+       </fileset>
+     </copy>
+     <copy todir="${dist.dir}/sqlunit-${rel.ver}/lib">
+       <fileset dir="lib">
+         <exclude name="ifxjdbc.jar" />
+         <exclude name="jconn2.jar" />
+       </fileset>
+     </copy>
+     <copy todir="${dist.dir}/sqlunit-${rel.ver}/etc">
+       <fileset dir="etc" />
+     </copy>
+     <tar tarfile="${dist.dir}/sqlunit-${rel.ver}.tar" 
+       basedir="${dist.dir}" excludes="htdoc/**, **/*tar.gz" />
+     <gzip src="${dist.dir}/sqlunit-${rel.ver}.tar" 
+       zipfile="${dist.dir}/sqlunit-${rel.ver}.tar.gz" />
+     <delete file="${dist.dir}/sqlunit-${rel.ver}.tar" />
+     <delete file="${lib.dir}/sqlunit-${rel.ver}.jar" />
+     <echo message="File sqlunit-${rel.ver}.tar.gz available in ${dist.dir}" />
+  </target>
+<!-- Runs the GUI tool -->
+  <target name="gui" depends="compile">
+    <java fork="yes" 
+        classname="net.sourceforge.sqlunit.tools.GUITool"
+        failonerror="true">
+      <sysproperty key="rcfile" value="${gui.rcfile}" />
+      <classpath refid="class.path" />
+    </java>
+  </target>
+<!-- Runs the TUI tool -->
+  <target name="tui" depends="compile">
+    <java fork="yes" classname="net.sourceforge.sqlunit.tools.TUITool"
+        failonerror="true">
+      <sysproperty key="rcfile" value="${tui.rcfile}" />
+      <sysproperty key="mode" value="${tui.mode}" />
+      <classpath refid="class.path" />
+    </java>
+  </target>
+<!-- Runs the transform tool -->
+  <target name="transform" depends="compile">
+    <java fork="yes" classname="net.sourceforge.sqlunit.tools.TransformTool"
+        failonerror="true">
+      <arg value="--input=${transform.input}" />
+      <arg value="--transform=${transform.transform}" />
+      <arg value="--output=${transform.output}" />
+      <classpath refid="class.path" />
+    </java>
+  </target>
+<!-- Sets up test documentation in the output directory -->
+  <target name="test-doc" depends="compile">
+    <delete dir="${output.dir}" />
+    <mkdir dir="${output.dir}" />
+    <java fork="yes" 
+        classname="net.sourceforge.sqlunit.tools.TestDocsGenerator"
+        failonerror="true">
+      <arg value="${test.dir}" />
+      <arg value="${output.dir}" />
+      <classpath refid="class.path" />
+    </java>
+    <echo message="XHTML TOC file(s) in ${output.dir}/Test*.html" />
+  </target>
+<!-- Clean up output files before executing tests --> 
+  <target name="clean-output" depends="init"> 
+    <delete file="${output.dir}/${output.file}"/> 
+    <delete file="${output.dir}/${output.file}.html"/> 
+  </target> 
+<!-- Runs the Canoo2HTML converter -->
+  <target name="make-output-dir" depends="init" unless="output.dir.exists">
+    <mkdir dir="${output.dir}" />
+  </target>
+  <target name="canoo2html" depends="compile">
+    <antcall target="make-output-dir" />
+    <delete file="${output.dir}/${output.file}.html" />
+    <xslt in="${output.file}" 
+        out="${output.dir}/${stripped.output.file}.html"
+        style="${etc.dir}/${webtest.style}.xsl" />
+    <move file="${output.file}" todir="${output.dir}" />
+  </target>
+<!-- Runs the mock tests -->
+  <target name="test" depends="compile,compile-test,def">
+    <sqlunit haltOnFailure="false" debug="${debug}"
+        logfile="${output.file}" logformat="${log.format}">
+      <fileset dir="test/mock/">
+        <include name="**/*.xml" />
+      </fileset>
+    </sqlunit>
+  </target>
+<!-- Standard target for running JUnit tests -->
+  <target name="junit-test" depends="compile-test">
+    <junit>
+      <sysproperty key="db.engine" value="mysql" />
+      <formatter type="plain" usefile="false" />
+      <test name="${testclass}" />
+      <classpath refid="class.path" />
+    </junit>
+  </target>
+</project>

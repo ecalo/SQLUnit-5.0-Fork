@@ -1,0 +1,64 @@
+<body>
+Classes for the SQLUnit core package. The SQLUnit package is designed as a set of individual XML handlers for the various elements of the SQLUnit test suite authoring XML. There is a one to one correspondence between the SQLUnit element and the SQLUnit handler class as illustrated in the table below:
+<center><table cellspacing="3" cellpadding="3" border="1">
+  <tr>
+    <td><b>XML Element</b></td>
+    <td><b>SQLUnit Handler Class</b></td>
+  </tr>
+  <tr>
+    <td>
+      sqlunit
+      <ul>
+        <li>connection</li>
+        <li>setup</li>
+          <ul>
+            <li>sql</li>
+            <li>include</li>
+          </ul>
+        <li>test</li>
+          <ul>
+            <li>prepare</li>
+            <li>sql or call</li>
+            <li>result</li>
+          </ul>
+        <li>teardown</li>
+          <ul>
+            <li>sql</li>
+            <li>include</li>
+          </ul>
+      </ul>
+    </td>
+    <td>
+      &nbsp;
+      <ul>
+        <li>net.sourceforge.sqlunit.ConnectionHandler</li>
+        <li>net.sourceforge.sqlunit.SetupHandler</li>
+          <ul>
+            <li>net.sourceforge.sqlunit.SqlHandler</li>
+            <li>net.sourceforge.sqlunit.IncludeHandler</li>
+          </ul>
+        <li>net.sourceforge.sqlunit.TestHandler</li>
+          <ul>
+            <li>net.sourceforge.sqlunit.PrepareHandler</li>
+            <li>net.sourceforge.sqlunit.SqlHandler|CallHandler</li>
+            <li>net.sourceforge.sqlunit.ResultHandler</li>
+          </ul>
+        <li>net.sourceforge.sqlunit.TeardownHandler</li>
+          <ul>
+            <li>net.sourceforge.sqlunit.SqlHandler</li>
+            <li>net.sourceforge.sqlunit.IncludeHandler</li>
+          </ul>
+      </ul>
+    </td>
+  </tr>
+</table></center><p />
+
+Each handler class reads the JDOM element and extracts the information to pass back to the SQLUnit class. The SQLUnit class is designed as a JUnit test class. The JUnit class contains a single test method called testWrapper() which is responsible for reading the XML file and carrying out the operations specified in the setup element, followed by each test in sequence, followed by the operations in the teardown element. The ConnectionHandler class is called before all the other operations to get a JDBC connection to the database.<p />
+
+All handler classes implement the IHandler interface, which specifies a single process method which takes a JDOM Element org.jdom.Element and a java.sql.Connection object and returns a java.lang.Object. A given handler implementation may not need to return an Object, in which case it must return null. The HandlerFactory uses the handlers.properties Java properties file to instantiate the appropriate instance of a handler given the JDOM Element name.<p />
+
+Apart from the handlers, there are some auxilliary classes that provide utilities to the handlers. The SymbolTable class is a container of variables that are declared within an SQLUnit test script. The DatabaseResult object is a HashMap of fields and values returned from processing a SQL statement or stored procedure, or parsed out of a SQLUnit result element. The key for this HashMap is a DatabaseResultKey which is really a tuple of (resultsetId, rowId, colId) for each column returned by a SQL statement or stored procedure specified by the SQLUnit sql or call elements and parsed out of the SQLUnit result element. The SqlTypeUtils class is responsible for converting between database type to String and back, depending on the method called.<p />
+
+The SQLUnitException class is a common class that is shared by the SQLUnit package. The content of the SQLUnitException error messages is handled by specifying constant Strings in the IErrorCodes interface class.<p />
+
+</body>

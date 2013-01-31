@@ -1,0 +1,355 @@
+/*
+ * $Id: IncludeFileParser.jj,v 1.1 2005/01/20 01:36:15 spal Exp $
+ * $Source: /cvsroot/sqlunit/sqlunit/src/net/sourceforge/sqlunit/parsers/IncludeFileParser.jj,v $
+ * SQLUnit - a test harness for unit testing database stored procedures.
+ * Copyright (C) 2003  The SQLUnit Team
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+options {
+    IGNORE_CASE = true;
+    STATIC = false;
+    DEBUG_PARSER = false;
+    DEBUG_TOKEN_MANAGER = false;
+    DEBUG_LOOKAHEAD = false;
+}
+
+PARSER_BEGIN(IncludeFileParser)
+
+package net.sourceforge.sqlunit.parsers;
+
+import java.io.Reader;
+import java.util.List;
+import java.util.ArrayList;
+
+/**
+ * The IncludeFileParser uses the embedded JavaCC grammar to parse the
+ * named file in the include.file attribute.
+ * @author Sujit Pal (spal@users.sourceforge.net)
+ * @version $Revision: 1.1 $
+ */
+public final class IncludeFileParser {
+    
+    private static final String MULTILINE_SQL_PREFIX = "M:";
+    private static final String CALLABLE_SQL_PREFIX = "C:";
+    private static final String SHELL_CALL_PREFIX = "S:";
+    private static final String OTHER_SQL_PREFIX = "O:";
+
+    public static final List parse(final Reader fileReader)
+            throws ParseException {
+        IncludeFileParser parser = new IncludeFileParser(fileReader);
+        return parser.StatementCollection();
+    }
+}
+
+PARSER_END(IncludeFileParser)
+
+<DEFAULT> SKIP:
+{
+    <DEFAULT_WHITESPACE: (" " | "\t" | "\n" | "\r"
+        | "\r\n" | "\f")> : DEFAULT
+}
+
+<DEFAULT> TOKEN:
+{
+    <LEADING_DELIMITER: ("\n;\n" | "\n/\n" | "\ngo\n"
+        | "\r;\r" | "\r/\r" | "\rgo\r"
+        | "\r\n;\r\n" | "\r\n/\r\n" | "\r\ngo\r\n")>
+  | <TRAILING_DELIMITER: (";\n" | ";\r" | ";\r\n")>
+  | <START_SINGLELINE_COMMENT: ("--")> : IN_SINGLELINE_COMMENT
+  | <START_MULTILINE_COMMENT: ("/*")> : IN_MULTILINE_COMMENT
+  | <START_MULTILINE: ("CREATE " | "REPLACE " | "IF " | "BEGIN ")> : IN_MULTILINE_CALL
+  | <START_EXEC_PROC_CALL: ("{CALL ") > : IN_EXEC_PROC
+  | <START_EXEC_PROC_OTHER: ("EXEC " | "EXECUTE PROCEDURE ")> : IN_EXEC_PROC
+  | <START_SHELL_CALL: ("!")> : IN_SHELL_CALL
+  | <START_OTHER_SQL_CHAR: ~[] > : IN_OTHER_SQL
+}
+
+<IN_SINGLELINE_COMMENT> TOKEN:
+{
+    <END_SINGLELINE_COMMENT: ("\n" | "\r" | "\r\n")> : DEFAULT
+  | <SINGLELINE_COMMENT_CHAR: ~[] > 
+}
+
+<IN_MULTILINE_COMMENT> TOKEN:
+{
+    <END_MULTILINE_COMMENT: ("*/\n" | "*/\r" | "*/\r\n")> : DEFAULT
+  | <MULTILINE_COMMENT_CHAR: ~[] > 
+}
+
+<IN_MULTILINE_CALL> TOKEN:
+{
+    <MULTILINE_DELIMITER: (<LEADING_DELIMITER>) > : DEFAULT
+  | <MULTILINE_CHAR: ~[] >
+}
+
+<IN_EXEC_PROC> TOKEN: 
+{
+    <EXEC_PROC_CONT_CHAR: ("\n" | "\r" | "\r\n")>
+  | <EXEC_PROC_OPEN_PAREN: ("(")>
+  | <EXEC_PROC_CLOSE_PAREN: (")")>
+  | <EXEC_PROC_DELIMITER: (<LEADING_DELIMITER>
+      | <TRAILING_DELIMITER>) > : DEFAULT
+  | <EXEC_PROC_CHAR: ~[] >
+}
+
+<IN_SHELL_CALL> TOKEN: 
+{
+    <SHELL_CONT_CHAR: ("\\\n" | "\\\r" | "\\\r\n")>
+  | <SHELL_CALL_DELIMITER: (<LEADING_DELIMITER>
+      | <TRAILING_DELIMITER>) > : DEFAULT
+  | <OPEN_PAREN: "(">
+  | <CLOSE_PAREN: ")">
+  | <SHELL_CALL_CHAR: ~[] >
+}
+
+<IN_OTHER_SQL> TOKEN:
+{
+    <OTHER_SQL_DELIMITER: (<LEADING_DELIMITER>
+        | <TRAILING_DELIMITER>) > : DEFAULT
+  | <OTHER_SQL_CHAR: ~[] >
+}
+
+// An include file is a collection of statements separated by one of the
+// available delimiter characters.
+List StatementCollection() : 
+{
+    List stmtList = new ArrayList();
+    String stmt;
+}
+{
+    (
+        stmt = CallableSQLStatement()
+        {
+            stmtList.add(stmt);
+        }
+      | stmt = ShellCallStatement()
+        {
+            stmtList.add(stmt);
+        }
+      | stmt = OtherSQLStatement()
+        {
+            stmtList.add(stmt);
+        }
+      | stmt = MultilineSQLStatement()
+        {
+            stmtList.add(stmt);
+        }
+      | CommentStatement()
+    )*
+    (<EOF>)?
+    { return stmtList; }
+}
+
+// Comment statements can either be single line or multiline.
+void CommentStatement() : 
+{ }
+{
+    (
+        SingleLineCommentStatement()
+      | MultiLineCommentStatement()
+    )
+}
+
+// Single line comments begin with a "--" string on a newline and are 
+// terminated by newline.
+void SingleLineCommentStatement() :
+{ }
+{
+    (
+        <START_SINGLELINE_COMMENT>
+        (
+            <SINGLELINE_COMMENT_CHAR>
+        )*
+        <END_SINGLELINE_COMMENT>
+    )
+}
+
+// Multi line comments begin with "/*" on a newline and can contain
+// multiple lines. They are terminated with a "*/" string at the end
+// of the line.
+void MultiLineCommentStatement() :
+{ }
+{
+    (
+        <START_MULTILINE_COMMENT>
+        (
+            <MULTILINE_COMMENT_CHAR>
+        )*
+        <END_MULTILINE_COMMENT>
+    )
+}
+
+// Multi line SQL statements are those that have a semi-colon (";") character
+// terminating lines within the multi-line SQL. The trailing semi-colon 
+// delimiter is not allowed for this type of statement.
+String MultilineSQLStatement() :
+{
+    StringBuffer cbuf = new StringBuffer(MULTILINE_SQL_PREFIX);
+}
+{
+    (
+        <START_MULTILINE>
+        {
+            cbuf.append(getToken(0).image);
+        }
+        (
+            <MULTILINE_CHAR>
+            {
+                cbuf.append(getToken(0).image);
+            }
+        )*
+        <MULTILINE_DELIMITER>
+    )
+    { return cbuf.toString(); }
+}
+
+// A Callable SQL statement is one which starts with "EXEC(UTE PROCEDURE) "
+// or "{CALL ". The execute procedure call will be rewritten to a CALL form,
+// since that is the form all JDBC drivers understand. The handler will 
+// use a java.sql.CallableStatement to handle this call.
+String CallableSQLStatement() :
+{
+    StringBuffer ebuf = new StringBuffer(CALLABLE_SQL_PREFIX);
+    boolean isCall = false;
+    boolean hasOpeningParen = false;
+    boolean hasClosingParen = false;
+}
+{
+    (
+        (
+            <START_EXEC_PROC_CALL>
+            {
+                ebuf.append(getToken(0).image);
+                isCall = true;
+            }
+          | <START_EXEC_PROC_OTHER>
+            {
+                ebuf.append("{CALL ");
+                isCall = false;
+            }
+        )
+        (
+            <EXEC_PROC_CHAR>
+            {
+                ebuf.append(getToken(0).image);
+            }
+          | <EXEC_PROC_OPEN_PAREN>
+            {
+                ebuf.append(getToken(0).image);
+                hasOpeningParen = true;
+            }
+          | <EXEC_PROC_CLOSE_PAREN>
+            {
+                ebuf.append(getToken(0).image);
+                hasClosingParen = true;
+            }
+          | <EXEC_PROC_CONT_CHAR>
+            {
+                ebuf.append(" ");
+            }
+        )*
+        <EXEC_PROC_DELIMITER>
+        {
+            if (!hasClosingParen && !hasOpeningParen) {
+                ebuf.append("()");
+            }
+            if (!isCall) {
+                ebuf.append("}");
+            }
+        }
+    )
+    { return ebuf.toString(); }
+}
+
+// A Shell call statement represents a call to an operating system command
+// or external utility. This may be useful for cleaning up temporary files
+// or making SQL calls through the database client of your choice. A statement
+// can span multiple lines using the backslash (\) continuation character. 
+// The parser treats the shell call as a system process and will start up a 
+// Java Runtime object for it. Note that the runtime will have no knowledge
+// of the environment settings, so you need to provide full path names. Special
+// features of the shell such as pipes and redirectors will also not work 
+// unless you wrap the command in the shell processor, like so:
+//   !/bin/sh -c (command) for Unix/Linux
+//   !command.com /c (command) for Windows XP
+//   !cmd.exe /c (command) for Windows NT
+// The parenthesis are required. The recommended procedure would be to 
+// simply invoke a shell script which does what you want as well as source
+// environment variables that you may need.
+String ShellCallStatement() :
+{
+    StringBuffer sbuf = new StringBuffer(SHELL_CALL_PREFIX);
+    int nestedBracketDepth = 0;
+}
+{
+    (
+        <START_SHELL_CALL>
+        (
+            <SHELL_CALL_CHAR>
+            {
+                sbuf.append(getToken(0).image);
+            }
+          | <SHELL_CONT_CHAR>
+            {
+                sbuf.append(" ");
+            }
+          | <OPEN_PAREN>
+            {
+                if (nestedBracketDepth == 0) {
+                    sbuf.append("'");
+                }
+                nestedBracketDepth++;
+            }
+          | <CLOSE_PAREN>
+            {
+                nestedBracketDepth--;
+                if (nestedBracketDepth == 0) {
+                    sbuf.append("'");
+                }
+            }
+        )*
+        <SHELL_CALL_DELIMITER>
+    )
+    { return sbuf.toString(); }
+}
+
+// The Other SQL statement represents an SQL statement that is not a CREATE
+// or REPLACE call (MultilineSQLStatement) or an EXEC(UTE PROCEDURE) call
+// (CallableSQLStatement). SQL statements such as SELECT, INSERT, UPDATE,
+// DELETE, RENAME, DROP, etc, fall into this category. The SQL statement
+// can contain newlines which will be transformed by the parser into white
+// space. The parser will use a java.sql.PreparedStatement to process this
+// statement.
+String OtherSQLStatement() :
+{
+    StringBuffer obuf = new StringBuffer(OTHER_SQL_PREFIX);
+}
+{
+    (
+        (
+            <START_OTHER_SQL_CHAR>
+            {
+                obuf.append(getToken(0).image);
+            }
+          | <OTHER_SQL_CHAR>
+            {
+                obuf.append(getToken(0).image);
+            }
+        )*
+        <OTHER_SQL_DELIMITER>
+    )
+    { return obuf.toString(); }
+}

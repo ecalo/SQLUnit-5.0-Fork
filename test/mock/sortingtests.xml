@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: sortingtests.xml,v 1.3 2005/06/07 01:13:40 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/sortingtests.xml,v $
+  Desc: Test for the sorting feature
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <!-- check natural sorting order (expected result is unsorted) -->
+  <test name="Testing natural sorting case">
+    <call>
+      <stmt>superHeroesSortedNaturally</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="id" type="INTEGER">3</col>
+          <col id="2" name="lname" type="VARCHAR">Wayne</col>
+          <col id="3" name="fname" type="VARCHAR">Bruce</col>
+          <col id="4" name="alias" type="VARCHAR">Batman</col>
+        </row>
+        <row id="2">
+          <col id="1" name="id" type="INTEGER">1</col>
+          <col id="2" name="lname" type="VARCHAR">Parker</col>
+          <col id="3" name="fname" type="VARCHAR">Peter</col>
+          <col id="4" name="alias" type="VARCHAR">Spiderman</col>
+        </row>
+        <row id="3">
+          <col id="1" name="id" type="INTEGER">2</col>
+          <col id="2" name="lname" type="VARCHAR">Kent</col>
+          <col id="3" name="fname" type="VARCHAR">Clark</col>
+          <col id="4" name="alias" type="VARCHAR">Superman</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <!-- check sorting order override for alias -->
+  <test name="Testing sort override for alias">
+    <call>
+      <stmt>superHeroesSortedByAlias</stmt>
+    </call>
+    <result>
+      <resultset id="1" order-by="4">
+        <row id="1">
+          <col id="1" name="id" type="INTEGER">3</col>
+          <col id="2" name="lname" type="VARCHAR">Wayne</col>
+          <col id="3" name="fname" type="VARCHAR">Bruce</col>
+          <col id="4" name="alias" type="VARCHAR">Batman</col>
+        </row>
+        <row id="2">
+          <col id="1" name="id" type="INTEGER">1</col>
+          <col id="2" name="lname" type="VARCHAR">Parker</col>
+          <col id="3" name="fname" type="VARCHAR">Peter</col>
+          <col id="4" name="alias" type="VARCHAR">Spiderman</col>
+        </row>
+        <row id="3">
+          <col id="1" name="id" type="INTEGER">2</col>
+          <col id="2" name="lname" type="VARCHAR">Kent</col>
+          <col id="3" name="fname" type="VARCHAR">Clark</col>
+          <col id="4" name="alias" type="VARCHAR">Superman</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <!-- check sorting order override for alias descending -->
+  <test name="Testing sort override for alias desc">
+    <call>
+      <stmt>superHeroesSortedByAliasDesc</stmt>
+    </call>
+    <result>
+      <resultset id="1" order-by="-4">
+        <row id="1">
+          <col id="1" name="id" type="INTEGER">2</col>
+          <col id="2" name="lname" type="VARCHAR">Kent</col>
+          <col id="3" name="fname" type="VARCHAR">Clark</col>
+          <col id="4" name="alias" type="VARCHAR">Superman</col>
+        </row>
+        <row id="2">
+          <col id="1" name="id" type="INTEGER">1</col>
+          <col id="2" name="lname" type="VARCHAR">Parker</col>
+          <col id="3" name="fname" type="VARCHAR">Peter</col>
+          <col id="4" name="alias" type="VARCHAR">Spiderman</col>
+        </row>
+        <row id="3">
+          <col id="1" name="id" type="INTEGER">3</col>
+          <col id="2" name="lname" type="VARCHAR">Wayne</col>
+          <col id="3" name="fname" type="VARCHAR">Bruce</col>
+          <col id="4" name="alias" type="VARCHAR">Batman</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <!-- check sorting order override for alias and lname -->
+  <test name="Testing sort override for (alias+lname)">
+    <call>
+      <stmt>superHeroesSortedByAliasAndName</stmt>
+    </call>
+    <result>
+      <resultset id="1" order-by="4,2,3">
+        <row id="1">
+          <col id="1" name="id" type="INTEGER">3</col>
+          <col id="2" name="lname" type="VARCHAR">Wayne</col>
+          <col id="3" name="fname" type="VARCHAR">Bruce</col>
+          <col id="4" name="alias" type="VARCHAR">Batman</col>
+        </row>
+        <row id="2">
+          <col id="1" name="id" type="INTEGER">1</col>
+          <col id="2" name="lname" type="VARCHAR">Parker</col>
+          <col id="3" name="fname" type="VARCHAR">Peter</col>
+          <col id="4" name="alias" type="VARCHAR">Spiderman</col>
+        </row>
+        <row id="3">
+          <col id="1" name="id" type="INTEGER">2</col>
+          <col id="2" name="lname" type="VARCHAR">Kent</col>
+          <col id="3" name="fname" type="VARCHAR">Clark</col>
+          <col id="4" name="alias" type="VARCHAR">Superman</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd" [
+    <!ENTITY jdbc-url SYSTEM "file:test/mssqlserver/jdbc-url.txt">
+]>
+<!-- $Id: TestSQLUnit_TestNullNumericTestProc.xml,v 1.2 2005/06/07 01:13:40 spal Exp $ -->
+<!-- $Source: /cvsroot/sqlunit/sqlunit/test/mssqlserver/TestSQLUnit_TestNullNumericTestProc.xml,v $ -->
+<sqlunit>
+    <!-- ********************************************************************************     //-->
+    <!--                                                                                   //-->
+    <!-- Test Case:    TestSQLUnit_TestNullNumericTestProc                        //-->
+    <!--                                                                                   //-->
+    <!-- Purpose:        This test will perform usage tests of NUEMRIC and             //-->
+    <!--                    DECIMAL parameter types within with NULL values within             //-->
+    <!--                    SQLUnit.                                                                //-->
+    <!--    Issue:                                                                                //-->
+    <!--        http://sourceforge.net/forum/forum.php?thread_id=1176084&forum_id=265576    //-->
+    <!--                                                                                            //-->
+    <!--    Fixed in:    SQLUnit 4.6                                                            //-->
+    <!-- ********************************************************************************     //-->
+    <!-- *****************************    **    //-->
+    <!--  Connection set-up information    //-->
+    <!-- *****************************    **    //-->
+    <connection server-name="microsoft_sql_server">
+        <driver>com.microsoft.jdbc.sqlserver.SQLServerDriver</driver>
+        &jdbc-url;
+        <user>sqlunit</user>
+        <password>sqlunit</password>
+    </connection>
+    <!-- ********************    //-->
+    <!-- Set up return values    //-->
+    <!-- ********************    //-->
+    <!-- *****************    //-->
+    <!-- Tests to perform    //-->
+    <!-- *****************    //-->
+    <test name="TestSQLUnit_TestNullNumericTestProc_1: Use NULL with an output-only NUMERIC parameter, scale=default">
+        <call>
+            <stmt>{call SQLUnit_TestNullNumericTestProc(?)}</stmt>
+            <param id="1" type="NUMERIC" inout="out" is-null="true" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" type="NUMERIC" name="param1">NULL</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">NULL</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNullNumericTestProc_2: Use NULL with an output-only NUMERIC parameter, scale='11'">
+        <call>
+            <stmt>{call SQLUnit_TestNullNumericTestProc(?)}</stmt>
+            <param id="1" type="NUMERIC" inout="out" is-null="true" name="param1" scale="11"/>
+        </call>
+        <result>
+            <outparam id="1" type="NUMERIC" name="param1">NULL</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">NULL</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNullNumericTestProc_3: Use NULL with an inout NUMERIC parameter, scale=default">
+        <call>
+            <stmt>{call SQLUnit_TestNullNumericTestProc(?)}</stmt>
+            <param id="1" type="NUMERIC" inout="inout" is-null="true" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" type="NUMERIC" name="param1">NULL</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">NULL</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNullNumericTestProc_4: Use NULL with an inout NUMERIC parameter, scale='3'">
+        <call>
+            <stmt>{call SQLUnit_TestNullNumericTestProc(?)}</stmt>
+            <param id="1" type="NUMERIC" inout="inout" is-null="true" name="param1" scale="3"/>
+        </call>
+        <result>
+            <outparam id="1" type="NUMERIC" name="param1">NULL</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="NUMERIC">NULL</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNullNumericTestProc_5: Use NULL with an output-only DECIMAL parameter, scale=default">
+        <call>
+            <stmt>{call SQLUnit_TestNullNumericTestProc(?)}</stmt>
+            <param id="1" type="DECIMAL" inout="out" is-null="true" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" type="DECIMAL" name="param1">NULL</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <!-- Parameter type is declared as NUMERIC within stored proc -->
+                    <col id="1" type="NUMERIC">NULL</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNullNumericTestProc_6: Use NULL with an output-only DECIMAL parameter, scale='11'">
+        <call>
+            <stmt>{call SQLUnit_TestNullNumericTestProc(?)}</stmt>
+            <param id="1" type="DECIMAL" inout="out" is-null="true" name="param1" scale="11"/>
+        </call>
+        <result>
+            <outparam id="1" type="DECIMAL" name="param1">NULL</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <!-- Parameter type is declared as NUMERIC within stored proc -->
+                    <col id="1" type="NUMERIC">NULL</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNullNumericTestProc_7: Use NULL with an inout DECIMAL parameter, scale=default">
+        <call>
+            <stmt>{call SQLUnit_TestNullNumericTestProc(?)}</stmt>
+            <param id="1" type="DECIMAL" inout="inout" is-null="true" name="param1"/>
+        </call>
+        <result>
+            <outparam id="1" type="DECIMAL" name="param1">NULL</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <!-- Parameter type is declared as NUMERIC within stored proc -->
+                    <col id="1" type="NUMERIC">NULL</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestNullNumericTestProc_8: Use NULL with an inout DECIMAL parameter, scale='3'">
+        <call>
+            <stmt>{call SQLUnit_TestNullNumericTestProc(?)}</stmt>
+            <param id="1" type="DECIMAL" inout="inout" is-null="true" name="param1" scale="3"/>
+        </call>
+        <result>
+            <outparam id="1" type="DECIMAL" name="param1">NULL</outparam>
+            <resultset id="1">
+                <row id="1">
+                    <!-- Parameter type is declared as NUMERIC within stored proc -->
+                    <col id="1" type="NUMERIC">NULL</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <!-- *******    //-->
+    <!-- Cleanup    //-->
+    <!-- *******    //-->
+    <teardown/>
+</sqlunit>

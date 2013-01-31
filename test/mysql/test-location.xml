@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: test-location.xml,v 1.4 2004/09/08 01:06:58 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mysql/test-location.xml,v $
+  Desc: This is an alternate spec for my laptop which does not have
+  PostgreSQL installed.
+-->
+<sqlunit>
+  <connection>
+    <driver>com.mysql.jdbc.Driver</driver>
+    <url>jdbc:mysql://localhost:3306/sqlunitdb</url>
+    <user>defaultuser</user>
+    <password>defaultuser</password>
+    <jarfile-url>file:///tmp/mysql-connector-java.jar</jarfile-url>
+  </connection>
+
+  <setup>
+    <sql><stmt>delete from customer where 1=1</stmt></sql>
+    <sql><stmt>insert into customer values(1,'Sujit Pal','secret','en_US',null,0,now())</stmt></sql>
+  </setup>
+
+  <test name="Checking returned value from customer"
+          failure-message="Returned value check for customer failed">
+    <sql>
+      <stmt>select custId from customer where custId=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="custId" type="INTEGER">${deptId_HR}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing bad column name passed to database"
+          failure-message="Bad column name test failed">
+    <sql>
+      <stmt>select myname from customer where custId=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <result>
+      <exception>
+        <code>1054</code>
+        <message>Unknown column 'myname' in 'field list'</message>
+      </exception>
+    </result>
+  </test>
+
+  <test name="Testing rowcount functionality" 
+      failure-message="RowCount test failed">
+    <sql>
+      <stmt>select custId from customer where custId=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <result>
+      <resultset id="1" rowcount="1" />
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

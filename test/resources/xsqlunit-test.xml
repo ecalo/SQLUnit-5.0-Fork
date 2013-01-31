@@ -1,0 +1,34 @@
+<project name="xslqlunit-test.xml" basedir=".">
+    <description>Tests xsqlunit task</description>
+
+    <target name="-init">
+        <taskdef name="sqlunit"
+            classname="net.sourceforge.sqlunit.ant.XSqlunitTask"
+            classpath="${test.runtime.cp}"/>
+    </target>
+
+    <target name="emptyReporter" depends="-init">
+        <sqlunit testfile="${project.test}/mock/simple.xml">
+            <reporter/>
+        </sqlunit>
+    </target>
+
+    <target name="twoReporters" depends="-init">
+        <sqlunit testfile="${project.test}/mock/simple.xml">
+            <reporter logFormat="default"/>
+            <reporter logFormat="canoo" file="${basedir}/canoo.log"/>
+        </sqlunit>
+    </target>
+
+    <target name="classnameReporter" depends="-init">
+        <sqlunit testfile="${project.test}/mock/simple.xml">
+            <reporter classname="net.sourceforge.sqlunit.ant.EmptyReporter"/>
+        </sqlunit>
+    </target>
+
+    <target name="withSymbols" depends="-init">
+        <sqlunit testfile="${project.test}/mock/simple.xml">
+            <sysproperty key="key1" value="value1"/>
+        </sqlunit>
+    </target>
+</project>

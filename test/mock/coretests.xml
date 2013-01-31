@@ -1,0 +1,538 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: coretests.xml,v 1.24 2006/01/07 02:41:20 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/coretests.xml,v $
+  Desc: Input specification for running SQLUnit tests against a mock database.
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <setup>
+    <include file="test/mock/included.sql" />
+  </setup>
+
+  <!-- basic tests of SQLUnit functionality -->
+
+  <test name="Testing simple SQL call">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing the same call with SqlHandler">
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing multi-resultset call">
+    <call>
+      <stmt>multipleResults</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="topicId" type="INTEGER">1</col>
+          <col id="2" name="topic" type="VARCHAR">Junk Topics</col>
+          <col id="3" name="topicTypeId" type="INTEGER">3</col>
+        </row>
+      </resultset>
+      <resultset id="2" />
+      <resultset id="3" />
+      <resultset id="4">
+        <row id="1">
+          <col id="1" name="topicId" type="INTEGER">1</col>
+          <col id="2" name="ancestorTopicId" type="INTEGER">1</col>
+          <col id="3" name="topic" type="VARCHAR">Unused Topics</col>
+          <col id="4" name="localeId" type="INTEGER">1</col>
+          <col id="5" name="description" type="VARCHAR">Unused</col>
+        </row>
+        <row id="2">
+          <col id="1" name="topicId" type="INTEGER">1</col>
+          <col id="2" name="ancestorTopicId" type="INTEGER">1000</col>
+          <col id="3" name="topic" type="VARCHAR">Deprecated Topics</col>
+          <col id="4" name="localeId" type="INTEGER">1</col>
+          <col id="5" name="description" type="VARCHAR">Deprecated</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing simple return code, no resultset">
+    <call>
+      <stmt>simpleReturnCode</stmt>
+      <param id="1" name="rc" type="INTEGER" inout="out">${rc}</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">100</outparam>
+    </result>
+  </test>
+
+  <test name="Testing throwing SQLException">
+    <call>
+      <stmt>exceptionResult</stmt>
+    </call>
+    <result>
+      <exception>
+        <code>1234</code>
+        <message>Test Exception</message>
+      </exception>
+    </result>
+  </test>
+
+  <test name="Testing returning a CURSOR OUTPARAM">
+    <call>
+      <stmt>refCursorReturn</stmt>
+      <param id="1" type="oracle.CURSOR" inout="out">${refCursor}</param>
+    </call>
+    <result>
+      <outparam id="1" type="oracle.CURSOR">
+        <resultset id="1">
+          <row id="1">
+            <col id="1" type="INTEGER">7</col>
+            <col id="2" type="VARCHAR">James Bond</col>
+            <col id="3" type="VARCHAR">Martini</col>
+          </row>
+        </resultset>
+      </outparam>
+    </result>
+  </test>
+
+  <test name="Testing result code and one resultset">
+    <call>
+      <stmt>resultAndOneResultSet</stmt>
+      <param id="1" type="INTEGER" inout="out">${rc}</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">143</outparam>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">7</col>
+          <col id="2" type="VARCHAR">James Bond</col>
+          <col id="3" type="VARCHAR">Martini</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing void return code and no resultset">
+    <call>
+      <stmt>voidReturnAndNoResultSet</stmt>
+    </call>
+    <result />
+  </test>
+
+  <test name="Testing result code and exception">
+    <call>
+      <stmt>resultAndException</stmt>
+      <param id="1" name="rc" type="INTEGER" inout="out">${rc}</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">-2001</outparam>
+      <exception>
+        <code>1234</code>
+        <message>Test Exception</message>
+      </exception>
+    </result>
+  </test>
+
+  <test name="Testing updatecount functionality">
+    <sql>
+      <stmt>updateCount2</stmt>
+    </sql>
+    <result>
+      <updatecount>2</updatecount>
+    </result>
+  </test>
+
+  <test name="Testing sql parameter replacement">
+    <sql>
+      <stmt>?SimpleResult</stmt>
+      <param id="1" type="VARCHAR">a</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing sql multi-parameter replacement">
+    <sql>
+      <stmt>???????SimpleResult</stmt>
+      <param id="1" type="VARCHAR">a</param>
+      <param id="1" type="VARCHAR">n</param>
+      <param id="1" type="VARCHAR">o</param>
+      <param id="1" type="VARCHAR">t</param>
+      <param id="1" type="VARCHAR">h</param>
+      <param id="1" type="VARCHAR">e</param>
+      <param id="1" type="VARCHAR">r</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing call parameter replacement">
+    <call>
+      <stmt>?SimpleResult</stmt>
+      <param id="1" type="VARCHAR">a</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing call multi-parameter replacement">
+    <call>
+      <stmt>???????SimpleResult</stmt>
+      <param id="1" type="VARCHAR">a</param>
+      <param id="1" type="VARCHAR">n</param>
+      <param id="1" type="VARCHAR">o</param>
+      <param id="1" type="VARCHAR">t</param>
+      <param id="1" type="VARCHAR">h</param>
+      <param id="1" type="VARCHAR">e</param>
+      <param id="1" type="VARCHAR">r</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <!-- method invoker tests -->
+  <test name="Testing methodinvoker (static/no args)">
+    <methodinvoker class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="staticMethodWithoutArgs" static="true">
+    </methodinvoker>
+    <result />
+  </test>
+
+  <test name="Testing methodinvoker (static/args)">
+    <methodinvoker class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="staticMethodWithArgs" static="true">
+      <methodArgs>
+        <arg name="a1" type="java.lang.String" value="a" />
+      </methodArgs>
+    </methodinvoker>
+    <result />
+  </test>
+
+  <test name="Testing methodinvoker (no ctor/no args)">
+    <methodinvoker class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="nonStaticWithoutArgsAndNullConstructor">
+    </methodinvoker>
+    <result />
+  </test>
+
+  <test name="Testing methodinvoker (no ctor/args)">
+    <methodinvoker class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="nonStaticWithArgsAndNullConstructor">
+      <methodArgs>
+        <arg name="a1" type="java.lang.String" value="another" />
+      </methodArgs>
+    </methodinvoker>
+    <result />
+  </test>
+
+  <test name="Testing methodinvoker (ctor/no args)">
+    <methodinvoker class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="nonStaticWithoutArgsWithConstructor">
+      <constructorArgs>
+        <arg name="c1" type="java.lang.String" value="a" />
+      </constructorArgs>
+    </methodinvoker>
+    <result />
+  </test>
+
+  <test name="Testing methodinvoker (ctor/args)">
+    <methodinvoker class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="nonStaticWithArgsWithConstructor">
+      <constructorArgs>
+        <arg name="c1" type="java.lang.String" value="a" />
+      </constructorArgs>
+      <methodArgs>
+        <arg name="a1" type="java.lang.String" value="another" />
+      </methodArgs>
+    </methodinvoker>
+    <result />
+  </test>
+
+  <test name="Testing methodinvoker (exception)">
+    <methodinvoker class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="nonStaticWithArgsWithConstructor">
+      <constructorArgs>
+        <arg name="c1" type="java.lang.String" value="a" />
+      </constructorArgs>
+      <methodArgs>
+        <arg name="m1" type="java.lang.String" value="a" />
+      </methodArgs>
+    </methodinvoker>
+    <result>
+      <exception>
+        <message>Application Specific Exception!</message>
+      </exception>
+    </result>
+  </test>
+
+  <!-- dynamic sql tests -->
+  <test name="Testing dynamicsql (static/no args)">
+    <dynamicsql class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="staticMethodWithoutArgs" static="true">
+    </dynamicsql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing dynamicsql (static/args)">
+    <dynamicsql class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="staticMethodWithArgs" static="true">
+      <methodArgs>
+        <arg name="a1" type="java.lang.String" value="a" />
+      </methodArgs>
+    </dynamicsql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing dynamicsql (no ctor/no args)">
+    <dynamicsql class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="nonStaticWithoutArgsAndNullConstructor">
+    </dynamicsql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing dynamicsql (no ctor/args)">
+    <dynamicsql class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="nonStaticWithArgsAndNullConstructor">
+      <methodArgs>
+        <arg name="a1" type="java.lang.String" value="another" />
+      </methodArgs>
+    </dynamicsql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing dynamicsql (ctor/no args)">
+    <dynamicsql class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="nonStaticWithoutArgsWithConstructor">
+      <constructorArgs>
+        <arg name="c1" type="java.lang.String" value="a" />
+      </constructorArgs>
+    </dynamicsql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing dynamicsql (ctor/args)">
+    <dynamicsql class="net.sourceforge.sqlunit.test.TestingMethodsGenerator"
+        method="nonStaticWithArgsWithConstructor">
+      <constructorArgs>
+        <arg name="c1" type="java.lang.String" value="a" />
+      </constructorArgs>
+      <methodArgs>
+        <arg name="a1" type="java.lang.String" value="another" />
+      </methodArgs>
+    </dynamicsql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing expected time functionality"
+      expected-duration-millis="10" percentage-tolerance="200">
+    <call>
+      <stmt>resultAndOneResultSet</stmt>
+      <param id="1" type="INTEGER" inout="out">${rc}</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">143</outparam>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">7</col>
+          <col id="2" type="VARCHAR">James Bond</col>
+          <col id="3" type="VARCHAR">Martini</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing variable substitution">
+    <prepare>
+      <set name="${nother}" value="nother" />
+    </prepare>
+    <call>
+      <stmt>?${nother}SimpleResult</stmt>
+      <param id="1" type="VARCHAR">a</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing returning NULL values">
+    <call>
+      <stmt>aSimpleNullResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">NULL</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing full specification">
+    <call>
+      <stmt>aSimpleMultiColResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+          <col id="2" name="col2" type="VARCHAR">Larry</col>
+          <col id="3" name="col3" type="INTEGER">31</col>
+        </row>
+        <row id="2">
+          <col id="1" name="col1" type="INTEGER">2</col>
+          <col id="2" name="col2" type="VARCHAR">Curly</col>
+          <col id="3" name="col3" type="INTEGER">32</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing partial row specification">
+    <call>
+      <stmt>aSimpleMultiColResult</stmt>
+    </call>
+    <result>
+      <resultset id="1" partial="true">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+          <col id="2" name="col2" type="VARCHAR">Larry</col>
+          <col id="3" name="col3" type="INTEGER">31</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing partial col specification">
+    <call>
+      <stmt>aSimpleMultiColResult</stmt>
+    </call>
+    <result>
+      <resultset id="1" order-by="NONE">
+        <row id="1" partial="true">
+          <col id="2" name="col2" type="VARCHAR">Larry</col>
+        </row>
+        <row id="2" partial="true">
+          <col id="2" name="col2" type="VARCHAR">Curly</col>
+          <col id="3" name="col3" type="INTEGER">32</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing partial row/col specification">
+    <call>
+      <stmt>aSimpleMultiColResult</stmt>
+    </call>
+    <result>
+      <resultset id="1" partial="true">
+        <row id="1" partial="true">
+          <col id="3" name="col3" type="INTEGER">31</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <echo name="Test of echo tag" text="Bye for now" />
+
+  <test name="Test of result.echo attribute">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result echo="true" />
+  </test>
+
+  <test name="Testing rowcount functionality">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1" rowcount="1" />
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

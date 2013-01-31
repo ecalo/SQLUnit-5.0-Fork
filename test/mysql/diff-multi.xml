@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: diff-multi.xml,v 1.3 2004/08/09 22:05:15 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mysql/diff-multi.xml,v $
+  Desc: This is an alternate spec for my laptop which does not have
+  PostgreSQL installed.
+-->
+<sqlunit>
+  <connection connection-id="1">
+    <driver>com.mysql.jdbc.Driver</driver>
+    <url>jdbc:mysql://localhost:3306/sqlunitdb</url>
+    <user>defaultuser</user>
+    <password>defaultuser</password>
+  </connection>
+  <connection connection-id="2">
+    <driver>com.mysql.jdbc.Driver</driver>
+    <url>jdbc:mysql://localhost:3306/sqlunitdb</url>
+    <user>defaultuser</user>
+    <password>defaultuser</password>
+  </connection>
+
+  <setup>
+    <sql connection-id="1">
+      <stmt>delete from widgets where 1=1</stmt>
+    </sql>
+    <sql connection-id="1">
+      <stmt>insert into widgets values(1,'Sony Camcorder',500.00,10)</stmt>
+    </sql>
+    <sql connection-id="1">
+      <stmt>insert into widgets values(2,'Canon Camcorder',545.00,11)</stmt>
+    </sql>
+  </setup>
+
+  <diff name="Diffing the same result set/exact equality"
+      failure-message="Diff test #1 failed" multi-threaded="true">
+    <sql connection-id="1">
+      <stmt>select price_per_unit from widgets where widget_id=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <sql connection-id="2">
+      <stmt>select price_per_unit from widgets where widget_id=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+  </diff>
+
+  <diff name="Diffing different result set/always matcher"
+      failure-message="Diff test #2 failed" multi-threaded="true">
+    <match resultset-id="1" row-id="*" col-id="1"
+        matcher="net.sourceforge.sqlunit.matchers.AllOrNothingMatcher">
+      <arg name="match" value="true" />
+    </match>
+    <sql connection-id="1">
+      <stmt>select widget_name from widgets where widget_id=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <sql connection-id="2">
+      <stmt>select widget_name from widgets where widget_id=?</stmt>
+      <param id="1" type="INTEGER">2</param>
+    </sql>
+  </diff>
+
+  <diff name="Diffing different resultset/multiple matchers"
+      failure-message="Diff test #3 failed" multi-threaded="true">
+    <match col-id="1" 
+        matcher="net.sourceforge.sqlunit.matchers.AllOrNothingMatcher">
+      <arg name="match" value="true" />
+    </match>
+    <match col-id="2" matcher="net.sourceforge.sqlunit.matchers.RangeMatcher">
+      <arg name="tolerance" value="50" />
+    </match>
+    <match col-id="3" 
+        matcher="net.sourceforge.sqlunit.matchers.PercentageRangeMatcher">
+      <arg name="pc-tolerance" value="10" />
+    </match>
+    <sql connection-id="1">
+      <stmt>select widget_name, price_per_unit, number_sold from widgets where widget_id=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <sql connection-id="2">
+      <stmt>select widget_name, price_per_unit, number_sold from widgets where widget_id=?</stmt>
+      <param id="1" type="INTEGER">2</param>
+    </sql>
+  </diff>
+
+  <diff name="Diffing different resultset/pc-matcher/range"
+      failure-message="Diff test #4 failed" multi-threaded="true">
+    <match col-id="1-2" 
+        matcher="net.sourceforge.sqlunit.matchers.PercentageRangeMatcher">
+      <arg name="pc-tolerance" value="20" />
+    </match>
+    <sql connection-id="1">
+      <stmt>select price_per_unit, number_sold from widgets where widget_id=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <sql connection-id="2">
+      <stmt>select price_per_unit, number_sold from widgets where widget_id=?</stmt>
+      <param id="1" type="INTEGER">2</param>
+    </sql>
+  </diff>
+
+  <diff name="Diffing different resultset/pc-matcher/enum"
+      failure-message="Diff test #5 failed" multi-threaded="true">
+    <match col-id="1,2" 
+        matcher="net.sourceforge.sqlunit.matchers.PercentageRangeMatcher">
+      <arg name="pc-tolerance" value="20" />
+    </match>
+    <sql connection-id="1">
+      <stmt>select price_per_unit, number_sold from widgets where widget_id=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <sql connection-id="2">
+      <stmt>select price_per_unit, number_sold from widgets where widget_id=?</stmt>
+      <param id="1" type="INTEGER">2</param>
+    </sql>
+  </diff>
+
+  <teardown />
+
+</sqlunit>

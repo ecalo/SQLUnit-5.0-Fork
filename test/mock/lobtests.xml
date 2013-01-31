@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: lobtests.xml,v 1.11 2006/01/07 02:27:23 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/lobtests.xml,v $
+  Desc: Input specification for running SQLUnit tests against a mock database.
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <test name="Testing LOB(Bytes) implementation with LOB and md5">
+    <call>
+      <stmt>bytesInResultSet</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="id" type="INTEGER">1</col>
+          <col id="2" name="lobcol" type="BINARY">md5:e2c5d7f7506947325d66754bbe903fd2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing LOB(Bytes) implementation with LOB and file">
+    <sql>
+      <stmt>bytesInResultSet</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="id" type="INTEGER">1</col>
+          <col id="2" name="lobcol" type="BINARY">file:/tmp/Dictionary.ser</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <!-- storing objects in blobs -->
+  <!-- This is a way to store Java Objects in a database even if the
+       database does not really support the datatype JAVA_OBJECT -->
+  <test name="Testing LOB(Bytes) with Java Object Support and md5"
+      java-object-support="on" >
+    <call>
+      <stmt>bytesInResultSet</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="id" type="INTEGER">1</col>
+          <col id="2" name="lobcol" type="BINARY">obj:Dictionary:{1=&gt;'Larry',2=&gt;'Curly',3=&gt;'Moe'}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing XML CLOB and file">
+    <sql>
+      <stmt>xmlResultSet</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="LONGVARCHAR">file:test/mock/xmltest.out</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing a plain CLOB">
+    <sql>
+      <stmt>clobResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="CLOB">file:test/mock/xmltest.out</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing a plain BLOB">
+    <sql>
+      <stmt>blobResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="BLOB">md5:e2c5d7f7506947325d66754bbe903fd2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing a real Java Object">
+    <sql>
+      <stmt>javaObjectResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="myobj" type="JAVA_OBJECT">obj:Dictionary:{1=&gt;'Larry',2=&gt;'Curly',3=&gt;'Moe'}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing LOB(InputStream) implementation with LOB and md5">
+    <call>
+      <stmt>lobInResultSet</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="id" type="INTEGER">1</col>
+          <col id="2" name="lobcol" type="LONGVARBINARY">md5:e2c5d7f7506947325d66754bbe903fd2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

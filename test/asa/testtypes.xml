@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: testtypes.xml,v 1.1 2004/09/08 22:13:00 dfishburn Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/asa/testtypes.xml,v $
+  $Revision: 1.1 $
+  Desc: This file tests the various data types supported by 
+  Sybase Adaptive Server Anywhere 9.0.1.
+-->
+<sqlunit>
+  <connection reconnect-on-failure="on">
+
+    <!-- This uses the iAnywhere JDBC Driver.
+        You must be using ASA 9.0.1.1883 or higher for this to work.
+        You can verify the version you have by running:
+            dbeng9 -v
+        The %ASANY9%\java\jodbc.jar must be in your classpath.
+    -->
+    <driver>ianywhere.ml.jdbcodbc.IDriver</driver>
+    <url>jdbc:odbc:driver=Adaptive Server Anywhere 9.0</url>
+
+    <!-- This uses the standard Sun JDBC ODBC bridge to access ASA.
+        You must create a new ODBC DSN for your database, then update
+        the URL line by replacing:
+            replace_with_your_dsn 
+        with the DSN you just created.
+    <driver>sun.jdbc.odbc.JdbcOdbcDriver</driver>
+    <url>jdbc:odbc:replace_with_your_dsn</url>
+    <driver>sun.jdbc.odbc.JdbcOdbcDriver</driver>
+    <url>jdbc:odbc:cons</url>
+    -->
+
+    <!-- This uses the Sybase jConnect driver.
+        The description of the resultset is different when using
+        this driver over the iAnywhere JDBC driver and the 
+        Sun JDBC-ODBC bridge.
+    <driver>com.sybase.jdbc2.jdbc.SybDriver</driver>
+    <url>jdbc:sybase:Tds:localhost:2638</url>
+    -->
+
+    <user>DBA</user>
+    <password>SQL</password>
+  </connection>
+
+  <test name="Testing all datatypes">
+    <call>
+      <stmt>
+        select CAST(1 AS BIT) as "bit"
+             , CAST(10 AS TINYINT) as "tinyint"
+             , CAST(100 AS SMALLINT) as "smallint"
+             , CAST(1000 AS INTEGER) as "integer"
+             , CAST(10000 AS UNSIGNED INTEGER) as "unsigned_integer"
+             , CAST(100000 AS BIGINT) as "bigint"
+             , CAST(1000000 AS UNSIGNED BIGINT) as "unsigned_bigint"
+             , CAST('char' AS CHAR(4)) as "char"
+             , CAST('varchar' AS VARCHAR(7)) as "varchar"
+             , CAST('long varchar' AS LONG VARCHAR) as "long_varchar"
+             , CAST('binary' AS BINARY(6)) as "binary"
+             , CAST('varbinary' AS VARBINARY(9)) as "varbinary"
+             , CAST('long binary' AS LONG BINARY) as "long_binary"
+             , CAST('xml' AS XML) as "xml"
+             , CAST('1900/1/1' AS DATE) as "date"
+             , CAST('1900/1/1 13:02:55' AS DATETIME) as "datetime"
+             , CAST('1901/1/1' AS TIMESTAMP) as "timestamp"
+             , CAST('1902/1/1' AS SMALLDATETIME) as "smalldatetime"
+             , CAST('300.12' AS NUMERIC(5,2)) as "numeric"
+             , CAST('301.13' AS DECIMAL(5,2)) as "decimal"
+             , CAST('402.14' AS FLOAT) as "float"
+             , CAST('403.15' AS REAL) as "real"
+             , CAST('404.15' AS DOUBLE) as "double"
+          from dummy
+      </stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="01" name="bit" type="BIT">true</col>
+          <col id="02" name="tinyint" type="TINYINT">10</col>
+          <col id="03" name="smallint" type="SMALLINT">100</col>
+          <col id="04" name="integer" type="INTEGER">1000</col>
+          <col id="05" name="unsigned_integer" type="BIGINT">10000</col>
+          <col id="06" name="bigint" type="BIGINT">100000</col>
+          <col id="07" name="unsigned_bigint" type="DECIMAL">1000000</col>
+          <col id="08" name="char" type="VARCHAR">char</col>
+          <col id="09" name="varchar" type="VARCHAR">varchar</col>
+          <col id="10" name="long_varchar" type="VARCHAR">long varchar</col>
+          <col id="11" name="binary" type="BINARY">md5:9d7183f16acce70658f686ae7f1a4d20</col>
+          <col id="12" name="varbinary" type="BINARY">varbinary</col>
+          <col id="13" name="long_binary" type="LONGVARBINARY">md5:254d53fd270c1c1adac16596c9279440</col>
+          <col id="14" name="xml" type="LONGVARCHAR">md5:0f635d0e0f3874fff8b581c132e6c7a7</col>
+          <col id="15" name="date" type="DATE">1900-01-01</col>
+          <col id="16" name="datetime" type="TIMESTAMP">1900-01-01 13:02:55.000</col>
+          <col id="17" name="timestamp" type="TIMESTAMP">1901-01-01 00:00:00.000</col>
+          <col id="18" name="smalldatetime" type="TIMESTAMP">1902-01-01 00:00:00.000</col>
+          <col id="19" name="numeric" type="NUMERIC">300.12</col>
+          <col id="20" name="decimal" type="DECIMAL">301.13</col>
+          <col id="21" name="float" type="REAL">402.14</col>
+          <col id="22" name="real" type="REAL">403.15</col>
+          <col id="23" name="double" type="DOUBLE">404.15</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

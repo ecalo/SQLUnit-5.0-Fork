@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: connectiontest.xml,v 1.5 2004/09/08 01:06:58 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mysql/connectiontest.xml,v $
+  Desc: This is an alternate spec for my laptop which does not have
+  PostgreSQL installed.
+-->
+<sqlunit>
+  <connection connection-id="1">
+    <driver>com.mysql.jdbc.Driver</driver>
+    <url>jdbc:mysql://localhost:3306/sqlunitdb</url>
+    <user>defaultuser</user>
+    <password>defaultuser</password>
+  </connection>
+  <!--
+  <connection connection-id="2">
+    <datasource>jdbc/myDSN</datasource>
+    <jndi>
+      <arg name="java.naming.factory.initial" 
+          value="org.jnp.interfaces.NamingContextFactory" />
+      <arg name="java.naming.provider.url" value="jnp://localhost:1099" />
+      <arg name="java.naming.factory.url.pkgs" value="org.jboss.naming" />
+    </jndi>
+  </connection>
+  -->
+
+  <setup>
+    <sql connection-id="1"><stmt>delete from customer where 1=1</stmt></sql>
+    <sql connection-id="1"><stmt>insert into customer values(1,'Sujit Pal','secret','en_US',null,0,now())</stmt></sql>
+  </setup>
+
+  <test name="Checking returned value from customer"
+          failure-message="Returned value check for customer failed">
+    <sql connection-id="1">
+      <stmt>select custId from customer where custId=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="custId" type="INTEGER">${deptId_HR}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing bad column name passed to database"
+          failure-message="Bad column name test failed">
+    <sql connection-id="1">
+      <stmt>select myname from customer where custId=?</stmt>
+      <param id="1" type="INTEGER">1</param>
+    </sql>
+    <result>
+      <exception>
+        <code>1054</code>
+        <message>Unknown column 'myname' in 'field list'</message>
+      </exception>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

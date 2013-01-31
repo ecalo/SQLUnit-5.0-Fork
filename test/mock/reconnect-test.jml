@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "docs/sqlunit.dtd">
+<!--
+  $Id: reconnect-test.jml,v 1.2 2006/04/30 22:25:56 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/reconnect-test.jml,v $
+  Desc: Test specification used by the ReconnectOnFailureTest.java
+-->
+<sqlunit>
+  <connection reconnect-on-failure="on">
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <test name="Throwing an expected exception to trigger reconnect">
+    <call>
+      <stmt>exceptionResult</stmt>
+    </call>
+    <result>
+      <exception>
+        <code>1234</code>
+        <message>Test Exception</message>
+      </exception>
+    </result>
+  </test>
+
+  <test name="Running another arbitary call to compare connections">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

@@ -1,0 +1,219 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: test.xml,v 1.9 2004/06/25 23:31:01 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/sybase/test.xml,v $
+  Desc: This file is the input specification for running Sybase sprocs
+  test suite for Sybase ASE version 12.5
+-->
+<sqlunit>
+  <connection transaction-support="off">
+    <driver>com.sybase.jdbc2.jdbc.SybDriver</driver>
+    <url>jdbc:sybase:Tds:host:port/dbname</url>
+    <user>user</user>
+    <password>pass</password>
+  </connection>
+
+  <setup>
+    <set name="${var}" value="0" />
+    <sql><stmt>set chained off</stmt></sql>
+  </setup>
+
+  <test name="Getting a named status">
+    <call>
+      <stmt>{? = call GetStatusList(?)}</stmt>
+      <param id="1" type="INTEGER" inout="out">${rc}</param>
+      <param id="2" type="INTEGER">1</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">0</outparam>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="status" type="VARCHAR">Disabled</col>
+          <col id="2" name="statusId" type="INTEGER">2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Getting all valid statuses">
+    <call>
+      <stmt>{? = call GetStatusList()}</stmt>
+      <param id="1" type="INTEGER" inout="out">${rc}</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">0</outparam>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="status" type="VARCHAR">Active</col>
+          <col id="2" name="statusId" type="INTEGER">1</col>
+        </row>
+        <row id="2">
+          <col id="1" name="status" type="VARCHAR">Disabled</col>
+          <col id="2" name="statusId" type="INTEGER">2</col>
+        </row>
+        <row id="3">
+          <col id="1" name="status" type="VARCHAR">Newborn</col>
+          <col id="2" name="statusId" type="INTEGER">0</col>
+        </row>
+        <row id="4">
+          <col id="1" name="status" type="VARCHAR">Retired</col>
+          <col id="2" name="statusId" type="INTEGER">3</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Handling a multi-resultset result">
+    <call>
+      <stmt>{? = call GetTopic(?)}</stmt>
+      <param id="1" type="INTEGER" inout="out">${rc}</param>
+      <param id="2" type="INTEGER">1</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">0</outparam>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="topicId" type="INTEGER">1</col>
+          <col id="2" name="topic" type="VARCHAR">Unused topics</col>
+          <col id="3" name="topicTypeId" type="INTEGER">3</col>
+          <col id="4" name="topicType" type="VARCHAR">Editorial and Products</col>
+          <col id="5" name="topicPath" type="VARCHAR">1</col>
+          <col id="6" name="topicPathString" type="VARCHAR">Unused topics</col>
+          <col id="7" name="defaultLocaleId" type="INTEGER">1</col>
+          <col id="8" name="defaultLocale" type="VARCHAR">en_US</col>
+          <col id="9" name="statusId" type="INTEGER">0</col>
+          <col id="10" name="status" type="VARCHAR">Newborn</col>
+          <col id="11" name="parentTopicId" type="INTEGER">NULL</col>
+          <col id="12" name="mergeTopicId" type="INTEGER">NULL</col>
+          <col id="13" name="description" type="VARCHAR">Unused topics</col>
+        </row>
+      </resultset>
+      <resultset id="2" />
+      <resultset id="3" />
+      <resultset id="4">
+        <row id="1">
+          <col id="1" name="topicId" type="INTEGER">1</col>
+          <col id="2" name="ancestorTopicId" type="INTEGER">1</col>
+          <col id="3" name="topic" type="VARCHAR">Unused topics</col>
+          <col id="4" name="defaultLocaleId" type="INTEGER">1</col>
+          <col id="5" name="description" type="VARCHAR">Unused topics</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Running sp_TestDataDump">
+    <call>
+      <stmt>{? = call TestDataDump(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}</stmt>
+      <param id="1" type="INTEGER" inout="out">${status}</param>
+      <param id="2" type="CHAR">1097130112605841</param>
+      <param id="3" type="VARCHAR">C1</param>
+      <param id="4" type="VARCHAR">1234</param>
+      <param id="5" type="CHAR">D</param>
+      <param id="6" type="TIMESTAMP">2003-09-29 00:00:00.000</param>
+      <param id="7" type="NUMERIC">1000</param>
+      <param id="8" type="NUMERIC">1</param>
+      <param id="9" type="NUMERIC">4</param>
+      <param id="10" type="CHAR">1097130112605841</param>
+      <param id="11" type="VARCHAR">Testing</param>
+      <param id="12" type="TIMESTAMP">1900-01-01 00:00:00.000</param>
+      <param id="13" type="NUMERIC">0</param>
+      <param id="14" type="VARCHAR" inout="out">${ReqIdV}</param>
+      <param id="15" type="INTEGER" inout="out">${errorCode}</param>
+      <param id="16" type="VARCHAR" inout="out">${errorDesc}</param>
+  </call>
+    <result>
+      <outparam id="1" type="INTEGER">0</outparam>
+      <outparam id="14" type="VARCHAR">1234567890</outparam>
+      <outparam id="15" type="INTEGER">0</outparam>
+      <outparam id="16" type="VARCHAR">success</outparam>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="" type="VARCHAR">${ReqIdV}</col>
+        </row>
+      </resultset>
+      <resultset id="2">
+        <row id="1">
+          <col id="1" name="RequestTypeId" type="INTEGER">4</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Running sp_convertToNumeric">
+    <call>
+      <stmt>{? = call TestConvertToNumeric(?,?)}</stmt>
+      <param id="1" type="INTEGER" inout="out">${rc}</param>
+      <param id="2" type="VARCHAR">${ReqIdV}</param>
+      <param id="3" type="INTEGER" inout="out">${ReqId}</param>
+    </call>
+    <result />
+  </test> 
+
+  <test name="Running sp_ViewStatus">
+    <call>
+      <stmt>{? = call TestViewStatus(?,?,?)}</stmt>
+      <param id="1" type="INTEGER" inout="out">${status}</param>
+      <param id="2" type="CHAR">1097130112605853</param>
+      <param id="3" type="INTEGER" inout="out">${errorCode}</param>
+      <param id="4" type="VARCHAR" inout="out">${errorDesc}</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">0</outparam>
+      <outparam id="3" type="INTEGER">0</outparam>
+      <outparam id="4" type="VARCHAR">success</outparam>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="NUMERIC">35222643</col>
+          <col id="2" type="NUMERIC">118</col>
+          <col id="3" type="CHAR">IN</col>
+          <col id="4" type="VARCHAR">Compliments</col>
+          <col id="5" type="VARCHAR">0 </col>
+          <col id="6" type="CHAR">01 Oct 2003</col>
+          <col id="7" type="VARCHAR">ML</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="running sp_TestNullOutParam">
+    <call>
+      <stmt>{? = call TestNullOutParam(?,?)}</stmt>
+      <param id="1" type="INTEGER" inout="out">${rc1}</param>
+      <param id="2" type="INTEGER" inout="out">${errcode}</param>
+      <param id="3" type="VARCHAR" inout="out">${errmsg}</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">0</outparam>
+      <!--
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">${1}</col>
+        </row>
+      </resultset>
+      -->
+      <outparam id="2" type="INTEGER">10</outparam>
+      <outparam id="3" type="VARCHAR">NULL</outparam>
+    </result>
+  </test>
+
+  <test name="running sp_TestKeyRequest">
+    <call>
+      <stmt>{? = call TestKeyRequest(?,?,?)}</stmt>
+      <param id="1" type="INTEGER" inout="out">${status}</param>
+      <param id="2" type="CHAR" inout="out">${keyVal}</param>
+      <param id="3" type="INTEGER" inout="out">${errorCode}</param>
+      <param id="4" type="VARCHAR" inout="out">${errorDesc}</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">0</outparam>
+      <outparam id="2" type="CHAR">${keyVal}</outparam>
+      <outparam id="3" type="INTEGER">0</outparam>
+      <outparam id="4" type="VARCHAR">success</outparam>
+    </result>
+  </test>
+
+  <teardown>
+    <include file="test/sybase/teardown.sql" />
+  </teardown>
+
+</sqlunit>

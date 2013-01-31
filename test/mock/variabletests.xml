@@ -1,0 +1,179 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: variabletests.xml,v 1.10 2005/06/07 01:13:40 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/variabletests.xml,v $
+  Desc: Tests for variable usage
+-->
+<sqlunit>
+  <connection>
+    <driver>${ant.mock.driver.class}</driver>
+    <url>${ant.mock.jdbc.url}</url>
+    <user />
+    <password />
+  </connection>
+  <connection connection-id="1">
+    <driver>${ant.mock.driver.class}</driver>
+    <url>${ant.mock.jdbc.url}</url>
+    <user />
+    <password />
+  </connection>
+
+  <!-- basic tests of SQLUnit functionality -->
+
+  <test name="Testing scalar substitution using set">
+    <prepare>
+      <set name="${var1}" value="1" />
+    </prepare>
+    <sql connection-id="1">
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">${var1}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Setting variable as lvalue">
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">${var2}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Using variable set as rvalue">
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">${var2}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing vector set">
+    <prepare>
+      <set name="${query}">
+        <sql><stmt>aSimpleResult</stmt></sql>
+        <result>
+          <resultset id="1">
+            <row id="1">
+              <col id="1" name="c1" type="INTEGER">${var3}</col>
+            </row>
+          </resultset>
+        </result>
+      </set>
+    </prepare>
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="c1" type="INTEGER">${query.var3}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Reusing previously set variable">
+    <call>
+      <stmt>resultAndOneResultSet</stmt>
+      <param id="1" type="INTEGER" inout="out">${var3}</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">${var3}</outparam>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="agentId" type="INTEGER">7</col>
+          <col id="2" name="name" type="VARCHAR">James Bond</col>
+          <col id="3" name="drink" type="VARCHAR">Martini</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Setting a value into a variable">
+    <sql>
+      <stmt>anotherInResultSet</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="another" type="VARCHAR">${var4}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <diff name="Using variable set as input param"
+      failure-message="${var4} does not contain [another]">
+    <sql>
+      <stmt>?SimpleResult</stmt>
+      <param id="1" type="VARCHAR">${var4}</param>
+    </sql>
+    <sql>
+      <stmt>anotherSimpleResult</stmt>
+    </sql>
+  </diff>
+
+  <test name="Setting a value from a method call"
+      failure-message="${var5} does not contain [another]">
+    <prepare>
+      <set name="${var5}" static="true"
+          class="net.sourceforge.sqlunit.test.mock.VarSetter" method="setVar">
+        <methodArgs>
+          <arg name="value" type="java.lang.String" value="another" />
+        </methodArgs>
+      </set>
+    </prepare>
+    <sql>
+      <stmt>?SimpleResult</stmt>
+      <param id="1" type="VARCHAR">${var5}</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <diff name="Testing prepare in diff tag"
+      failure-message="${var6} does not contain [another]">
+    <prepare>
+      <set name="${var6}" static="true"
+          class="net.sourceforge.sqlunit.test.mock.VarSetter" method="setVar">
+        <methodArgs>
+          <arg name="value" type="java.lang.String" value="another" />
+        </methodArgs>
+      </set>
+    </prepare>
+    <sql>
+      <stmt>?SimpleResult</stmt>
+      <param id="1" type="VARCHAR">${var5}</param>
+    </sql>
+    <sql>
+      <stmt>anotherSimpleResult</stmt>
+    </sql>
+  </diff>
+
+  <echo name="Pulling ant variable from inside SQLUnit"
+      text="Project: ${ant.ant.project.name}" value="Project: sqlunit" />
+
+  <teardown />
+
+</sqlunit>

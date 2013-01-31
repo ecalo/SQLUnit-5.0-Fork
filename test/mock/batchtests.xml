@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: batchtests.xml,v 1.5 2005/06/07 01:13:39 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/batchtests.xml,v $
+  Desc: Input specification for running SQLUnit tests against a mock database.
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <batchtest name="Testing basic batchsql functionality">
+    <batchsql>
+      <stmt>updateCount1</stmt>
+      <stmt>updateCount2</stmt>
+      <stmt>updateCount1</stmt>
+    </batchsql>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+      <updatecount>1</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <batchtest name="Testing batchsql with expected-count">
+    <batchsql>
+      <stmt>updateCount1</stmt>
+      <stmt>updateCount2</stmt>
+      <stmt>updateCount1</stmt>
+    </batchsql>
+    <batchresult expected-count="3" />
+  </batchtest>
+
+  <batchtest name="Testing batchsql with failed-at">
+    <batchsql>
+      <stmt>updateCount1</stmt>
+      <stmt>updateCountExecuteFailed</stmt>
+      <stmt>updateCount2</stmt>
+      <stmt>updateCount1</stmt>
+    </batchsql>
+    <batchresult failed-at="1" />
+  </batchtest>
+
+  <batchtest name="Testing batchsql with failed-at and expected-count">
+    <batchsql>
+      <stmt>updateCount1</stmt>
+      <stmt>updateCountExecuteFailed</stmt>
+      <stmt>updateCount2</stmt>
+      <stmt>updateCount1</stmt>
+    </batchsql>
+    <batchresult expected-count="4" failed-at="1" />
+  </batchtest>
+
+  <batchtest name="Testing basic batchcall functionality">
+    <batchcall>
+      <stmt>updateCount?</stmt>
+      <paramset id="1">
+        <param id="1" type="INTEGER">1</param>
+      </paramset>
+      <paramset id="1">
+        <param id="1" type="INTEGER">2</param>
+      </paramset>
+    </batchcall>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <batchtest name="Testing expected-count functionality">
+    <batchcall>
+      <stmt>updateCount?</stmt>
+      <paramset id="1">
+        <param id="1" type="INTEGER">1</param>
+      </paramset>
+      <paramset id="1">
+        <param id="1" type="INTEGER">2</param>
+      </paramset>
+    </batchcall>
+    <batchresult expected-count="2" />
+  </batchtest>
+
+  <batchtest name="Testing expected-count/failed-at functionality">
+    <batchcall>
+      <stmt>updateCount?</stmt>
+      <paramset id="1">
+        <param id="1" type="VARCHAR">ExecuteFailed</param>
+      </paramset>
+      <paramset id="1">
+        <param id="1" type="VARCHAR">2</param>
+      </paramset>
+    </batchcall>
+    <batchresult expected-count="2" failed-at="0" />
+  </batchtest>
+
+  <teardown />
+
+</sqlunit>

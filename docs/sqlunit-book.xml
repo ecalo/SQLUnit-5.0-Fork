@@ -1,0 +1,1882 @@
+<?xml version="1.0"?>
+<!-- $Id: sqlunit-book.xml,v 1.100 2006/04/30 22:25:54 spal Exp $ -->
+<!-- $Source: /cvsroot/sqlunit/sqlunit/docs/sqlunit-book.xml,v $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" 
+          "/usr/share/sgml/docbook/xml-dtd-4.2-1.0-24/docbookx.dtd" [
+  <!ENTITY tag-top SYSTEM "sqlunit-tag-top.xml">
+  <!ENTITY tags SYSTEM "sqlunit-tags.xml">
+  <!ENTITY errors SYSTEM "sqlunit-errors.xml">
+  <!ENTITY types SYSTEM "sqlunit-types.xml">
+  <!ENTITY asserts SYSTEM "sqlunit-asserts.xml">
+  <!ENTITY matchers SYSTEM "sqlunit-matchers.xml">
+  <!ENTITY reporters SYSTEM "sqlunit-reporters.xml">
+  <!ENTITY parser-grammar SYSTEM "IncludeFileParser.jjdoc">
+]>
+<book>
+  <bookinfo>
+    <title>SQLUnit User Guide</title>
+    <author><firstname>Sujit</firstname><surname>Pal</surname></author>
+    <copyright>
+      <year>2003-2004</year>
+      <holder>The SQLUnit Team</holder>
+    </copyright>
+  </bookinfo>
+  <chapter>
+    <title>Introduction</title>
+    <anchor id="Introduction" />
+    <para>SQLUnit is a regression and unit testing harness for testing database stored procedures. The test suite is written as an XML file. The SQLUnit harness itself is written in Java and uses the JUnit unit testing framework to convert the XML test specifications to JDBC calls and compare the results generated from the calls with the specified results.</para>
+    <para>Stored procedures are often used to provide an object abstraction to the underlying relational data store. The object abstractions are consumed by Java middleware programs. In shops where this is the case, Java programmers often use the popular JUnit testing framework to unit test their code. Using SQLUnit to unit test the database stored procedures thus becomes a natural extension of the unit testing process, and provides unit testing coverage for a layer that is often neglected in this respect.</para>
+    <para>Since the stored procedure author need not be a Java coder, and may not even know Java or JUnit, SQLUnit provides an XML language to write test suites.  Stored Procedure authors who know Java and/or can write JUnit tests will find that the repetitive nature of JDBC programming would, over time, encourage refactoring the common parts of the tests into utility classes. SQLUnit already does this, except it goes one step further and abstracts the test specification out of Java into XML.</para>
+    <para>The XML itself is fairly small and easy to learn for anybody and should be instantly intuitive to a person who is already familiar with JUnit.</para>
+    <para>Further, since SQLUnit uses JDBC to communicate with the database, it should be possible to write unit tests for stored procedures for any database that provides a JDBC driver. Some relatively painless porting may be needed for each new DBMS or driver, due to vendor-specific extensions to the SQL standard or restrictions of the JDBC API.</para>
+  </chapter>
+  <chapter>
+    <title>Alternative Forms of this document</title>
+    <anchor id="AlternativeFormats" />
+    <section>
+      <title>Printer Friendly Format</title>
+      <para>This is the same document as this one, but comes as one large HTML file, which is suitable for printing and reading where you may not have access to a computer.</para>
+      <para>You can use the File::Print command from the browser menu to send the document to the printer.</para>
+      <para><ulink url="sqlunit-book.html">Print User Guide</ulink>.</para>
+    </section>
+    <section>
+      <title>Downloadable Format</title>
+      <para>This is a tar.gz file which can be downloaded to your personal computer, so you dont have to connect to the network every time you want to read the SQLUnit documentation. You will have to make a subdirectory and gunzip and untar inside that subdirectory.</para>
+      <para>Here is the sequence of instructions (for Unix/Linux users) to build the documentation locally.
+<screen>
+<userinput><prompt>$ </prompt>mkdir sqlunit-docs</userinput>
+<userinput><prompt>$ </prompt>mv /download/dir/htdoc.tar.gz sqlunit-docs</userinput>
+<userinput><prompt>$ </prompt>cd sqlunit-docs</userinput>
+<userinput><prompt>$ </prompt>tar xvzf htdoc.tar.gz</userinput>
+</screen></para>
+      <para>You can access this from the browser using a file URL from your browser, like so:
+<programlisting>
+file:///path/to/sqlunit-docs/index.html
+</programlisting></para>
+      <para>Make sure to check back from time to time, though, since there may have been bug fixes and feature enhancements in future releases that you could probably take advantage of.</para>
+      <para><ulink url="htdoc.tar.gz">Download User Guide</ulink>.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Historical Trivia</title>
+    <anchor id="Historical" />
+    <para>This project was inspired by a regression testing tool for Informix stored procedures, originally written by Mark H Sullivan. It was written using a combination of Java, shell scripts and make, and supported a very rudimentary set of directives for running the stored procedures in a certain sequence and comparing the outputs with the specified outputs. All error checking was at runtime, so we had to be careful to avoid "syntax" errors such as using double quotes instead of single quotes. It was also very hard to extend, as I found out when trying to add some new directives.</para>
+    <para>I re-wrote this tool in C using lex and yacc for the command processor, and Informix ESQL/C to call the procedures themselves. This fixed some of our problems, because the problems associated with debugging missing quotes and newlines were caught earlier on. However, the tool would mysteriously segfault occasionally. Some leaks were caught with dbmalloc, but the problems still remained, so we had to abandon the tool as well.</para>
+    <para>I re-wrote the tool again using Perl. It used the same input files as the original tool and the C tool, and provided early error checking similar to the C tool. It also provided more intuitive error messages when the tests failed.</para>
+    <para>Some months later, on another project, I was introduced to JUnit based on a chance remark of a colleague, and software development has never been the same for me since. I was almost an instant JUnit convert.</para>
+    <para>Some years later, on yet another project, I learned how to associate Java handler classes with XML tags, which forms the basis of much of the architecture of SQLUnit.</para>
+    <para>Over the years, and especially in my current job, I have been exposed to interface driven development and the use of factories to instantiate implementation classes, which also form the basis of the SQLUnit design.</para>
+    <para>I started SQLUnit as a Sourceforge project when I was tasked with writing the persistence layer (including development of Sybase stored procedures) for a new application. While JUnit sufficed to test the Java portion of the code, I missed having a regression tool for stored procedures around. So based on what I thought would be useful, and on the lessons learned during the last few iterations of building a similar tool, I set about writing one in my spare time (on my train ride to and from work). I ultimately ended up delivering the project without using SQLUnit, but I hope to use it the next time I have to write a similar application.</para>
+    <para>SQLUnit would be different from its predecessors in that it would be based on a standard testing framework (Junit), have a clean, expressive and extendable command syntax (XML), and be able to run on any database which provided a JDBC driver.</para>
+    <para>SQLUnit in its first incarnation only provided for exact equality comparisons between specified results and the results of SQL or stored procedure calls. It used JDBC to get a database connection. Over time, SQLUnit has evolved, so we now have around 6 different ways of getting a database connection, including one by looking up a named DataSource from a JNDI server. The original code only had around 10 tags, now we have around 30.</para>
+    <para>SQLUnit has been put to various uses by its user community, apart from the one for which it was intended, namely regression testing stored procedures. It has been used to regression test new JDBC drivers against old ones and against a known set of specifications. It has been used to validate ETL runs from operational databases to a data warehouse with a specified degree of accuracy. It has been bundled along with testing suites for commercial applications.</para>
+    <para>SQLUnit has benefited tremendously from the feedback and criticism from the community, many of which were very insightful and knowledgeable, and have formed the basis of enhancements and features to SQLUnit. It has also benefited from the numerous patches, bug fixes and porting efforts by various members of the community. In short, SQLUnit is what it is today because of the strong community support that it has. Thank you, SQLUnit would not be what it is today without you.</para>
+  </chapter>
+  <chapter>
+    <title>Porting Information</title>
+    <anchor id="Porting" />
+    <para>Work is currently going on to port SQLUnit (or to just make it run on) various databases. Here is the status of the porting efforts till date. If you are running SQLUnit with databases other than those listed below, let us know, and we will add in your information as well. If you are planning to run SQLUnit with a database not listed below, you probably will have no problems. Most non-standard features (such as Oracle CURSORs, multiple resultsets in Sybase, etc) have been identified and accounted for in the SQLUnit code. In case you do have problems, however, please let us know on the forum.</para>
+    <para>
+      <table frame="all">
+        <title>Ports of SQLUnit to different databases</title>
+        <tgroup cols="3" align="left" colsep="1" rowsep="1">
+          <colspec colname="c1" />
+          <colspec colname="c2" />
+          <colspec colname="c3" />
+          <thead>
+           <row>
+             <entry>Database Name (Version)</entry>
+             <entry>Porter</entry>
+             <entry>Status</entry>
+           </row>
+         </thead>
+         <tbody>
+           <row>
+             <entry>PostgreSQL 7.3</entry>
+             <entry>Sujit Pal</entry>
+             <entry>Complete. PostgreSQL was used to do a proof of concept of the initial release of SQLUnit. It has been used thereafter to test new features as they are developed.</entry>
+           </row>
+           <row>
+             <entry>MySQL 3.4</entry>
+             <entry>Sujit Pal</entry>
+             <entry>MySQL does not support stored procedures or functions, but it has been used to test the batch tags, the diff and the sql tags. It plays nicely with SQLUnit. MySQL will support stored functions tentatively in version 5, so we will revisit this when that happens.</entry>
+           </row>
+           <row>
+             <entry>Oracle</entry>
+             <entry>Sahib Singh Wadhwa, Andrei Grigoriev, Sujit Pal</entry>
+             <entry>Complete, with a lot of patches and bug reports from Sahib and Andrei. Thanks to Andrei for running SQLUnit through a very thorough testing with Oracle and getting the last few Oracle CURSOR specific bugs ironed out.</entry>
+           </row>
+           <row>
+             <entry>Sybase ASE 12.5</entry>
+             <entry>Sowmya Shetty, Lakshmi, Sujit Pal</entry>
+             <entry>Complete, with lots of testing support from Soumya Shetty and Lakshmi</entry>
+           </row>
+           <row>
+             <entry>IBM DB2</entry>
+             <entry>Sujit Pal</entry>
+             <entry>Started June 05, 2003. In progress. The stored procedures were written in C, the Java stored procedures had issues running under JDK 1.4. Still need to build a test suite and run them.</entry>
+           </row>
+           <row>
+             <entry>HSQLDB (formerly Hypersonic)</entry>
+             <entry>Campbell Boucher-Burnett</entry>
+             <entry>In progress</entry>
+           </row>
+           <row>
+             <entry>Informix SE 7.0</entry>
+             <entry>-</entry>
+             <entry>Not started. This should work, but has not been tested. The test cases are available in CVS, but the JDBC driver that I had available had issues with working with PAM authentication on Linux. If someone has a working setup of Informix, then I would appreciate you running the tests and letting me know the results.</entry>
+           </row>
+           <row>
+             <entry>Microsoft SQL Server 2000</entry>
+             <entry>James Henderson, Paul King</entry>
+             <entry>On May 29, 2005, James contributed his suite of MS SQL Server tests that he uses to regression test SQLUnit. Earlier, on May 20, 2004, Paul reported that he has been using SQLUnit to test MS SQL Server 2000 for some time, but has not tested the LOB feature yet.</entry>
+           </row>
+           <row>
+             <entry>Sybase ASA 9.0.1</entry>
+             <entry>David Fishburn</entry>
+             <entry>Complete, test suite included with distribution (test/asa/README)</entry>
+           </row>
+         </tbody>
+       </tgroup>
+     </table>
+   </para>
+  </chapter>
+  <chapter>
+    <title>License Information</title>
+    <anchor id="Licensing" />
+    <blockquote>
+      <attribution>Miguel de Icaza</attribution>
+      <para>English is broken, it does not distinguish between free beer and free speech. Spanish on the other hand, distinguishes between gratis and libre. Free software is libre software.</para>
+    </blockquote>
+    <para>SQLUnit is libre software. It is also gratis software, but if someone wants to earn money by installing, customizing or training people about it for a fee, I dont see any problems with that. SQLUnit is distributed under the terms of the GNU General Public License, which gives you the right to copy, modify and re-distribute it either in source or binary form. Using SQLUnit does not obligate you to contribute back to the project any enhancements or fixes you make to it, but we appreciate the gesture if you do so.</para>
+    <para>The full text of the <ulink url="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</ulink> can be found here.</para>
+  </chapter>
+  <chapter>
+    <title>Installing</title>
+    <anchor id="Installing" />
+    <section>
+      <title>Downloading the source</title>
+      <para>The latest source code can be downloaded from sourceforge via anonymous cvs. The <systemitem>CVSROOT</systemitem> environment will need to be set as follows (for Linux using bash):
+<screen>
+<userinput><prompt>$ </prompt>export CVSROOT=:pserver:anonymous@cvs.sqlunit.sourceforge.net:/cvsroot/sqlunit</userinput>
+<userinput><prompt>$ </prompt>cvs -z3 checkout sqlunit</userinput>
+</screen>
+      </para>
+      <para>Alternatively, you can <ulink url="http://sourceforge.net/project/showfiles.php?group_id=77832">download</ulink> the latest released tarball (which also contains the source, but may not be the latest) from the download section. If you are going to be doing any development work for SQLUnit, however, I would recommend getting the source from CVS.</para>
+      <warning><para>Note that tarballs prior to version 1.4 cotained only the SQLUnit JAR file due to a packaging bug, and are hence binary only. Additionally, you would have to go to CVS to pick up the DTD file. Thanks to Arjen Stolk for pointing this out.</para></warning>
+    </section>
+    <section>
+      <title>Required JAR files</title>
+      <anchor id="aRequiredJars" />
+      <para>
+        <table frame="all">
+          <title>JARs used by SQLUnit</title>
+          <tgroup cols="6" align="left" colsep="1" rowsep="1">
+            <colspec colname="c1" />
+            <colspec colname="c2" />
+            <colspec colname="c3" />
+            <colspec colname="c4" />
+            <colspec colname="c5" />
+            <colspec colname="c6" />
+            <thead>
+              <row>
+                <entry>Software and Version</entry>
+                <entry>How it is used</entry>
+                <entry>Licensing</entry>
+                <entry>URL</entry>
+                <entry>Required</entry>
+                <entry>Included</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>Java 1.4 or later</entry>
+                <entry>SQLUnit is written using Java 1.4_02, so you will need to install the JRE if you are just going to use it, or the JDK if you are going to do development with it.</entry>
+                <entry>Proprietary but free for download and use</entry>
+                <entry><ulink url="http://java.sun.com" /></entry>
+                <entry>Yes</entry>
+                <entry>No</entry>
+              </row>
+              <row>
+                <entry>Ant 1.6 or later</entry>
+                <entry>Ant is used to build the SQLUnit package. An ant task is provided to run SQLUnit from within Ant.</entry>
+                <entry><ulink url="http://ant.apache.org/license.html">Apache License</ulink></entry>
+                <entry><ulink url="http://ant.apache.org" /></entry>
+                <entry>Yes, although you can also just call it from the command line with java.</entry>
+                <entry>No</entry>
+              </row>
+              <row>
+                <entry>JUnit 3.7 or later</entry>
+                <entry>SQLUnit is really a specialized JUnit test class. It is needed to run SQLUnit.</entry>
+                <entry><ulink url="http://www.opensource.org/licenses/cpl.php">Common Public License Version 1.0</ulink></entry>
+                <entry><ulink url="http://www.junit.org/index.htm" /></entry>
+                <entry>Yes</entry>
+                <entry>Yes</entry>
+              </row>
+              <row>
+                <entry>JDOM 1.0 or later</entry>
+                <entry>SQLUnit uses JDOM to do its XML parsing and rendering.</entry>
+                <entry><ulink url="http://xml.apache.org/fop/license.html">Apache License</ulink></entry>
+                <entry><ulink url="http://www.jdom.org" /></entry>
+                <entry>Yes</entry>
+                <entry>Yes</entry>
+              </row>
+              <row>
+                <entry>Apache Log4J 1.2.8 or higher</entry>
+                <entry>This is used for logging in SQLUnit.</entry>
+                <entry><ulink url="http://xml.apache.org/fop/license.html">Apache License</ulink></entry>
+                <entry><ulink url="http://logging.apache.org/log4j/docs" /></entry>
+                <entry>Yes</entry>
+                <entry>Yes</entry>
+              </row>
+              <row>
+                <entry>Apache Xerces-J 1.4.4</entry>
+                <entry>Used by Canoo WebTest</entry>
+                <entry><ulink url="http://xml.apache.org/xerces-j/" /></entry>
+                <entry>Yes</entry>
+                <entry>Yes</entry>
+              </row>
+              <row>
+                <entry>MockRunner 0.2.7</entry>
+                <entry>SQLUnit uses this to set up and run a set of Mock tests against a Mock database that consists of method calls which are introspected.</entry>
+                <entry><ulink url="http://mockrunner.sourceforge.net/license.html">Apache style license</ulink></entry>
+                <entry><ulink url="http://mockrunner.sourceforge.net" /></entry>
+                <entry>No. This is only needed if you want to run the mock test suite to make sure everything worked.</entry>
+                <entry>Yes</entry>
+              </row>
+              <row>
+                <entry>Apache Commons-Lang</entry>
+                <entry>Used by MockRunner</entry>
+                <entry><ulink url="http://jakarta.apache.org/commons/license.html">Apache License</ulink></entry>
+                <entry><ulink url="http://jakarta.apache.org/commons/" /></entry>
+                <entry>No, see above.</entry>
+                <entry>Yes</entry>
+              </row>
+              <row>
+                <entry>XDoclet 1.2.1</entry>
+                <entry>SQLUnit uses XDoclet to convert source code annotations into Docbook XML which is then included in this document.</entry>
+                <entry><ulink url="sourceforge.net/softwaremap/trove_list.php?form_cat=187">BSD License</ulink></entry>
+                <entry><ulink url="http://xdoclet.sourceforge.net" /></entry>
+                <entry>No, only needed to generate the documentation.</entry>
+                <entry>No</entry>
+              </row>
+              <row>
+                <entry>Apache Jalopy 0.6.2</entry>
+                <entry>SQLUnit uses Jalopy to provide a guide for coding conventions used in SQLUnit. Contributed code typically passes through Jalopy to get reformatted before inclusion.</entry>
+                <entry><ulink url="http://jalopy.sourceforge.net/license-bsd.html">BSD License</ulink></entry>
+                <entry><ulink url="http://jalopy.sourceforge.net" /></entry>
+                <entry>No, only needed to reformat contributed code before submission.</entry>
+                <entry>No</entry>
+              </row>
+              <row>
+                <entry>Apache Checkstyle 3.4</entry>
+                <entry>SQLUnit uses CheckStyle to audit code style on an ongoing basis. The checks that have been configured are a union of the sun_checks.xml and BlochEffectiveJava.xml files supplied with the distribution. Some checks have been relaxed or eliminated where it did not match the coding style for SQLUnit.</entry>
+                <entry><ulink url="http://checkstyle.sourceforge.net/java.header">LGPL</ulink></entry>
+                <entry><ulink url="http://checkstyle.sourceforge.net" /></entry>
+                <entry>Yes, if you plan on making code contributions.</entry>
+                <entry>No</entry>
+              </row>
+              <row>
+                <entry>JavaCC 3.2</entry>
+                <entry>SQLUnit uses JavaCC to generate a parser for include files based on the grammar specified in the IncludeFileParser.jj.</entry>
+                <entry><ulink url="http://www.opensource.org/licenses/bsd-license.html">BSD License</ulink></entry>
+                <entry><ulink url="https://javacc.dev.java.net" /></entry>
+                <entry>Yes</entry>
+                <entry>Yes</entry>
+              </row>
+              <row>
+                <entry>Apache Commons JEXL 1.0</entry>
+                <entry>SQLUnit uses JEXL as the Expression parser and evaluator for its ExpressionMatcher matcher.</entry>
+                <entry><ulink url="http://jakarta.apache.org/commons/license.html">Apache License</ulink></entry>
+                <entry><ulink url="http://jakarta.apache.org/commons/jexl/" /></entry>
+                <entry>Yes</entry>
+                <entry>Yes</entry>
+              </row>
+              <row>
+                <entry>Apache Commons Logging 1.0</entry>
+                <entry>JEXL needs Apache Logging as a runtime dependency.</entry>
+                <entry><ulink url="http://jakarta.apache.org/commons/license.html">Apache License</ulink></entry>
+                <entry><ulink url="http://jakarta.apache.org/commons/logging/" /></entry>
+                <entry>Yes</entry>
+                <entry>Yes</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </para>
+      <warning><para>JAR files for open source databases, such as MySQL and PostgreSQL, which used to be supplied with the distribution, have been removed. This is because SQLUnit has shifted to using the MockRunner project to build its own mock database to run its tests instead of running them against popular databases. Users of databases already have the corresponding JDBC drivers installed, so providing them did not make much sense anyway.</para></warning>
+    </section>
+    <section>
+      <title>Running the install script</title>
+      <para>If you want to install SQLUnit from source, you can run the following commands.</para>
+      <screen>
+<userinput><prompt>$ </prompt>ant</userinput>
+<computeroutput>
+Buildfile: build.xml
+
+init:
+
+help:
+     [echo] SQLUnit version 4.9
+     [echo] Targets:
+     [echo]   help - display this message
+     [echo]   clean - removes all files from the build directory
+     [echo]   distclean - removes all files from the dist directory
+     [echo]   compile - compile all the java files
+     [echo]   compile-test - compiles java files needed for testing
+     [echo]   test - runs the mock database tests
+     [echo]   junit-test -Dtest.class=classname - runs JUnit test
+     [echo]   reformat - formats sources in contrib with Jalopy
+     [echo]   checkstyle - check code style using CheckStyle
+     [echo]   install - creates the jar files in the dist directory
+     [echo]   sqlunit-flat -Dtestfile=file.xml - runs SQLUnit
+     [echo]   sqlunit-nested -Dtestdir=dir - runs SQLUnit w/FileSet
+     [echo]   javadoc - creates the project javadocs
+     [echo]   doclet - generates Docbook XML for sqlunit tags
+     [echo]   htdoc - creates tarball for website
+     [echo]   package - creates tarball for download
+     [echo]   gui - start up the SQLUnit GUI Tool
+     [echo]   tui - runs the SQLUnit TUI Tool for testing
+
+BUILD SUCCESSFUL
+
+</computeroutput>
+      </screen>
+      <para>So to create a SQLUnit JAR file from scratch, run the following ant directive to create the <systemitem>sqlunit.jar</systemitem> file in your <systemitem>dist</systemitem> directory.</para>
+      <screen>
+<userinput><prompt>$ </prompt>ant install</userinput>
+<computeroutput>
+Buildfile: build.xml
+
+setup:
+
+clean:
+   [delete] Deleting directory /home/spal/sqlunit/build
+    [mkdir] Created dir: /home/spal/sqlunit/build
+
+compile:
+    [javac] Compiling 18 source files to /home/spal/sqlunit/build
+     [copy] Copying 1 file to /home/spal/sqlunit/build/net/sourceforge/sqlunit
+
+distclean:
+   [delete] Deleting directory /home/spal/sqlunit/dist
+    [mkdir] Created dir: /home/spal/sqlunit/dist
+
+install:
+      [jar] Building jar: /home/spal/sqlunit/dist/sqlunit-1.0.jar
+     [echo] File sqlunit-1.0.jar in dist
+
+BUILD SUCCESSFUL
+
+Total time: 3 seconds
+</computeroutput>
+      </screen>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Running</title>
+    <anchor id="Running" />
+    <section>
+      <title>SQLUnit Command Line</title>
+      <para>SQLUnit is really a single JUnit test which reads the SQLUnit test XML file to determine what it should do. Starting with version 1.8, the SQLUnit Ant task comes with new configuration options.</para>
+      <para>Since the <systemitem>sqlunit</systemitem> task is an optional task, the task must be first declared to <systemitem>Ant</systemitem> using a <systemitem>taskdef</systemitem>, like this.</para>
+      <screen><![CDATA[
+<!-- This is specified once per buildfile -->
+<target name="def">
+  <taskdef name="sqlunit" 
+       classname="net.sourceforge.sqlunit.ant.SqlunitTask">
+    <classpath>
+      <pathelement location="/your/location/for/sqlunit.jar" />
+    </classpath>
+  </taskdef>
+</target>
+]]></screen>
+      <para>In order to run a single test file called <systemitem>test/mysql/test.xml</systemitem> from within <systemitem>Ant</systemitem> using the <systemitem>sqlunit</systemitem> task, the XML snippet in the build file would look like this.</para>
+      <screen><![CDATA[
+<!-- This is repeated for each test or 
+     group of tests in case of nested filesets -->
+<target name="run-postgres-test" depends="def">
+  <sqlunit testfile="test/postgres/test.xml" 
+      haltOnFailure="false" debug="false" />
+</target>
+]]></screen>
+      <para>Notice the new attributes <systemitem>haltOnFailure</systemitem> and <systemitem>debug</systemitem>. Both of them are optional attributes and SQLUnit will revert back to its default behavior if they are not specified. We will discuss them in more detail below.</para>
+      <para>In cases where you would like to run a group of SQLUnit test files, you can use nested <systemitem>filesets</systemitem> instead of the <systemitem>testfile</systemitem> attribute. So if your build base directory was the same as your stored procedure repository root, say <systemitem>/opt/database</systemitem>, under which you have organized your stored procedures into different subdirectories based on function, something like this:</para>
+      <screen>
+/opt/database
+ |-- stored_procedures
+ |    |
+ |    |-- accounting
+ |    |-- human_resources
+ |    |-- infotech
+ |    |-- ...
+      </screen>
+      <para>Further, let us assume that you store your SQLUnit test XML files for each functional silo along with the stored procedures, so your accounting SQLUnit XML test file is <systemitem>/opt/database/accounting/accounting_tests.xml</systemitem>. To specify that you wish to run all the <systemitem>.xml</systemitem> under the stored procedures directory, you would specify the sqlunit target like this:</para>
+      <screen><![CDATA[
+<target name="run-all-test" depends="compile,def">
+  <sqlunit haltOnFailure="false" debug="false">
+    <fileset dir="stored_procedures">
+      <include name="**/*.xml" />
+    </fileset>
+  </sqlunit>
+</target>
+]]></screen>
+      <para>You can specify multiple nested <systemitem>fileset</systemitem> elements if needed. Just remember that the <systemitem>testfile</systemitem> attribute specification and the nested <systemitem>fileset</systemitem> specifications are mutually exclusive. SQLUnit will give you an error if you attempt to specify both.</para>
+      <para>The <systemitem>haltOnFailure</systemitem> and the <systemitem>debug</systemitem> attributes can be used to control the behavior of SQLUnit. This is described below.</para>
+      <para>
+        <table frame="all">
+          <title>Configuring SQLUnit behavior</title>
+          <tgroup cols="3" align="left" colsep="1" rowsep="1">
+            <colspec colname="c1" />
+            <colspec colname="c2" />
+            <colspec colname="c3" />
+            <thead>
+              <row>
+                <entry>Attribute Name</entry>
+                <entry>Valid Values</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>haltOnFailure</entry>
+                <entry>"true" or "false", default "false"</entry>
+                <entry>If set to "true", SQLUnit will stop executing the current test file if there is a test failure or exception. If multiple files are specified using nested fileset elements, then it will continue to the next file.</entry>
+              </row>
+              <row>
+                <entry>debug</entry>
+                <entry>"true" or "false", default "false"</entry>
+                <entry>If set to "true", haltOnFailure will also be set to "true" regardless of the value set. Setting debug to "true" will output a very verbose trace log on the console. The trace contains a line for every method entered while the test was running.</entry>
+              </row>
+              <row>
+                <entry>logfile</entry>
+                <entry>A valid file name</entry>
+                <entry>If not set or set to an empty string, the logging for SQLUnit will be sent to STDOUT. If set, it will be sent to the file specified. The filename can be absolute or relative to the directory where the ant command is being run. This feature has been available since 2.2</entry>
+              </row>
+              <row>
+                <entry>logformat</entry>
+                <entry>Format name identifying a reporter</entry>
+                <entry>If not set or set to an empty string, the default reporter would be used. The default reporter will print a formatted report of the tests that were executed. This feature is available starting with version 3.6</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </para>
+      <para>If the logfile attribute is not set, SQLUnit will log its output to STDOUT and its exceptions, if any, to STDERR. This behavior has been introduced since version 2.2. Scripts running SQLUnit versions prior to this and depending on the older behavior (all logging to STDERR) will need to change the scripts to add logging to STDOUT as well).</para>
+      <warning><para>SQLUnit will report all its status messages, including error messages to STDOUT. If there were one or more failures at the end of the build, then it will send a <systemitem>BuildException</systemitem> to <systemitem>Ant</systemitem> which will report a BUILD FAILED message to the user.</para></warning>
+      <para>Starting with version 2.2, SQLUnit can be used with Ant's own BuildLoggers. The code has been tested with the <systemitem>org.apache.tools.ant.DefaultLogger</systemitem> and <systemitem>org.apache.tools.ant.XmlLogger</systemitem> loggers. To use a specific buildlogger, you can either use Ant's <systemitem>record</systemitem> tag or supply the log file name and logger class name in the <systemitem>ant</systemitem> command line, like so:</para>
+<screen>
+ant -logfile ${logfile_name} -logger ${logger_class_name} ${target}
+</screen>
+      <note><para>Do not specify a <systemitem>logfile</systemitem> attribute in the <systemitem>sqlunit</systemitem> task when specifying the <systemitem>logfile</systemitem> and <systemitem>logger</systemitem> on the command line. This can lead to unexpected behavior.</para></note>
+      <para>Alternatively, you can use either the <systemitem>depends</systemitem> attribute of <systemitem>target</systemitem> or the <systemitem>antcall</systemitem> task to run more than one suite of tests with a single call. However, using the nested <systemitem>fileset</systemitem> elements in the <systemitem>sqlunit</systemitem> task seems to be the more obvious way to do it.</para>
+      <warning><para>The options described for running SQLUnit from the command line using <systemitem>java</systemitem> or using the <systemitem>junit</systemitem> task under <systemitem>Ant</systemitem> in the documentation for versions prior to version 1.8 are deprecated and no longer supported. These approaches were cumbersome and not widely used.</para></warning>
+    </section>
+    <section>
+      <title>Interpreting the output</title>
+      <para>A clean SQLUnit run will look something like the example below. This is the output from the test suite. Notice that the ant target sqlunit uses the standard JUnit output formatter but only writes its log to STDOUT, so its output is all grouped neatly in one place.
+<screen>
+<userinput><prompt>$ </prompt> ant sqlunit -Dtestfile=test/postgresql/test.xml</userinput>
+<computeroutput>
+Buildfile: build.xml
+
+init:
+
+test-ant-task:
+  [sqlunit] Getting connection...
+  [sqlunit] Setting up test...
+  [sqlunit] Running test[1]: Adding department HR
+  [sqlunit] Running test[2]: Adding department InfoTech using non-Callable form
+  [sqlunit] Running test[3]: Adding Employee John Doe to InfoTech
+  [sqlunit] Running test[4]: Adding John Doe again
+  [sqlunit] Running test[5]: Adding Jane Doe to HR
+  [sqlunit] Running test[6]: Adding Dick Tracy to InfoTech
+  [sqlunit] Running test[7]: Updating Hourly Rate for John
+  [sqlunit] Running test[8]: Looking up John Doe by name
+  [sqlunit] Running test[9]: Looking up all employees in InfoTech
+  [sqlunit] Running test[10]: Adding timecard for John
+  [sqlunit] Running test[11]: Adding another timecard for John
+  [sqlunit] Running test[12]: Adding timecard for Dick
+  [sqlunit] Running test[13]: Getting monthly report for InfoTech
+  [sqlunit] Tearing down test...
+  [sqlunit] .
+  [sqlunit] Time: 3.795
+  [sqlunit]
+  [sqlunit] OK (1 tests)
+  [sqlunit]
+
+BUILD SUCCESSFUL
+
+Total time: 4 seconds
+</computeroutput>
+</screen>
+      </para>
+      <para>By default, SQLUnit will not consider a test failure as sufficient reason to stop the test suite from completing, since a test suite can contain unrelated tests that may not depend on each other. If you need SQLUnit to stop processing the suite after it encounters a test failure, set the haltOnFailure attribute to true. Here is an example of SQLUnit generating an error, with inline pointers to comments.</para>
+<screen>
+Buildfile: build.xml
+
+init:
+
+test-ant-task:
+  [sqlunit] Getting connection...
+  [sqlunit] Setting up test...
+  [sqlunit] Running test[1]: Adding department HR
+  [sqlunit] Running test[2]: Adding department InfoTech using non-Callable form
+  [sqlunit] Running test[3]: Adding Employee John Doe to InfoTech
+  [sqlunit] Running test[4]: Adding John Doe again
+  [sqlunit] Running test[5]: Adding Jane Doe to HR
+  [sqlunit] Running test[6]: Adding Dick Tracy to InfoTech
+  [sqlunit] Running test[7]: Updating Hourly Rate for John
+  [sqlunit] Running test[8]: Looking up John Doe by name
+  [sqlunit] Running test[9]: Looking up all employees in InfoTech
+  [sqlunit] Running test[10]: Adding timecard for John
+  [sqlunit] Running test[11]: Adding another timecard for John
+  [sqlunit] Running test[12]: Adding timecard for Dick
+  [sqlunit] Running test[13]: Getting monthly report for InfoTech
+  [sqlunit] No match on variable at [rset,row,col]=([1,2,4] <co id="co.errmsg" />
+  [sqlunit] *** expected: <co id="co.expected" />
+  [sqlunit] &lt;result>
+  [sqlunit]   &lt;resultset id="1">
+  [sqlunit]     &lt;row id="1">
+  [sqlunit]       &lt;col id="1" type="VARCHAR">Information Technology&lt;/col>
+  [sqlunit]       &lt;col id="2" type="VARCHAR">Dick Tracy&lt;/col>
+  [sqlunit]       &lt;col id="3" type="INTEGER">13&lt;/col>
+  [sqlunit]       &lt;col id="4" type="NUMERIC">50.00&lt;/col>
+  [sqlunit]       &lt;col id="5" type="NUMERIC">650.00&lt;/col>
+  [sqlunit]     &lt;/row>
+  [sqlunit]     &lt;row id="2">
+  [sqlunit]       &lt;col id="1" type="VARCHAR">Information Technology&lt;/col>
+  [sqlunit]       &lt;col id="2" type="VARCHAR">John Doe&lt;/col>
+  [sqlunit]       &lt;col id="3" type="INTEGER">16&lt;/col>
+  [sqlunit]       &lt;col id="4" type="NUMERIC">56.00&lt;/col <co id="co.errsrc" />
+  [sqlunit]       &lt;col id="5" type="NUMERIC">880.00&lt;/col>
+  [sqlunit]     &lt;/row>
+  [sqlunit]   &lt;/resultset>
+  [sqlunit] &lt;/result>
+  [sqlunit] *** but got: <co id="co.got" />
+  [sqlunit] &lt;result>
+  [sqlunit]   &lt;resultset id="1">
+  [sqlunit]     &lt;row id="1">
+  [sqlunit]       &lt;col id="1" type="VARCHAR">Information Technology&lt;/col>
+  [sqlunit]       &lt;col id="2" type="VARCHAR">Dick Tracy&lt;/col>
+  [sqlunit]       &lt;col id="3" type="INTEGER">13&lt;/col>
+  [sqlunit]       &lt;col id="4" type="NUMERIC">50.00&lt;/col>
+  [sqlunit]       &lt;col id="5" type="NUMERIC">650.00&lt;/col>
+  [sqlunit]     &lt;/row>
+  [sqlunit]     &lt;row id="2">
+  [sqlunit]       &lt;col id="1" type="VARCHAR">Information Technology&lt;/col>
+  [sqlunit]       &lt;col id="2" type="VARCHAR">John Doe&lt;/col>
+  [sqlunit]       &lt;col id="3" type="INTEGER">16&lt;/col>
+  [sqlunit]       &lt;col id="4" type="NUMERIC">55.00&lt;/col> <co id="co.errtrg" />
+  [sqlunit]       &lt;col id="5" type="NUMERIC">880.00&lt;/col>
+  [sqlunit]     &lt;/row>
+  [sqlunit]   &lt;/resultset>
+  [sqlunit] &lt;/result>
+  [sqlunit] Tearing down test...
+  [sqlunit] .
+  [sqlunit] Time: 1.204
+  [sqlunit]
+  [sqlunit] OK (1 tests)
+  [sqlunit]
+
+BUILD SUCCESSFUL
+
+Total time: 2 seconds
+</screen>
+<calloutlist>
+  <callout arearefs="co.errmsg">
+    <para>The error message says that there is a difference in resultsetId = 1, rowId = 2, colId = 4</para>
+  </callout>
+  <callout arearefs="co.expected">
+    <para>This is what the test expected. This is supplied to SQLUnit by the test author in the XML file.</para>
+  </callout>
+  <callout arearefs="co.got">
+    <para>This is the result object that SQLUnit generated by running the SQL or stored procedure.</para>
+  </callout>
+  <callout arearefs="co.errsrc">
+    <para>This is the place in the expected result where the difference was detected.</para>
+  </callout>
+  <callout arearefs="co.errtrg">
+    <para>This is the place in the generated result which is different from the expected result. This looks like a simple typo, so our corrective action would be to correct the test specification. Other kinds of errors may require us to fix the stored procedure code and re-run the test.</para>
+  </callout>
+</calloutlist>
+    </section>
+    <section>
+      <title>SQLUnit GUI Tool</title>
+      <anchor id="aGUITool" />
+      <para>This tool was originally contributed by Mohan Iyer. Arun Viswanath has done some major rework to add many more features to this tool.</para>
+      <para>The GUI Tool is a Swing based application for generating test cases by running the stored procedure against the database. The tool will append to the capture file defined in the properties file for the application. This is a very basic tool, it does not have any elegant error handling, but it works. The original version of the tool was contributed by Mohan Iyer, who used it to generate SQLUnit test cases against an Oracle database. The tool has been changed since to be more database agnostic.</para>
+      <para>To start the tool from the command line using, you can use the <systemitem>ant gui</systemitem> command defined in the supplied <systemitem>build.xml</systemitem> file. Alternatively you can set up a batch file or shell script to include the SQLUnit and JDOM JAR files in your classpath and invoke the following command:</para>
+      <para>
+<screen>
+<userinput><prompt>$ </prompt>ant gui [-Dgui.rcfile=etc/guirc.properties]</userinput>
+</screen>
+      </para>
+      <para>Here are some screenshots of the SQLUnit GUI Tool.</para>
+      <para><figure> 
+        <title>GUI Tool Startup Screen</title>
+        <graphic fileref="stylesheet-images/guitool-0.png" />
+      </figure>
+      <figure>
+        <title>GUI Tool with data</title>
+        <graphic fileref="stylesheet-images/guitool-1.png" />
+      </figure>
+     </para>
+     <para>A sample guiconfig.properties is provided in the etc directory in the distribution. Please modify it to suit your own installation.</para>
+     <note><para>Arun Viswanath has made many improvements to the GUI Tool, since Mohan Iyer's original contribution, and my subsequent effort to make the tool database agnostic. If you have suggestions for improvement for the GUI Tool, please let him know by posting to the forum.</para></note>
+     <note><para>Mohan Iyer envisaged that this basic Swing application could be leveraged to provide various editor plug-ins for SQLUnit. If anyone is interested in doing this, please feel free to go ahead and send me the plug-in code and I will be happy to put it in CVS and give you credit. Since I dont use IDEs myself, I will just take your word for it that the plug-in works.</para></note>
+    </section>
+    <section>
+      <title>SQLUnit TUI Tool</title>
+      <anchor id="aTUITool" />
+      <para>This tool was originally contributed by Sahib S Wadhwa for use with Oracle databases and subsequently modified by Sujit Pal to make it more database agnostic.</para>
+      <para>The TUI tool is a console based tool for manufacturing test cases by running the stored procedure against the database. The tool will generate the XML for the test case, which can then be cut and pasted into the test specifications. The tool eliminates the drudgery of having to write the XML test cases by hand, speeding up the test building process enormously. It also has a new interactive interface similar to text based database client tools. The inputs can be either partially or fully driven by the contents of a Java properties file, thereby making it partially or completely non-interactive if desired.</para>
+      <para>Here is a sample run of the TUITool. Make sure that the JDBC Driver for the database you are using, the JDOM JAR file and the SQLUnit JAR file is in your CLASSPATH. Alternatively, set the CLASSPATH on the java command line with -cp.</para>
+      <para>
+<screen>
+<userinput><prompt>$ </prompt>ant tui [-Dtui.mode=offline] [-Dtui.rcfile=etc/tuirc.properties]</userinput>
+<computeroutput>
+SQLUnit TUI Tool
+Copyright(c) 2003 The SQLUnit Team
+<userinput><prompt>TUITool:_captureFile&gt; </prompt>/home/sujit/sqlunit/tui.out</userinput>
+<userinput><prompt>TUITool:_connection!driver&gt; </prompt>com.mysql.jdbc.Driver</userinput>
+<userinput><prompt>TUITool:_connection!url&gt; </prompt>jdbc:mysql://localhost:3306/sqlunitdb</userinput>
+<userinput><prompt>TUITool:_connection!user&gt; </prompt>defaultuser</userinput>
+<userinput><prompt>TUITool:_connection!password&gt; </prompt>defaultuser</userinput>
+<userinput><prompt>TUITool:__test!name&gt; </prompt>Checking returned value from customer</userinput>
+<userinput><prompt>TUITool:__test!call!stmt&gt; </prompt>select custId from customer where custId=?</userinput>
+<userinput><prompt>TUITool:___test!call!param[1]!type&gt; </prompt>INTEGER</userinput>
+<userinput><prompt>TUITool:___test!call!param[1]!inout&gt; </prompt>in</userinput>
+<userinput><prompt>TUITool:___test!call!param[1]!is-null&gt; </prompt>false</userinput>
+<userinput><prompt>TUITool:___test!call!param[1]!value&gt; </prompt>1</userinput>
+<![CDATA[<test name="Checking returned value from customer">
+  <sql>
+    <stmt>select custId from customer where custId=?</stmt>
+    <param id="1" type="INTEGER" inout="in" is-null="false">1</param>
+  </sql>
+  <result>
+    <resultset id="1">
+      <row id="1">
+        <col id="1" type="INTEGER">1</col>
+      </row>
+    </resultset>
+  </result>
+</test>
+]]>
+Output captured to /home/sujit/sqlunit/tui.out
+<userinput><prompt>TUITool:__test!name&gt; </prompt>q</userinput>
+<userinput><prompt>$ </prompt></userinput>
+</computeroutput>
+</screen>
+      </para>
+      <para>The -Dmode=offline indicates that all replies to the prompts are stored in the supplied properties file indicated by -Drcfile. Offline mode can be used to run only a single test and is totally non-interactive. When the interactive mode is desired, some things such as the connection information, can be stored in the properties file to minimize typing effort.</para>
+      <para>The properties file is a standard Java properties file. A sample properties file is included in the distribution in <systemitem>etc/tuirc.properties</systemitem>. This will need to be modified and copied to whatever you want to call your rcfile for the SQLUnitTUI Tool. The keys mimic the prompts that the tool provides.</para>
+    </section>
+    <section>
+      <title>SQLUnit XSL Transform Tool</title>
+      <anchor id="aTransformTool" />
+      <para>If your SQL or stored procedures that you want to test are already available in an XML format, if you were using a ORM framework such as iBATIS SQLMaps, for instance, then you can use this tool to transform the information into a form suitable for SQLUnit to consume. The Transform Tool is a simple XSLT parser. You will need to supply the appropriate XSL file containing the required transformation.</para>
+      <para>The <ulink url="http://www.w3schools.com/xsl">W3Schools page on XSLT</ulink> is quite comprehensive and is useful as a reference or tutorial if you need pointers on how to get started using XSLT.</para>
+      <para>A sample run of using the TransformTool from within ant is shown below:</para>
+      <para>
+<screen>
+<userinput><prompt>$ </prompt>ant transform -Dtransform.input=inputfile.xml \
+    -Dtransform.transform=xsltfile.xsl \
+    -Dtransform.output=sqlunitfile.xml</userinput>
+<computeroutput>
+Buildfile: build.xml
+ 
+init:
+  
+precompile:
+   
+compile:
+    [javac] Compiling 10 source files to /home/sujit/src/sqlunit/build
+    [javac] Compiling 1 source file to /home/sujit/src/sqlunit/build
+            
+transform:
+    [java] SQLUnit Transform Tool
+    [java] Copyright(c) 2005, The SQLUnit Team
+
+BUILD SUCCESSFUL
+Total time: 5 seconds
+</computeroutput>
+</screen>
+      </para>
+      <para>The various files that drove the development of this tool can be found here:</para>
+      <para><itemizedlist mark="bullet">
+        <listitem><para><ulink url="http://cvs.sourceforge.net/viewcvs.cgi/sqlunit/sqlunit/etc/transform_test_input.xml">Input XML file</ulink></para></listitem>
+        <listitem><para><ulink url="http://cvs.sourceforge.net/viewcvs.cgi/sqlunit/sqlunit/etc/transform_test_transform.xsl">XSL Transform file</ulink></para></listitem>
+      </itemizedlist></para>
+    </section>
+    <section>
+      <title>SQLUnit TestDocsGenerator Tool</title>
+      <anchor id="aTestDocGenTool" />
+      <para>This tool was contributed by James Henderson.</para>
+      <para>It generates a listing of all available tests suites by traversing the supplied directory recursively, and a listing of all tests within each test suite. It is useful to determine if a test has been created to address specific criteria when testing your SQL code (or if a new test must be developed).</para>
+      <para>The tool assumes that your tests are organized hierarchically with each directory representing a test suite, and SQLUnit test file within each directory representing a test case. Each SQLUnit test file can have multiple tests.</para>
+      <para>This tool, when supplied with a directory, will recurse and process each SQLUnit XML file to extract the test name/description for each test within the test case. This process is performed for all SQLUnit XML files that are located by the recursion.</para>
+      <para>To run this tool, you can use the following ant command:</para>
+      <para>
+<screen>
+  <userinput><prompt>$ </prompt>ant test-doc [-Doutput.dir=/path/to/output/directory] [-Dtest.dir=/path/to/test/directory]
+  </userinput>
+  <computeroutput>
+Buildfile: build.xml
+ 
+init:
+ 
+precompile:
+ 
+compile:
+ 
+test-doc:
+   [delete] Deleting directory /home/sujit/src/sqlunit/output
+    [mkdir] Created dir: /home/sujit/src/sqlunit/output
+     [java] Processing /home/sujit/src/sqlunit/test/sybase/MyTestProcTest.xml:MyTestProcTest
+     [java] Processing /home/sujit/src/sqlunit/test/mssqlserver/TestSQLUnit_SQLServer2KTypes.xml:TestSQLUnit_SQLServer2KTypes
+     ...
+     [java] Processing /home/sujit/src/sqlunit/test/mock/variabletests.xml:variabletests
+     [java] Number of test cases processed:39
+     [echo] XHTML TOC file(s) in output/Test*.html
+  </computeroutput>
+</screen>
+      </para>
+      <para>The -Doutput.dir argument is optional, if not supplied, it will default to using the directory output/ under the current directory. The tool will generate three XHTML files that form the directory of all tests within the processed test suite.</para>
+      <para>The -Dtest.dir argument is also optional, if not supplied, it will process all XML files (with the .xml suffix) under the test/ subdirectory.</para>
+      <para><itemizedlist mark="bullet">
+        <listitem><para>TestDirectory.html - a list of all processed test cases in alphabetical order and a sequential list of all tests within a test case. Each test case also has a link to its SQLUnit XML source file.</para></listitem>
+        <listitem><para>TestCaseIndex.html - an alphabetical index of all processed test cases. This file provides a link to the corresponding test case with its test listing in TestDirectory.html</para></listitem>
+        <listitem><para>TestCaseFrameset.html - creates a frameset document to house the previous two documents.</para></listitem>
+      </itemizedlist></para>
+      <para>Most people will load TestCaseFrameset.html within a browser to get a complete view of all processed test cases and the tests within each test case.</para>
+      <warning><para>This tool depends on certain naming conventions in the SQLUnit test suite as outlined below.</para></warning>
+      <para><programlisting>
+TestCaseName.xml
+    TestCaseName[_1]: Description
+    TestCaseName[_2]: Description
+    ...
+    TestCaseName[_3]: Description
+      </programlisting></para>
+      <para>If numbered test cases exist, the test listed in the output will be numbered. The test case name will be extracted from the first numbered test. The description will always follow the colon (:).</para>
+      <para>As an example:</para>
+      <para><programlisting>
+MyTestCase.xml
+    MyTestCase_1: A simple test
+    MyTestCase_2: Another simple test
+      </programlisting></para>
+      <para>will have a test case name of MyTestCase (which matches the file name). Each test will be numbered and each description will be listing withi each test. The TestDirectory.html file when viewed through a browser will look something like this:</para>
+      <para><programlisting>
+Tests within Test Case MyTestCase
+1. A simple test
+2. Another simple test
+      </programlisting></para>
+      <para>If the naming convention is not used, the entire name attribute of the first test is used as the name of the test case. Numbering of tests is not required, but useful. A test description which follows the colon is required.</para>
+      <para>Also, you cannot use the resource form of the DTD SYSTEM declaration in your SQLUnit test files, you must use either the relative or absolute form instead.</para>
+      <para>Some of these conventions may be relaxed or removed in the future with changes to the sqlunit.dtd to accomodate the requirements of this tool. Please contact James Henderson on the SQLUnit "Open Discussion" forum to discuss and suggest ideas/features or to report bugs about this tool.</para>
+    </section>
+    <section>
+      <title>SQLUnit Canoo2HTML Tool</title>
+      <anchor id="aCanoo2HtmlTool" />
+      <para>This tool was contributed by James Henderson.</para>
+      <para>This tool converts the XML file generated by running SQLUnit with the Canoo reporter, into an XHTML document that can be displayed on a browser. This tool can be combined with the TestDocsGenerator to produce automated SQLUnit test reports, possibly with a continuous integration tool such as CruiseControl.</para>
+      <para>To run this tool, you can run this ant target:</para>
+      <para>
+<screen>
+  <userinput><prompt>$ </prompt>ant -Dlog.format=canoo \
+  -Doutput.file=output/mytests.xml -Dtestfile=test/mock/coretests.xml \
+  sqlunit-flat canoo2html</userinput>
+  <computeroutput>
+Buildfile: build.xml
+ 
+init:
+ 
+precompile:
+ 
+compile:
+    [javac] Compiling 10 source files to /home/sujit/src/sqlunit/build
+ 
+compile-test:
+    [javac] Compiling 31 source files to /home/sujit/src/sqlunit/build
+ 
+def:
+ 
+test:
+ 
+init:
+ 
+precompile:
+ 
+compile:
+    [javac] Compiling 10 source files to /home/sujit/src/sqlunit/build
+ 
+canoo2html:
+     [xslt] Processing /home/sujit/src/sqlunit/output/mytests.xml to /home/sujit/src/sqlunit/output/mytests.xml.html
+     [xslt] Loading stylesheet /home/sujit/src/sqlunit/etc/canoo2html_result_transform.xsl
+ 
+BUILD SUCCESSFUL
+Total time: 10 seconds
+  </computeroutput>
+</screen>
+      </para>
+      <para>The first target will run SQLUnit against the test/mock/coretests.xml file, and generate a Canoo XML test log in the output directory. The target need not necessarily be sqlunit-flat, it could also be sqlunit-nested or test from the distribution, or your own custom target to run the tests.</para>
+      <para>The second target applies an XSL transformation to the Canoo XML file to produce an XHTML file in the output directory (the same directory as the Canoo XML file). The XHTML file name is the same as the Canoo XML file name suffixed with .html. Thus, in our case described above, the XHTML file is output/mytests.xml.html.</para>
+      <para>The tests are color coded in the XHTML file, successful runs are shown in green and failures in red.</para>
+    </section>
+  </chapter>
+<!-- Generated by XDoclet: SQLUnit Tags -->
+  <chapter>
+    <title>SQLUnit Tags</title>
+    <anchor id="Tags" />
+    <section>
+      <title>List of currently supported tags</title>
+      <para>The XML Tags that make up a SQLUnit test specification are described below.</para>
+&tag-top;
+&tags;
+    </section>
+    <section>
+      <title>Extending SQLUnit: Writing your own tag handler</title>
+      <section>
+        <title>Overview</title>
+        <para>This is getting asked a lot nowadays, so I thought I will write this up for the benefit of those who are interested in doing this. To include a new tag, you need to do three things:
+          <orderedlist>
+            <listitem><para>Write a Handler for your tag that implements the IHandler interface.</para></listitem>
+            <listitem><para>Add the mapping of the tag name to the actual handler class in the etc/handlers.properties file</para></listitem>
+            <listitem><para>Update the list of "swappable" tags in handlers.properties, if applicable.</para></listitem>
+            <listitem><para>Modify the sqlunit.dtd file so that your new tag becomes part of the sqlunit dialect.</para></listitem>
+          </orderedlist>
+        </para>
+        <note><para>If you have written a TagHandler that does something unique, and would like to contribute it to the SQLUnit project, it would be gratefully accepted and credit given.</para></note>
+      </section>
+      <section>
+        <title>Finding your way around</title>
+        <para>It may help a little if you are familiar with the way the code is laid out in the distribution, so its easy to find things. The following table provides the name, location and a brief description of each of the packages in use.</para>
+        <warning><para>If you are already familiar with the pre-3.8 code, then you will find many changes in code for releases 4.0 and up. Hopefully, you will find that the changes are for the better. The code is (at least in my opinion) easier to read and understand, and better organized. Most of all, it should be easier to add new features as they are requested.</para></warning>
+        <para>
+          <table frame="all">
+            <title>SQLUnit Code Layout</title>
+            <tgroup cols="3" align="left" colsep="1" rowsep="1">
+              <colspec colname="c1" />
+              <colspec colname="c2" />
+              <colspec colname="c3" />
+              <thead>
+                <row>
+                  <entry>Package Name</entry>
+                  <entry>Location</entry>
+                  <entry>Description</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>net.sourceforge.sqlunit</entry>
+                  <entry>src/net/sourceforge/sqlunit</entry>
+                  <entry>The main package which contains the classes which did not fit neatly into the sub-packages detailed below. This used to be the only package for SQLUnit.</entry>
+                </row>
+                <row>
+                  <entry>net.sourceforge.sqlunit.ant</entry>
+                  <entry>src/net/sourceforge/sqlunit/ant</entry>
+                  <entry>Contains the Ant SQLUnit task</entry>
+                </row>
+                <row>
+                  <entry>net.sourceforge.sqlunit.beans</entry>
+                  <entry>src/net/sourceforge/sqlunit/beans</entry>
+                  <entry>Contains beans to support the handlers. Older versions of SQLUnit handlers would return an Object from the process() method. They still return Objects, but now some of the handlers return well-defined Objects which can be cast to one of the beans in this package.</entry>
+                </row>
+                <row>
+                  <entry>net.sourceforge.sqlunit.handlers</entry>
+                  <entry>src/net/sourceforge/sqlunit/handlers</entry>
+                  <entry>Contains all the handler implementations. All the implementations implement the IHandler interface.</entry>
+                </row>
+                <row>
+                  <entry>net.sourceforge.sqlunit.types</entry>
+                  <entry>src/net/sourceforge/sqlunit/types</entry>
+                  <entry>Contains implementations of various types. All the implementations implement the IType interface.</entry>
+                </row>
+                <row>
+                  <entry>net.sourceforge.sqlunit.matchers</entry>
+                  <entry>src/net/sourceforge/sqlunit/matchers</entry>
+                  <entry>Contains some user-defined matcher classes for use with the diff tag. All matchers implement the IMatcher interface.</entry>
+                </row>
+                <row>
+                  <entry>net.sourceforge.sqlunit.reporters</entry>
+                  <entry>src/net/sourceforge/sqlunit/reporters</entry>
+                  <entry>Contains reporter classes that can be used with SQLUnit. All reporters implement the IReporter interface.</entry>
+                </row>
+                <row>
+                  <entry>net.sourceforge.sqlunit.utils</entry>
+                  <entry>src/net/sourceforge/sqlunit/utils</entry>
+                  <entry>Contains utility classes whose methods get called by SQLUnit.</entry>
+                </row>
+                <row>
+                  <entry>net.sourceforge.sqlunit.tools</entry>
+                  <entry>src/net/sourceforge/sqlunit/tools</entry>
+                  <entry>Contains tools to generate test cases from existing SQL statements using console input and GUI based input.</entry>
+                </row>
+                <row>
+                  <entry>net.sourceforge.sqlunit.test</entry>
+                  <entry>test/java</entry>
+                  <entry>Contains some Java code used for LOB testing.</entry>
+                </row>
+                <row>
+                  <entry>net.sourceforge.sqlunit.test.mock</entry>
+                  <entry>test/java/mock</entry>
+                  <entry>Contains code for the mock database framework for testing SQLUnit code independent of a database.</entry>
+                </row>
+                <row>
+                  <entry>Test files for various databases</entry>
+                  <entry>test/*</entry>
+                  <entry>Contains subdirectories named after various databases and contains stored procedures and test XML files for these databases.</entry>
+                </row>
+                <row>
+                  <entry>SQLUnit registry files</entry>
+                  <entry>etc/*.properties</entry>
+                  <entry>Most of SQLUnit is interface driven, and uses Factory classes to instantiate a named implementation of an interface. The registry files contain the mappings to the various implementations.</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </table>
+        </para>
+      </section>
+      <section>
+        <title>Writing your handler</title>
+        <para>Your handler must implement the net.sourceforge.sqlunit.IHandler interface. It should also declare a default (null) constructor, either implicitly or explicitly. The only method to be overridden is the process() method with the following signature.</para>
+        <para>
+          <programlisting>
+public java.lang.Object process(org.jdom.Element el) throws java.lang.Exception;
+          </programlisting>
+        </para>
+        <para>A tag defines an action that must be performed on the element. When the SQLUnit class parses the test XML document in its processDoc() method, it looks up the tag name, then uses the handlers.property resource file to instantiate the appropriate handler and call its process() method with the current JDOM Element for that tag. There is no restriction on the class the handler returns from its process() method. Some handlers return null, some return a java.sql.Connection object (ConnectionHandler), and yet others return a net.sourceforge.sqlunit.DatabaseResult object (SqlHandler, CallHandler, etc). Handlers may call other handlers corresponding to its child tags in the same manner, using the following code template.</para>
+        <para>
+          <programlisting>
+IHandler handler = HandlerFactory.getInstance(element.getName());
+          </programlisting>
+        </para>
+        <para>Ideally, there should be no check on which handler is allowed to instantiate which child element, since this can be easily coded into the SQLUnit DTD. In reality, you will find instances of where this is so. These are either bad design decisions on my part and are candidates for refactoring, or its just too hard to put into a DTD.</para>
+        <para>As it pulls out data from the element, the handler would do something to process it and convert it into some other data structure. An example of it is the SqlHandler, which pulls out the SQL statement and positional parameters, then executes the query against the connection in the registry. It then converts the resultset retrieved into a DatabaseResult object and returns it.</para>
+      </section>
+      <section>
+        <title>Adding the tag to handler class mapping</title>
+        <para>This is a single line entry into the etc/handler.properties file, which can be found in the src/net/sourceforge/sqlunit subdirectory of the distribution. You will need to run the ant compile target for it to be available under your build subdirectory where subsequent calls to the sqlunit ant task can find it.</para>
+        <para>
+          <programlisting>
+mytag = net.sourceforge.sqlunit.MyTagHandler
+          </programlisting>
+        </para>
+      </section>
+      <section>
+        <title>Updating the list of valid swappable child tags</title>
+        <para>Some tags have the notion of "swappable" child tags. Not all parent tags contain swappable child tags. Currently the only ones defined are sqlunit, test and batchtest. Swappable tags are defined as multiple elements in an OR relationship in the DTD. A snippet showing the swappable tags in the handlers.properties are shown below.</para>
+        <para>
+          <programlisting>
+sqlunit.swappable.tags = test, batchtest, diff
+test.swappable.tags = sql, call, methodinvoker, dynamicsql
+batchtest.swappable.tags = batchsql, batchcall
+          </programlisting>
+        </para>
+      </section>
+      <section>
+        <title>Adding the DTD for the new tag</title>
+        <para>The DTD entry for your new tag will specify what are the legal attributes and subelements of your new tag. An example of the DTD for a simple tag with two attributes is shown below. For more complex tags, see the sqlunit.dtd file in the docs/ subdirectory.</para>
+        <para>
+          <programlisting><![CDATA[
+<!ELEMENT mytag EMPTY>
+  <!ATTLIST mytag
+    attr1 CDATA #REQUIRED
+    attr2 CDATA #REQUIRED>
+]]>
+          </programlisting>
+        </para>
+      </section>
+    </section>
+  </chapter>
+<!-- end of included SQLUnit tags -->
+  <chapter>
+    <title>Getting Connections</title>
+    <anchor id="GettingConnections" />
+    <section>
+      <title>Basic JDBC Connection</title>
+      <para>SQLUnit can build up a database Connection object using JDBC if the driver, URL, user and password are supplied. Here is an example of setting up a Connection object for the SQLUnit Mock Database.</para>
+      <para><programlisting><![CDATA[
+<connection connection-id="1">
+  <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+  <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+  <user>defaultuser</user>
+  <password>defaultuser</password>
+</connection>
+      ]]></programlisting></para>
+    </section>
+    <section>
+      <title>JDBC Connection with properties</title>
+      <para>Certain old database drivers will complain about not being able to connect to the database if the user and password are not embedded in the JDBC URL itself. Certain others allow parameters other than user and password to be passed on the URL as a query string, so the user can set additional properties. In either of the two cases, you should simply embed all the properties in the URL element and leave the user and password elements empty. Here is an example:</para>
+      <para><programlisting><![CDATA[
+<connection connection-id="3">
+  <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+  <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase;user=none;password=none</url>
+  <user />
+  <password />
+</connection>
+      ]]></programlisting></para>
+    </section>
+    <section>
+      <title>Basic JNDI Connection</title>
+      <para>SQLUnit can also lookup a DataSource object from a JNDI server, and get the database Connection object from that. You will need to specify the data source name to lookup, and the JNDI arguments. Refer to the documentation for your JNDI server to determine what the JNDI arguments should be. Here is an example of setting up a Mock JNDI server that SQLUnit uses for its tests.</para>
+      <para><programlisting><![CDATA[
+<connection connection-id="2">
+  <datasource>jdbc/mockDSN</datasource>
+  <jndi>
+    <arg name="java.naming.factory.initial"
+        value="net.sourceforge.sqlunit.test.mock.MockInitialContextFactory" />
+  </jndi>
+</connection>
+      ]]></programlisting></para>
+    </section>
+    <section>
+      <title>JDBC Connection using local JAR file</title>
+      <para>SQLUnit can also instantiate a driver class from a JAR or class file that is not in SQLUnit's classpath. This feature was originally built to allow SQLUnit to regression test a newer version of a JDBC driver against the older version. Since the class names were identical, SQLUnit had to load them in different contexts. SQLUnit uses a non-delegating URLClassLoader to load the driver class from the JAR or class file specified. JDBC Driver JAR files are normally self-contained, so you will typically have to specify only one single JAR file, but you can also specify a comma-separated list of file URLs containing paths to JAR files and directories containing class files. An example of the connection setup used for mock testing this functionality follows:</para>
+      <para><programlisting><![CDATA[
+<connection connection-id="4">
+  <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+  <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+  <user />
+  <password />
+  <jarfile-url>file:build/,file:lib/mockrunner.jar,file:lib/log4j-1.2.13.jar,file:lib/commons-lang-2.1.jar</jarfile-url>
+</connection>
+      ]]></programlisting></para>
+    </section>
+    <section>
+      <title>Connection Properties from external file</title>
+      <para>Connection properties can also be specified in an external file. This is useful when the same tests should run in different environments against different databases. The properties are specified as the value of the extern attribute of the connection element. The property can be specified either as a relative or absolute file path, or as a resource in the application classpath. Property files can either contain properties to build a Connection using JDBC or look up a DataSource using JNDI. Here are some examples:</para>
+      <para>To set up an external JDBC connection, the properties file must contain the following:</para>
+      <para><programlisting>
+#
+# etc/external-jdbc-connection.properties
+#
+sqlunit.driver = net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver
+sqlunit.url = jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase
+sqlunit.user = 
+sqlunit.password = 
+      </programlisting></para>
+      <para>To set up an external JNDI connection, the properties file must contain the following name-value pairs:</para>
+      <para><programlisting>
+#
+# etc/external-jndi-connection.properties
+#
+sqlunit.datasource = jdbc/mockDSN
+sqlunit.jndi.java.naming.factory.initial = net.sourceforge.sqlunit.test.mock.MockInitialContextFactory
+      </programlisting></para>
+      <para>The connection element to point to a properties file as a file name would look like this:</para>
+      <para><programlisting><![CDATA[
+<connection connection-id="5" extern="etc/external-jdbc-connection.properties" />
+      ]]></programlisting></para>
+      <para>To specify the properties file as a resource, it must be in the classpath and the connection element will look like this:</para>
+      <para><programlisting><![CDATA[
+<connection connection-id="7" extern="external-jdbc-connection" />
+      ]]></programlisting></para>
+    </section>
+    <section>
+      <title>Passing in a Connection object to SQLUnit</title>
+      <para>You can also embed SQLUnit inside your application, in which case you do not need to specify the connection element in the XML file at all. The only downside to this approach is that you are restricted to only a single database connection. To do this, build the Connection object in your application, and set the Connection object for the SQLUnit object. A code snippet to do this would look something like this:</para>
+      <para><programlisting>
+    // Instantiate SQLUnit
+    SQLUnit sqlunit = new SQLUnit("sqlunit");
+    // set the properties
+    sqlunit.setTestFile("/my/test/file.xml");
+    sqlunit.setHaltOnFailure(false);
+    sqlunit.setDebug(false);
+    sqlunit.setReporter(new TextReporter("/my/report/file.xml"));
+    // set the Connection
+    sqlunit.setConnection(conn);
+    // run the tests
+    try {
+        sqlunit.runTest();
+    } catch (SQLUnitException e) {
+        // report the exception
+    }
+      </programlisting></para>
+      <para>Note that you can also choose to supply the Connection information inside the XML files themselves using any of the methods described above, and not specify the setConnection() method at all. SQLUnit will then read the Connection properties from the XML files and run the tests using these Connections.</para>
+    </section>
+    <section>
+      <title>Controlling Transactions</title>
+      <para>SQLUnit can put each Connection object in one of three transaction modes. The mode is controlled by the transaction-support attribute. The table below summarizes the key characteristics of each mode.</para>
+      <para><table frame="all">
+        <title>Transaction Mode characteristics</title>
+        <tgroup cols="4" align="left" colsep="1" rowsep="1">
+          <colspec colname="c1" />
+          <colspec colname="c2" />
+          <colspec colname="c3" />
+          <colspec colname="c4" />
+          <thead>
+           <row>
+             <entry>Transaction-Support</entry>
+             <entry>AutoCommit Set?</entry>
+             <entry>COMMIT on success?</entry>
+             <entry>ROLLBACK on failure?</entry>
+           </row>
+         </thead>
+         <tbody>
+           <row>
+             <entry>on (default)</entry>
+             <entry>No</entry>
+             <entry>Yes</entry>
+             <entry>Yes</entry>
+           </row>
+           <row>
+             <entry>off</entry>
+             <entry>No</entry>
+             <entry>No</entry>
+             <entry>No</entry>
+           </row>
+           <row>
+             <entry>implicit</entry>
+             <entry>Yes</entry>
+             <entry>No</entry>
+             <entry>No</entry>
+           </row>
+         </tbody>
+        </tgroup>
+      </table></para>
+      <para>When transaction-support=on (the default), SQLUnit turns off JDBC AutoCommit mode and ensures that each SQL or CALL is committed on success and rolled back on failure. The unit of work it assumes is the block contained in either an sql.stmt or call.stmt tag. If a different unit of work is required for your tests, you should consider setting transaction-support=off.</para>
+      <para>When transaction-support=off, SQLUnit turns of JDBC AutoCommit mode. It will not do either COMMIT or ROLLBACK. The COMMIT or ROLLBACK has to be handled by the client by adding the appropriate statements in the stored procedures.</para>
+      <para>When transaction-support=implicit, SQLUnit will turn on JDBC AutoCommit mode, but not issue any COMMITs or ROLLBACKs. The job of controlling transactions is left to the database. Some databases, such as Sybase and MS SQL Server, have modes that intelligently handle transactional units of work on behalf of the client. In situations where the database does not offer these features, the JDBC transaction behavior will be used, where every SQL statement or stored procedure call will be treated as a single transaction.</para>
+      <warning><para>Prior to version 4.6, the transaction support feature did not work correctly. AutoCommit was turned on in both transaction-support on and off modes. The only difference between the two modes was that SQLUnit did a COMMIT or ROLLBACK after executing a SQL or CALL statement in the "on" mode, and not in the "off" mode. The problem was not noticeable unless you explicitly wanted to change the default unit of work, and found that setting transaction-support=off did not produce the results you expected. The fix in version 4.6 was to set the default AutoCommit mode to false, so transaction-support=off would not do any COMMIT or ROLLBACK on its own. However, this created a problem for Sybase tests that use the CHAINED feature (and is likely to cause similar problems for MS SQL Server tests that use TRANSACTION MODE IMPLICIT, although none have been reported at the time of this writing) with transaction-support=off. Using CHAINED or IMPLICIT implies that the caller lets the database decide when to apply a COMMIT or ROLLBACK, if the database supports it, or apply COMMIT or ROLLBACK after every call (the JDBC default). This mode requires that AutoCommit must be turned on. For this scenario, a new transaction-support mode "implicit" has been introduced in version 4.7. If you experience problems with CHAINED mode or IMPLICIT mode in Sybase or MS SQL Server, then you should try to use the transaction-mode="implicit".</para></warning>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Using variables</title>
+    <anchor id="Variables" />
+    <section>
+      <title>Setting explicitly from scalar</title>
+      <para>A variable "var" in a SQLUnit test specification is denoted by ${var}. The value of a single variable can be set explicitly using the scalar form of the set tag:</para>
+      <para><programlisting><![CDATA[
+<set name="${var}" value="41">
+      ]]></programlisting></para>
+    </section>
+    <section>
+      <title>Setting explicitly from query</title>
+      <para>You can also set the value for a group of variables using the non-scalar form of the set tag, shown below, which will set the value of ${myquery.col1} to the value returned from the SELECT statement.</para>
+      <para><programlisting><![CDATA[
+<set name="${myquery}">
+  <sql><stmt>select col1 from mytable where col2=45</stmt></sql>
+  <result>
+    <resultset id="1">
+      <row id="1">
+        <col id="1" name="c1" type="INTEGER">${col1}</col>
+      </row>
+    </resultset>
+  </result>
+</set>
+      ]]></programlisting></para>
+    </section>
+    <section>
+      <title>Setting explicitly from Java method call</title>
+      <para>Since version 4.3, variables can also be set explicitly from the results of a Java method call, which must return a String. The set tag needs to specify the class name and the method name to invoke, and the class must be in the CLASSPATH. An example of such a call is shown below:</para>
+      <para><programlisting><![CDATA[
+<set name="${var}" static="true" class="com.mycompany.sqlunit.Utilities"
+    method="currentTimestamp">
+  <methodArgs>
+    <arg name="prefix" type="java.lang.String" value="MyPrefix" />
+    <arg name="format" type="java.lang.String" value="yyyyMMddhhmmss" />
+  </methodArgs>
+</set>
+      ]]></programlisting></para>
+      <para>In the above example, SQLUnit will call the method currentTimeStamp in the class com.mycompany.sqlunit.Utilities and populate the returned string into the ${var} variable in its symbol table. The ${var} can then be used by other tests in the suite.</para>
+      <para><programlisting>
+public static String currentTimeStamp(String,String);
+      </programlisting></para>
+    </section>
+    <section>
+      <title>Setting variables from ant</title>
+      <para>Since version 4.6, assuming that SQLUnit is called as an Ant task, SQLUnit can refer to the variables in Ant's context by prefixing the variable name with "ant.". For example, if you wanted to access the Ant variable ${ant.project.name} within SQLUnit, you can refer to it as ${ant.ant.project.name}.</para>
+    </section>
+    <section>
+      <title>Setting variables implicitly</title>
+      <para>Variables can also be set implicitly when it is defined as a variable in a result tag and when it has not been previously declared (ie it does not have a value). The example below sets the value of the variable ${var} from the value returned from the stored procedure AddDept.</para>
+      <para><programlisting><![CDATA[
+<test name="Adding department HR">
+  <sql>
+    <stmt>select AddDept(?)</stmt>
+    <param id="1" type="VARCHAR">Human Resources</param>
+  </sql>
+  <result>
+    <resultset id="1">
+      <row id="1">
+        <col id="1" name="adddept" type="INTEGER">${var}</col>
+      </row>
+    </resultset>
+  </result>
+</test>
+      ]]></programlisting></para>
+      <para>In both the implicit and explicit cases, the variable ${var} functions like an lvalue in an assignment expression. Once the variable is set, the variable functions like an rvalue in an assignment expression. So if we had specified the scalar set tag above to appear in the setup tag for the test specification or the prepare tag for the test, then the test would compare the value that AddDept returned with the value for the variable ${var}.</para>
+      <para>The scope of the variable is an individual test specification file. So a variable that has been declared and assigned a value is available for the life of the test suite defined by a single XML file.</para>
+      <para>The only way to reset the value of a variable that has already been declared and assigned a value is to invoke the set tag for that variable again within the test specification.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Including Files</title>
+    <anchor id="IncludingFiles" />
+    <section>
+      <title>Including XML Files</title>
+      <para>When talking of included files, people commonly mean included XML in the context of XInclude or external entity references. The SQLUnit include tag represents an unfortunate choice of keyword and does not imply inclusion of external XML files. SQLUnit does not natively support inclusion of external XML files at all. If this functionality is desired, then you can use external entity references or embed XInclude tags and pre-process your test suite with a tool such as <ulink url="http://xincluder.sourceforge.net">XIncluder</ulink>.</para>
+      <para>Using External entity references is simple and requires no pre-processing of the test suite. Suppose you wanted to include an XML snippet that predeclares certain common operations that you wish to have executed during the setup phase of each test. The example below shows the declarations you would need to make.</para>
+      <para><programlisting><![CDATA[
+<!DOCTYPE sqlunit SYSTEM "sqlunit.dtd" [
+  <!ENTITY common-setup SYSTEM "file:tests/common-setup.xml">
+]>
+    <connection... />
+
+    <setup>
+      &common-setup;
+    </setup>
+
+    <test... />
+]]>
+      </programlisting></para>
+      <para>The ENTITY declaration within the DOCTYPE associates the name of the entity with the file name. The entity can then be referenced in the body of the test suite as shown in the setup tag above.</para>
+      <para>Information on using embedded XInclude tags and using a pre-processor can be found at the <ulink url="http://xincluder.sourceforge.net">XIncluder</ulink> project. I considered calling XIncluder from within SQLUnit, but that would impose a penalty for everyone, including people who have no interest in including XML files. If you need this functionality, it is easy enough to pre-process the file using a script, and then delete the generated test suite XML file after the test is complete.</para>
+    </section>
+    <section>
+      <title>SQLUnit Include Files</title>
+      <para>Include files in SQLUnit refer to plain text files which contain a list of SQL or stored procedure calls that need to be run before or after a test suite is run.</para>
+      <para>The include file is parsed according to a set of fairly simple and hopefully intuitive rules. An include file consists of a collection of statements separated by delimiters.</para>
+      <para>The set of allowed delimiters are a free-standing slash ("/") character, a free-standing semicolon (";") character or a free-standing string "go" on its own line. In all cases other than when the SQL starts with a CREATE or REPLACE, a terminating semicolon (";") character is also supported.</para>
+      <para>The various kinds of statements supported in an include file are comments, CREATE and REPLACE statements, EXECUTE PROCEDURE calls, other SQL statements and shell calls. We will describe each of them in detail below.</para>
+      <para>Both single line and multi line SQL comments are supported. Single line SQL comments are those that begin with "--" on a new line. Multi-line comments begin with a "/*" and end with a "*/" followed by a newline. Comments are only for the benefit of the human author or user of the include file and is of no consequence to SQLUnit. Comments are discarded by the parser.</para>
+      <para>CREATE and REPLACE statements are typically used to define stored procedures, functions or triggers and can contain embedded semicolon characters at the end of the line before the definition is complete. These statements cannot be delimited with a terminating semicolon character because of ambiguity. Although CREATE and REPLACE can be used generically for DDL operations, making this rule only for stored procedures or functions would have led to a complexity in the parser grammar. It is also easier to remember about this restriction when applied to a generic set of statements rather than a very specific subset. CREATE and REPLACE statements can be and often will be multi-line calls.</para>
+      <para>EXECUTE PROCEDURE statements are those start with "EXEC ", "EXECUTE PROCEDURE ", or "{CALL ". They differ from regular SQL statements in that they need to be handled using a CallableStatement. The statement will be re-written to the form expected by the JDBC driver, ie {CALL procedurename()}, if it is not already specified in that form. The syntax rules for EXECUTE PROCEDURE statements are identical to that of regular SQL statements (described below), but SQLUnit will handle them as a CallableStatement rather than as a PreparedStatement. Any of the delimiters listed above will work with an EXECUTE PROCEDURE statement. Like CREATE and REPLACE statements, EXECUTE PROCEDURE statements can be multi-line.</para>
+      <para>Other SQL statements are those which do not fall into the two categories described above. Examples are SELECT, INSERT, UPDATE, DELETE, INDEX, DROP, etc. They are handled by SQLUnit using PreparedStatement. Any of the listed delimiters will work for these statements. Like the CREATE/REPLACE and EXECUTE PROCEDURE statements, these can also be multi-line. Some examples are listed below:</para>
+      <para><programlisting>
+-- Simple select
+select * from foo where bar = 1
+/
+-- A multi-line example
+UPDATE foo 
+  SET bar = 1
+  WHERE bar = 2
+/
+      </programlisting></para>
+      <para>In all the types of SQL calls described above, case does not matter, unless it is enforced by the database engine, for example, case sensitive table and column names in Sybase.</para>
+      <para>Shell calls are calls to the operating system. They are preceded with a bang ("!") character on a new line. Since Java will spawn a separate process for the shell command, it has no knowledge of the user's environment. It is generally recommended to call a shell script or batch file with the full path name and source the environment within the script. In case you wish to use the shell metacharacters such as the pipe ("|") or redirection metacharacters, it must be called within the context of the shell, with the actual command in parenthesis. As before, the full path to the command processor will need to be supplied. Multi-line commands can be specified using backslash ("\") character. Any of the delimiters listed above can be used. Here are some examples of a shell call.</para>
+      <para><programlisting>
+-- Example of a shell script call
+!/path/to/shell/script.sh
+/
+-- Example of a call using the shell
+!/bin/sh -c (rm -rf /tmp/*.test; ls -l | wc -l >/tmp/xyz)
+/
+-- Example of a call using the Windows NT command processor
+!COMMAND.COM /C (DEL C:\TMP\*.TST)
+/
+-- Example of a call using Windows XP command processor
+!CMD.EXE /C (DEL C:\TMP\*.TST)
+/
+      </programlisting></para>
+      <para>In all cases, the parser makes no attempt to validate or parse the SQL or shell script. If SQLUnit encounters an error while running the statement, it will return the stack trace to the caller to aid in debugging.</para>
+      <para>The BNF grammar (generated by jjdoc) for the Include File Parser is shown below. The comments come from inline comments in the parser grammar file, and are terse versions of the description above.</para>
+      <para><programlisting>
+&parser-grammar;
+      </programlisting></para>
+    </section>
+  </chapter>
+<!-- Generated by XDoclet: SQLUnit Error Messages -->
+  <chapter>
+    <title>Error Messages</title>
+    <anchor id="ErrorMessages" />
+    <para>The error messages that SQLUnit will generate if there is a problem are listed below, along with possible corrective actions:</para>
+&errors;
+  </chapter>
+<!-- end of included SQLUnit Error messages -->
+  <chapter>
+    <title>Supported Datatypes</title>
+    <anchor id="SupportedTypes" />
+    <section>
+      <title>List of currently supported datatypes</title>
+      <para>The Database datatypes supported by SQLUnit are described below. Type classes are the names of the class used by SQLUnit to provide support for that datatype. The Type name is the name of the datatype that is used in the SQLUnit test specification. The Server is the database server for which the datatype is defined. A Server name of Any indicates global support across all databases. The Allow Input, Allows Output and Is Sortable columns indicate whether you can use these datatypes as inputs (in your param element) or as outputs (in your result specifications), and whether you can sort by columns with these datatypes (using the sort-by attribute of the resultset element).</para>
+<!-- Generated by XDoclet: SQLUnit Supported Types -->
+&types;
+<!-- end of included SQLUnit Supported Types -->
+      <warning><para>Starting with version 4.3, the base type mappings have been slightly modified to conform with the <ulink url="http://java.sun.com/docs/books/tutorial/jdbc/basics/_retrievingTable.html">usage recommendations from Sun Microsystems</ulink>. Details of the changes are given below.</para>
+      <para><table frame="all">
+        <title>Changes to base type mappings</title>
+        <tgroup cols="3" align="left" colsep="1" rowsep="1">
+          <colspec colname="c1" />
+          <colspec colname="c2" />
+          <colspec colname="c3" />
+          <thead>
+           <row>
+             <entry>Data Type</entry>
+             <entry>Old Mapping</entry>
+             <entry>New Mapping</entry>
+           </row>
+         </thead>
+         <tbody>
+           <row>
+             <entry>FLOAT</entry>
+             <entry>FloatType (java.lang.Float)</entry>
+             <entry>DoubleType (java.lang.Double)</entry>
+           </row>
+           <row>
+             <entry>NUMERIC</entry>
+             <entry>DoubleType (java.lang.Double)</entry>
+             <entry>BigDecimalType (java.math.BigDecimal)</entry>
+           </row>
+           <row>
+             <entry>VARBINARY</entry>
+             <entry>BinaryType (java.io.InputStream)</entry>
+             <entry>ByteArrayType (byte[])</entry>
+           </row>
+         </tbody>
+        </tgroup>
+      </table></para>
+      <para>As a result, the overrides for adaptive_server_anywhere.NUMERIC, adaptive_server_enterprise.NUMERIC, sybase_sql_server.NUMERIC, oracle.NUMERIC, postgresql.NUMERIC and mysql.FLOAT have been removed, since these mappings now conform to the corrected base type mappings.</para></warning>
+    </section>
+    <section>
+      <title>Extending SQLUnit: Adding support for your own datatypes</title>
+      <para>Differences in implementation among different JDBC drivers and databases will require you to add support for your database if your datatype is not listed above, or if it uses a different native type from that listed. SQLUnit allows you to define these outside the package in a properties file <systemitem>usertypes.properties</systemitem> which must be in your CLASSPATH. Some common scenarios are covered below:</para>
+      <section>
+        <title>Using an existing implementation for an unlisted datatype</title>
+        <para>For example, assume you wished to use the Sybase ASE DATETIME datatype which behaves in much the same way as a TIMESTAMP. You can add the information for SQLUnit to support the DATETIME in the usertypes.properties files as sshown below:</para>
+        <para><programlisting>
+# usertypes.properties
+adaptive_server_enterprise.DATETIME.class = net.sourceforge.sqlunit.types.TimestampType
+adaptive_server_enterprise.DATETIME.type = 93
+        </programlisting></para>
+        <para>The adaptive_server_enterprise is the name we get from Connection.getMetaData().getDatabaseProductName() when we open a connection to a Sybase ASA server. Actually it is "Adaptive Server Enterprise", but SQLUnit lowercases it and replaces embedded whitespace with underscores. Both entries are required. You may need to verify these values. When these values are added to the usertypes.properties file, SQLUnit will read them in after it reads its own types.properties file, and DATETIME will now work like TIMESTAMP for Sybase ASA.</para>
+      </section>
+      <section>
+        <title>Overriding the implementation for a datatype</title>
+        <para>PostgreSQL treats NUMERIC types as BigDecimal (and so does Oracle), while the standard mapping for NUMERIC is Double. To override this for PostgreSQL, we need to add the following entry in your usertypes.properties. (This is already added in to types.properties, see the table above).</para>
+        <para><programlisting>
+# usertypes.properties
+postgresql.NUMERIC.class = net.sourceforge.sqlunit.types.BigDecimalType
+postgresql.NUMERIC.type = 2
+        </programlisting></para>
+        <para>This will override the mapping for NUMERIC when the current server is PostgreSQL.</para>
+      </section>
+      <section>
+        <title>Adding a new implementation for a new datatype </title>
+        <para>Suppose that in the DATETIME example, we wanted to input and output the DATETIME in a different format than the default. The default is "yyyy-MM-dd HH:mm:ss.SSS" while we want "MMM dd, yyyy HH:mm:ss Z". We will need to write a new type class for this and map the new type class to the DATETIME type in our usertypes.properties file. Looking at the TimestampType class, we notice that all we need to do is to override the PATTERN variable to make this work, like so:</para>
+        <para><programlisting>
+// DateTimeType.java
+package com.myapplication.mypackage;
+
+import net.sourceforge.sqlunit.types.TimestampType;
+
+/**
+ * Models a Sybase DATETIME type.
+ */
+public class DateTimeType extends TimestampType {
+    // just use this new pattern to parse and format
+    protected static String PATTERN = "MMM dd, yyyy HH:mm:ss Z";
+}
+        </programlisting></para>
+        <para>And the user.properties file will now look like this:</para>
+        <para><programlisting>
+# user.properties
+adaptive_server_enterprise.DATETIME.class = com.myapplication.mypackage.DateTimeType
+adaptive_server_enterprise.DATETIME.type = 93
+        </programlisting></para>
+      </section>
+    </section>
+  </chapter>
+  <chapter>
+    <title>SQLUnit Assertions</title>
+    <anchor id="Assertions" />
+    <section>
+      <title>List of currently supported Assertions</title>
+      <para>Prior to version 4.0, SQLUnit only allowed for matching two results for equality, or for matching specific columns using a matching criterion defined by one or more MatchPattern objects. SQLUnit now allows the caller to specify an assertion that should be satisfied for a given test as an attribute of the test, diff and batchtest tags. The change is backward compatible, so if the assert attribute is not specified, it defaults to "equal" in case of diff and test, and "batch-equal" in case of batchtest. Both these default assert attributes are actually macro-assertions, and are composed of a comma-separated series of assertions. These assertions, along with some new ones, can be specified either individually or in a sequence that makes sense in the context of the test case.</para>
+    <para>The assertions that are currently supported by SQLUnit are shown below:</para>
+<!-- Generated by XDoclet: SQLUnit Assertions (sqlunit-assert.j) -->
+&asserts;
+    </section>
+    <section>
+      <title>Extending SQLUnit: Adding your own Assertion</title>
+      <para>Assertions can be of two kinds, one specific to the batchtest tag (involving BatchDatabaseResult objects) and the other specific to diff and test tags (involving DatabaseResult objects). The following things need to be done to add a new assertion.
+        <orderedlist>
+          <listitem><para>Determine if the tag is for the batchtest tag or the diff/test tags.</para></listitem>
+          <listitem><para>Add an entry for the mapping from the assert string to the actual method name to invoke.</para></listitem>
+          <listitem><para>Implement the method.</para></listitem>
+        </orderedlist>
+      </para>
+      <para>This can be most easily explained by means of an example. Suppose we wanted to implement an assertion <systemitem>"in-same-ballpark"</systemitem> for DatabaseResult objects. We wish to map this assertion to the method <systemitem>assertInSameBallpark()</systemitem>. The mapping to set up is shown below.</para>
+      <para><programlisting>
+    private static final String[] DATABASE_RESULT_ASSERT_MAPPING = {
+        {"equal", "assertEqual"},
+        // more mappings here
+        {"in-same-ballpark", "assertInSameBallpark"}
+    };
+      </programlisting></para>
+      <para>We then implement the logic to determine if two DatabaseResult objects are in the same ballpark. This involves adding a method and implementing it, like so:</para>
+      <para><programlisting>
+    private static void assertInSameBallpark(String failureMessage,
+            DatabaseResult expR, DatabaseResult gotR, List matchPatterns)
+            throws SQLUnitException {
+        // some logic here. If the test fails it should throw an
+        // SQLUnitException with an ASSERT_FAILED message.
+    }
+      </programlisting></para>
+      <para>Look at the code for Assertions.java for more information.</para>
+    </section>
+  </chapter>
+<!-- end Generated by XDoclet: SQLUnit Assertions (sqlunit-assert.j) -->
+  <chapter>
+    <title>Large Object (LOB) Support</title>
+    <anchor id="LargeObjects" />
+    <section>
+      <title>Handling Object output from ORDBMS</title>
+      <anchor id="ObjectOutput" />
+      <para>Databases such as PostgreSQL allow storing non-primitive database types, both built-in such as the geometric data types, or user-defined. These datatypes can be returned from stored procedure calls. As long as a toString() method is defined for these objects, all that needs to be done is to specify the String representation of this object in your expected result. For example, a PostgreSQL <systemitem>POINT</systemitem> data type is backed by the <systemitem>org.postgresql.geometric.PGPoint</systemitem> object, which defines a toString() method. So a POINT(x,y) can be represented by the String (x,y). So to test that a <systemitem>POINT(10.0, 20.0)</systemitem> is returned as the seventh column of the first row of the first resultset from a procedure call, the XML would look something like this:</para>
+      <para>
+        <programlisting><![CDATA[
+<result>
+  <resultset id="1">
+    <row id="1">
+      <col id="1" type="INTEGER">123</col>
+      ...
+      <col id="7" type="OTHER">(10.0,20.0)</col>
+    </row>
+  </resultset>
+</result>
+        ]]>
+        </programlisting>
+      </para>
+      <para>The toString() method must be defined in order for the comparison to work, since SQLUnit compares two objects for equality based on their String representation returned from the toString() method.</para>
+      <para>Note that SQLUnit does not yet (and probably never will) support passing built-in or user-defined objects as arguments to stored procedures to be tested with SQLUnit. The reason is that it is difficult to convert from the String representation to the equivalent object representation in a generic manner. The approach taken in the PostgreSQL test (AddEmployee.sql) is to pass the parameters for object creation (the x and y coordinates for the Employee.location::POINT) as separate arguments to the stored procedure. The stored procedure is responsible for constructing a <systemitem>POINT</systemitem> object and storing it into the database. This approach allows scaling to more complicated types (such as <systemitem>CIRCLE((x,y),r)</systemitem>) in a trivial manner.</para>
+    </section>
+    <section>
+      <title>Handling BLOB and CLOB outputs</title>
+      <anchor id="BlobClobOutput" />
+      <para>Modern databases are frequently capable of storing BLOBs (Binary large objects) and CLOBs (Character large objects) as columns in their tables. Since it is hard and messy to include the expected CLOB output in the XML test file, and pretty much impossible in case of a BLOB, SQLUnit requires that you either specify the name of a file containing the data or specify the MD5 Checksum for the data as a String in your expected results element.</para>
+      <para>SQLUnit converts large objects such as CLOB, BLOB, LONGVARBINARY and LONGVARCHAR to an MD5 digest when extracting from the database via a stored procedure or SQL call. This is done in order to make subsequent comparisons faster. Other types are extracted and stored as Strings, which may be converted to an MD5 digest form at comparison time if the test matches it against a file name (prefixed with file:) or an MD5 digest (prefixed with md5:).</para>
+      <para>If you are specifying the name of the file to compare against, prepend either the full path name of the file or the relative path offset from the directory where the tests will be run, with the string <systemitem>file:</systemitem>. If specifying the MD5 Checksum for the resulting LOB data, prepend the checksum string with <systemitem>md5:</systemitem>.</para>
+      <para>SQLUnit writes CLOB and BLOB objects retrieved from the database into temporary files on disk. In case of a test failure, the mapping between the LOB column [resultset,row,col] in the failed test and the temporary file created is shown at the bottom of the test report. It is up to the user to verify what the difference is using operating system tools such as diff (for CLOBs) and cmp (for BLOBs).</para>
+    </section>
+    <section>
+      <title>Java Object Support</title>
+      <anchor id="JavaObjSupport" />
+      <para>Java aware databases support storing Java objects in the database natively. Most relational databases are not Java aware. SQLUnit provides a way to handle serialized Java Objects as first class Java Objects by storing them as BLOB columns. This is a little different from storing native database objects stored in Object Relational Databases as discussed in the section <link linkend="ObjectOutput">Handling Object Output from ORDBMS</link>. Java Objects are populated, then serialized and the bytecode generated are then stored in the database as BLOBs. When they are returned in the resultset of a stored procedure or SQL call, they can be automatically stringified using the Object's toString() method. The only requirements for the Object being stored are that it must implement <systemitem>java.io.Serializable</systemitem> and override the default <systemitem>Object.toString()</systemitem> method.</para>
+      <para>Here is a contrived example. Suppose you wanted to store a permission object in a user table, to indicate which user had access to what system resources. You could create a Dictionary Object which contained a Map of resource names to permission. So you would create a Dictionary class which implements the java.io.Serializable interface and whose toString() method you would override to create a compact but readable String representation. The source code for the Dictionary object is available at <ulink url="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/sqlunit/sqlunit/test/Dictionary.java">test/Dictionary.java</ulink>. You would then have your application populate these objects for different users and store them in the database. The source code for the JUnit class which simulates this behavior is available at <ulink url="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/sqlunit/sqlunit/test/LOBLoader.java">test/LOBLoader.java</ulink>. The JUnit class also creates several other files in order to run the MySQL SQLUnit tests. See the README file for details on how to run the test.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <title>User-Defined Matching</title>
+    <anchor id="UserDefinedMatching" />
+    <section>
+      <title>What is User-Defined Matching</title>
+      <para>Starting with version 2.7, SQLUnit provides the ability to match the results generated from two different SQL queries or Stored Procedure calls. It also provides the ability for the user to define matching strategies on a per-column basis, to override the default matching strategy. By default, SQLUnit will match two columns from two different results on the basis of exact equality, including type. Matchers match only the value, based on the matching criteria. The user can specify different behavior for one or more columns in the result, such as match when the two columns are different by a certain tolerable amount.</para>
+      <para>SQLUnit ships with some simple Matcher classes that are available in <systemitem>net.sourceforge.sqlunit.matchers</systemitem>. These can be used as-is, or can be used as the basis for more sophisticated Matcher classes with site-specific functionality.</para>
+    </section>
+    <section>
+      <title>Wildcarding rules for Match Attributes</title>
+      <para>
+        <table frame="all">
+          <title>Wildcarding rules for the Match Attributes</title>
+          <tgroup cols="3" align="left" colsep="1" rowsep="1">
+            <colspec colname="c1" />
+            <colspec colname="c2" />
+            <colspec colname="c3" />
+            <thead>
+              <row>
+                <entry>Pattern</entry>
+                <entry>Description</entry>
+                <entry>Example</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>*</entry>
+                <entry>Specifying a '*' for a given attribute means that SQLUnit will match all corresponding elements represented by this attribute in the result element. It is equivalent to not specifying the attribute at all.</entry>
+                <entry>resultset-id="1" row-id="*" col-id="*" means match all rows and all columns in resultset 1</entry>
+              </row>
+              <row>
+                <entry>Single number (n)</entry>
+                <entry>Specifying a single number for a given attribute means that SQLUnit will match all corresponding elements having this attribute in the result element.</entry>
+                <entry>resultset-id="*" row-id="*" col-id="3" will match the third column in all rows in all resultsets</entry>
+              </row>
+              <row>
+                <entry>Range of numbers (m-n)</entry>
+                <entry>Specifying a range of numbers for a given attribute means that SQLUnit will match all corresponding elements whose attribute falls in the specified range.</entry>
+                <entry>resultset-id="*" row-id="1" col-id="1-3" will match the first, second and third columns in the first row for all resultsets using this matcher.</entry>
+              </row>
+              <row>
+                <entry>Enumeration of numbers (m,n,p)</entry>
+                <entry>Specifying an enumeration for a given attribute means that SQLUnit will match all corresponding elements whose attributes match one of the numbers in the enumeration.</entry>
+                <entry>resultset-id="*" row-id="1" col-id="1,2,3" will do the same thing as the above example.</entry>
+              </row>
+              <row>
+                <entry>Combination of Enumeration and Range (m-n,p,q)</entry>
+                <entry>Any combination of range patterns and simple enumeration separated by commas is also supported.</entry>
+                <entry>resultset-id="*" row-id="1" col-id="1-3,5,6" will match the first, second, third, fifth and sixth columns in the first row for all resultsets using the matcher.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </para>
+    </section>
+    <section>
+      <title>List of currently supported Matchers</title>
+&matchers;
+    </section>
+    <section>
+      <title>Extending SQLUnit: Writing your own Matcher</title>
+      <note><para>If you have written a Matcher that does something unique, and would like to contribute it to the SQLUnit project, it would be gratefully accepted and credit given.</para></note>
+      <para>Writing your own Matcher is easy. The Matcher simply specifies the match operation by implementing the <systemitem>isEquals(String,String,Map)</systemitem> method in the <systemitem>net.sourceforge.sqlunit.IMatcher</systemitem> interface. Specifying where the matcher should be invoked can be done from the SQLUnit specification file itself.</para>
+      <para>We will illustrate the process by taking the PercentageRangeMatcher class supplied with the SQLUnit distribution and annotating it with comments that may be helpful in writing your own matcher.</para>
+      <para><programlisting>
+/*
+ * $Id: sqlunit-book.xml,v 1.100 2006/04/30 22:25:54 spal Exp $ <co id="udf.cvstag" /> 
+ * $Source: /cvsroot/sqlunit/sqlunit/docs/sqlunit-book.xml,v $
+ * SQLUnit - a test harness for unit testing database stored procedures.<co id="udf.copyright" />
+ * Copyright (C) 2003  The SQLUnit Team
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+package net.sourceforge.sqlunit.matchers; <co id="udf.package" />
+
+import java.util.Map;  <co id="udf.imports" />
+import net.sourceforge.sqlunit.IErrorCodes;
+import net.sourceforge.sqlunit.IMatcher;
+import net.sourceforge.sqlunit.SQLUnitException;
+
+/** <co id="udf.classdoc" />
+ * The PercentageRangeMatcher is an implementation of the IMatcher interface
+ * used to define rulesets for matching columns in SQLUnit. This matcher
+ * will accept a percentage tolerance value and check to see that the target 
+ * is within (+/-) tolerance percent of the source.
+ * Arguments:
+ * pc-tolerance : a percentage tolerance value.
+ * @author Sujit Pal (spal@users.sourceforge.net)
+ * @version $Revision: 1.100 $
+ */
+public class PercentageRangeMatcher implements IMatcher { <co id="udf.implements" />
+
+    /**
+     * Default constructor as per contract with IMatcher.
+     */
+    public PercentageRangeMatcher() {;}
+
+    /**
+     * Returns true if the value of the target is withing (+/-) a specified
+     * tolerance value of the source. Note that in this case, the source,
+     * target and tolerance must all be numeric values.
+     * @param source the String representing the source to be matched.
+     * @param target the String representing the target to be matched.
+     * @param args a Map of name value pairs of arguments passed in.
+     */
+    public boolean isEqual(String source, String target, Map args)
+            throws SQLUnitException { <co id="udf.isEqual" />
+
+        String aTolerance = (String) args.get("pc-tolerance"); <co id="udf.runtimechecks" />
+        if (aTolerance == null) {
+            throw new SQLUnitException(IErrorCodes.MATCHER_EXCEPTION,
+                new String[] {this.getClass().getName(),
+                "Value for key 'pc-tolerance' is NULL"});
+        }
+        // is tolerance a float?
+        float iTolerance = 0;
+        try {
+            iTolerance = Float.parseFloat(aTolerance);
+        } catch (NumberFormatException e) {
+            throw new SQLUnitException(IErrorCodes.MATCHER_EXCEPTION,
+                new String[] {this.getClass().getName(),
+                "Value of key 'pc-tolerance' is not a FLOAT"});
+        }
+        // cannot have the tolerance exceed 100
+        if (iTolerance &gt; 100.0) {
+            throw new SQLUnitException(IErrorCodes.MATCHER_EXCEPTION,
+                new String[] {this.getClass().getName(),
+                "Value of key 'pc-tolerance' must be between 0 and 100"});
+        }
+        // is the source a float? <co id="udf.convert" />
+        float iSource = 0;
+        try {
+            iSource = Float.parseFloat(source);
+        } catch (NumberFormatException e) {
+            throw new SQLUnitException(IErrorCodes.MATCHER_EXCEPTION,
+                new String[] {this.getClass().getName(),
+                "Value of 'source' is not a FLOAT"});
+        }
+        // is the target an integer?
+        float iTarget = 0;
+        try {
+            iTarget = Float.parseFloat(target);
+        } catch (NumberFormatException e) {
+            throw new SQLUnitException(IErrorCodes.MATCHER_EXCEPTION,
+                new String[] {this.getClass().getName(),
+                "Value of 'target' is not a FLOAT"});
+        }
+        // return the match <co id="udf.return" />
+        return ((iTarget &gt;= (iSource - (iTolerance * 100))) &amp;&amp;
+            (iTarget &lt;= (iSource + (iTolerance * 100))));
+    }
+}
+      </programlisting></para>
+      <para><calloutlist>
+        <callout arearefs="udf.cvstag">
+          <para>In general, if you are contributing a matcher to the SQLUnit project, please include the Id and Source CVS tags. This will allow us to track version revisions in SQLUnit. Even if you dont plan to contribute the matcher to the SQLUnit project, its a good practice to include the tags for whatever Source Code Control System you are using.</para>
+        </callout>
+        <callout arearefs="udf.copyright">
+          <para>Please include this boilerplate in your code if you are planning to contribute the matcher to the SQLUnit project. This indicates that this code is now covered by the GNU General Public License. If you are not planning to contribute the Matcher, please ignore this callout.</para>
+        </callout>
+        <callout arearefs="udf.package">
+          <para>The package statement identifies the package in which your matcher class will live in. It can be anything you want, but your CLASSPATH must contain this package when running SQLUnit with your new user-defined Matcher class.</para>
+        </callout>
+        <callout arearefs="udf.imports">
+          <para>You will need to import the following classes from the net.sourceforge.sqlunit package. IMatcher is the interface which your matcher class is implementing. SQLUnitException is the Exception class thrown by SQLUnit applications, and IErrorCodes is another interface which contains the definition of the Error Codes thrown by SQLUnit. It is important to throw SQLUnitExceptions from your Matcher class because otherwise your exceptions will not be reported by SQLUnit.</para>
+        </callout>
+        <callout arearefs="udf.classdoc">
+          <para>Because of the weak coupling between any Matcher and the rest of SQLUnit, the class documentation is probably the best place you have to provide the user of your Matcher class with useful information relating to the use of the Matcher. The class documentation in this case defines what the Matcher does, and provides the information about what keys need to be passed in to the Matcher for it to do its work.</para>
+        </callout>
+        <callout arearefs="udf.implements">
+          <para>Your Matcher class needs to implement the <systemitem>net.sourceforge.sqlunit.IMatcher</systemitem> interface, otherwise it will not be visible to SQLUnit.</para>
+        </callout>
+        <callout arearefs="udf.isEqual">
+          <para>Your Matcher class needs to implement the only method in the IMatcher interface, which is the <systemitem>boolean isEqual(String,String,Map)</systemitem>. The first argument represents the source column value to match, the second the target column value, and the third is a Map of key-value pairs which contain additional information needed by the isEqual method. If the actual comparison needs to be made on numeric objects, as is the case with the PercentageRangeMatcher, then your Matcher should convert to the appropriate class.</para>
+        </callout>
+        <callout arearefs="udf.runtimechecks">
+          <para>The weak coupling between the SQLUnit code and the Matcher code is by design. It was necessiated by the need to make the Matchers be very flexible and to keep the SQLUnit XML code simple to use. As a result, the Matcher must make sure that it can use the arguments being passed to it. If not, it should abort with a SQLUnitException (IErrorCodes.MATCHER_EXCEPTION) specifying the class name and the Matcher specific exception message.</para>
+        </callout>
+        <callout arearefs="udf.convert">
+          <para>As mentioned above, the Matcher code is responsible for converting from the supplied String value to whatever form it needs. In this case, it converts the source and target String values to Floats. If conversion fails, then it should throw a SQLUnitException (IErrorCodes.MATCHER_EXCEPTION) specifying the class name and the Matcher specific exception message.</para>
+        </callout>
+        <callout arearefs="udf.return">
+          <para>This computes the value of the match and returns it.</para>
+        </callout>
+      </calloutlist></para>
+    </section>
+    <section>
+      <title>Setting up your Matcher for use with SQLUnit</title>
+      <para>This can best be explained by use of an example. Suppose you to specify a particular Matcher, <systemitem>com.mycompany.sqlunit.matchers.MyMatcher</systemitem>  to work on the first resultset, all rows, and columns 1, columns 3 to 5 and column 7, you would embed the Match element within your Diff Element as shown below. In addition, if your matcher needed some extra information, you can supply them as a set of key-value pairs using nested Arg elements within the Match element. In our example below, the Matcher looks for the variable key1 with a value value1 in order to do the matching.</para>
+      <para>
+        <programlisting><![CDATA[
+<diff name="MyDiff">
+  <match resultset-id="1" row-id="*" col-id="1,3-5,7"
+    matcher="com.mycompany.sqlunit.matchers.MyMatcher">
+    <arg name="key1" value="value1" />
+  </match>
+</diff>
+        ]]>
+        </programlisting>
+      </para>
+      <para>The above example illustrates some rudimentary wildcarding features that SQLUnit supports in order to specify more than one column for a particular matching strategy. Any columns that are not covered by the wildcarded filters default to the default matching strategy, which is to check for exact equality. The rules for wildcarding are the same for the resultset-id, row-id and col-id attributes and are detailed below. SQLUnit decides which columns qualify by checking the patterns for resultset-id, row-id and col-id additively.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <title>User-Defined Reporting</title>
+    <anchor id="aUserDefinedReporting" />
+    <section>
+      <title>What is User-Defined Reporting?</title>
+      <para>Starting with version 3.6, SQLUnit has the ability to use reporters that work within the context of other testing frameworks. By default, SQLUnit uses the TextReporter, which can be used to print a text report of the results of the test, either to a file specified in the sqlunit task's logfile attribute, or to STDERR if the logfile attribute is not specified. This functionality was contributed by Rob Nielsen and Paul King. They have also contributed a reporter that works within the context of the <ulink url="http://webtest.canoo.com">Canoo Web Test framework</ulink>.</para>
+      <note><para>If you have written a Reporter that does something unique, and would like to contribute it to the SQLUnit project, it would be gratefully accepted and credit given.</para></note>
+    </section>
+    <section>
+      <title>List of currently supported Reporters</title>
+&reporters;
+    </section>
+    <section>
+      <title>Extending SQLUnit: Writing your own Reporter</title>
+      <para>To add a new User-defined reporter, simply implement the IReporter interface and add an entry into etc/reporters.properties, and recompile the distribution. The interface specifies a template with methods to be implemented that are then called by SQLUnit in a predetermined manner in the reporting lifecycle. The Javadocs provide guidance as to what point in the lifecycle that method would be called by SQLUnit, so the implementation would have to code the required behavior. Take a look at the CanooWebTestReporter and TextReporter for more details. There is also a hasContainer() method which indicates if the reporter is running within the context of another test framework or not. If it is running in the context of another test framework, then SQLUnit will not attempt to set up the Ant BuildListener objects for it.</para>
+    </section>
+    <section>
+      <title>Setting up your Reporter for use with SQLUnit</title>
+      <para>SQLUnit currently comes with the default TextReporter and the CanooWebTestReporter. To use either of these, specify the logformat attribute of the sqlunit task to be the alias for the reporter of your choice. The aliases can be found in the reporters.properties file in the etc subdirectory of the distribution. Here is an example of using the CanooWebTestReporter.</para>
+      <para>
+        <programlisting><![CDATA[
+<sqlunit testfile="mytest.xml" haltOnFailure="false" debug="false"
+    logfile="./output.log" logformat="canoo" />
+        ]]>
+        </programlisting>
+      </para>
+    </section>
+  </chapter>
+  <chapter>
+    <title>User-Defined Test Grouping and Test Skipping</title>
+    <anchor id="TestGroupSkip" />
+    <section>
+      <title>What are User-Defined Test Groups</title>
+      <para>Starting with version 4.9, SQLUnit provides to ability to classify the tests according to some user-defined criteria. One example for classification may be by test importance (severity) or by the part of the system (category) it applies to or both. This gives the ability to execute for example only tests that applies to ModuleA and with the highest priority.</para>
+    </section>
+    <section>
+      <title>Declaring the group of a test</title>
+      <para>All the grouping information of a given test is declared in &lt;classifiers&gt; tag. It is called in this way, because it classfies the test. One concrete example is:</para>
+      <para><programlisting>
+  &lt;test name="testName"&gt;
+    &lt;classifiers&gt;
+      &lt;severity&gt;WARN&lt;/severity&gt;
+      &lt;category&gt;TestForModuleA&lt;/category&gt;
+    &lt;/classifiers&gt;
+    &lt;sql&gt;
+      &lt;stmt&gt;aSimpleResult&gt;/stmt&gt;
+    &lt;/sql&gt;
+    &lt;result&gt;
+      &lt;resultset id="1"gt;
+        &lt;row id="1"&gt;
+          &lt;col id="1" name="col1" type="INTEGER"&gt;1&lt;/col&gt;
+        &lt;/row&gt;
+      &lt;/resultset&gt;
+    &lt;/result&gt;
+  &lt;/test&gt;
+      </programlisting></para>
+      <para>This means that this test belongs to TestForModuleA category and its severity is WARN, so that if it fails it will be just a warning and not a error or a fatal situation.</para>
+      <para>The user then should provide some global criteria and each test's classification will be compared. If the test matches them it will be executed; if not will be skipped and reported as skipped. Here is a detailed explantion how the decision whether a test matches ot not is done. When &lt;classifiers&gt; tag is reached, its corresponding ClassifiersHandler is called, whose in turn calls the handlers of all its children. It is responsibility of the children's handler to extract the criterion they are interested in from the environment and then to compare whether their content meets that criterion. If it is not met they return false (as a Boolean object) to ClassifiersHandler. On the other hand, the latter stops its execution on the first false value it receives and the test is not executed.</para>
+      <para>For a concrete example how the user defines these global criteria see the next two sections.</para>
+      <para>SQLUnit comes with two classifying handlers (but you can provide your own too), which are SeverityHandler and CategoryHandler and the next two sections are dedicated to them.</para>
+    </section>
+    <section>
+      <title>SeverityHandler</title>
+      <para>SeverityHandler corresponds to &lt;severity&gt; tag, nested in &lt;classifiers&gt; tag. As shown in the example of the previous section the body of &lt;severity&gt; tag contains the severity of the test. Now the user gives the global severity, which we will call the threshold severity in one of the following way: as an ant property called sqlunit.threshold.severity, as the value of the key sqlunit.threshold.severity from SQLUnit's SymbolTable or as a System property called sqlunit.threshold.severity. SeverityHandler will take the threshold severity, the current test's severity and will execute the test iff the current test's severity is equal ot greater than the threshold severity.</para>
+      <para>The following values are valid severity value: DEBUG, INFO, WARN, ERROR, FATAL and are compared in the following way: DEBUG &lt; INFO &lt; WARN &lt; ERROR &lt; FATAL. For example if the user invokes the test from the previous section with</para>
+      <para><programlisting>
+ant -Dsqlunit.severity.threshold=INFO
+      </programlisting></para>
+      <para>the test will be executed because INFO &lt;= WARN. But if it is invoked with</para>
+      <para><programlisting>
+ant -Dsqlunit.severity.threshold=ERROR
+      </programlisting></para>
+      <para>the test will not be executed as ERROR &gt; WARN.</para>
+      <para>Since &lt;severity&gt; is an optional tag, the following edge cases are taken into account: if the threshold severity is not set all tests match regardless of their severities; if a test does not have assigned severity it matches, regardless of the threshold severity.</para>
+    </section>
+    <section>
+      <title>CategoryHandler</title>
+      <para>CategoryHandler corresponds to &lt;category&gt; tag, nested in &lt;classifiers&gt; tag. As shown in the example of the previous section the body of &lt;category&gt; tag contains the category of the test. Now the user gives the global category in one of the following ways: as an ant property called sqlunit.category, as the value of the key sqlunit.category from SQLUnit's SymbolTable or as a System property called sqlunit.category. CategoryHandler will take the global category, the current test's category and will execute the test iff they match in the terms of regular expression matching. For example if the user invokes the test from the previous section with</para>
+      <para><programlisting>
+ant -Dsqlunit.category=TestForModuleA
+      </programlisting></para>
+      <para>the test will be executed. If it is invoked with</para>
+      <para><programlisting>
+ant -Dsqlunit.category=TestForModuleB
+      </programlisting></para>
+      <para>the test will not be executed.</para>
+      <para>Since &lt;category&gt; is an optional tag, the following edge cases are take into account: if the global category is not set all tests match regardless of their category; if a test does not have assigned category it matches regardless of the global category.</para>
+      <para>The global category can be given as regular expression pattern also:</para>
+      <para>
+ant -Dsqlunit.category=TestForModule(.*)
+      </para>
+    </section>
+    <section>
+      <title>Extending SQLUnit: Write your own classification</title>
+      <para>If you want to classify your tests not only by severity and category, but by other criteria, you have just to add your own handler as it described in the section Writing your handler. Note that in the case of classifying handlers, their process method should always return to ClassifiersHandler a Boolean object. Except the fact that it must receive a Boolean from its "children" the ClassifiersHandler knows nothing about the handlers it calls, thus making it more robust. If you return to it an object of another type, you will receive ClassCastException.</para>
+    </section>
+    <section>
+      <title>Skipping Tests with &lt;skip&gt;</title>
+      <para>Sometimes you may want to skip deliberately some test (regardless whether they match some criteria like the ones above or not). SQLUnit provides skip tag which is used in this way:</para>
+      <para><programlisting>
+  &lt;test name="Testing with skip=true and reason"&gt;
+    &lt;skip value="true"&gt;Reason for skipping&lt;/skip&gt;
+    &lt;call&gt;
+      &lt;stmt&gt;aSimpleResult&lt;/stmt&gt;
+    &lt;/call&gt;
+    &lt;result&gt;
+      &lt;resultset id="1"&gt;
+        &lt;row id="1"&gt;
+          &lt;col id="1" name="col1" type="INTEGER"&gt;1&lt;/col&gt;
+        &lt;/row&gt;
+      &lt;/resultset&gt;
+    &lt;/result&gt;
+  &lt;/test&gt;
+      </programlisting></para>
+      <para>The content of skip tag value attribute specifies whether the test will be skipped or not. If it is true the test is skipped and the reason for its skipping is given in the body of &lt;skip&gt; tag.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Using the Mock Testing Framework</title>
+    <anchor id="MockTest" />
+    <section>
+      <title>Overview</title>
+      <para>The SQLUnit Mock Testing Framework is based on the JDBC mock testing framework provided by the <ulink url="http://mockrunner.sourceforge.net">MockRunner Project</ulink>, and allows a developer to test the SQLUnit code without using a database. Its primary value would be to model databases to which members of the SQLUnit development team do not have access.</para>
+      <para>Instead of a real database, the testing framework relies on introspecting a class specified in the JDBC URL. This class must implement the IMockDatabase interface and contains one or more methods with the following signature:</para>
+      <para><programlisting>
+public MockResultSet methodName(Integer resultSetId);
+      </programlisting></para>
+      <para>The actual implementation of IMockDatabase is specified in the connection parameters in the XML test file. In the example below, the "jdbc:mock" string is used by the DriverManager to select the SQLUnitMockDriver to handle the Connection, and the rest of the URL is used to identify the class name which will be used to supply the MockResultSets needed for the tests.</para>
+      <para><programlisting><![CDATA[
+<connection>
+  <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+  <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+  <user />
+  <password />
+</connection>
+]]>
+      </programlisting></para>
+      <para>The AbstracMockDatabase abstract class provides an introspecting implementation of the IMockDatabase#getResultSet() method. It is an abstract class, so it is expected that someone implementing a Mock Database using this mechanism would extend this class. This is the case with the SQLUnitMockDatabase class, which contains various methods that model mock stored procedure calls.</para>
+    </section>
+    <section>
+      <title>Writing your own mock procedures</title>
+      <para>The SQLUnitMockDatabase provides various examples of mock procedures written using the SQLUnit Mock framework, but there are a number of conventions which you should be aware of when reading through these examples.</para>
+      <para><orderedlist>
+        <listitem><para>Each mock procedure will need to return various resultsets based on the resultset id supplied. Calls made to the same procedure with different values of the resultset id will result in different MockResultSet objects being returned.</para></listitem>
+        <listitem><para>ResultSet 0 is always the count of the number of resultsets that can be returned from this procedure call, embedded in a MockResultSet object.</para></listitem>
+        <listitem><para>ResultSet 1 through n represents the first through the n-th ResultSet objects that may be returned from the procedure.</para></listitem>
+        <listitem><para>ResultSet -1 through -n represents the first through n-th Outparam objects that may be returned from the procedure. They need to be always specified as Strings, they will be automatically converted based on the Outparam definition supplied in the param element. Oracle CURSOR outparams are returned as MockResultSets.</para></listitem>
+        <listitem><para>Throwing of SQLExceptions can be simulated by wrapping a SQLException within a MockResultSet at a particular ResultSet position.</para></listitem>
+        <listitem><para>MockResultSetUtils contains most of the functionality of wrapping and unwrapping non-ResultSet objects into and out of MockResultSets. Consider adding functionality to this class if you do not see something you want.</para></listitem>
+      </orderedlist></para>
+      <para>Here is an example of a mock procedure that returns a single return code (OUTPARAM 1) and a single resultset consisting of 1 row with 3 columns. As described above, resultset index of -1 corresponds to the return code at outparam position 1, resultset index of 0 corresponds to the number of resultsets returned from the procedure, and resultset index of 1 corresponds to the first resultset returned from the procedure.</para>
+      <para><programlisting>
+/**
+ * Returns a result code and a single resultset.
+ * @param index the result set id.
+ * @return a MockResultSet at the specified index.
+ */
+public MockResultSet resultAndOneResultSet(Integer index) {
+    if (index == null) { return null; }
+    int rsid = index.intValue();
+    switch (rsid) {
+        case -1:
+            return MockResultSetUtils.buildScalarOutParam("143");
+        case 0:
+            return MockResultSetUtils.buildZerothResultSet(1);
+        case 1:
+            MockResultSet mrs = new MockResultSet("resultAnd1ResultSet:-1");
+            mrs.setResultSetMetaData(MockResultSetUtils.buildMetaData(
+                new ColumnMetaData[] {
+                new ColumnMetaData("agentId", Types.INTEGER),
+                new ColumnMetaData("name", Types.VARCHAR),
+                new ColumnMetaData("drink", Types.VARCHAR)}));
+            mrs.addRow(new Object[] {
+                new Integer(7), new String("James Bond"),
+                new String("Martini")});
+            return mrs;
+        default:
+            return null;
+    }
+}
+      </programlisting></para>
+      <para>More information on how the various peices fit together from a programmatic perspective can be found in the package level documentation in the Javadocs for this package.</para>
+    </section>
+    <section>
+      <title>Writing tests against the mock procedures</title>
+      <para>The process of writing tests against the mock procedure is identical to writing it for a real database. You can find some examples under test/mock/test.xml in the distribution. Here is one of them, which corresponds to the code shown above for the mock procedure.</para>
+      <para><programlisting><![CDATA[
+<test name="Testing result code and one resultset">
+  <call>
+    <stmt>resultAndOneResultSet</stmt>
+    <param id="1" type="INTEGER" inout="out">${rc}</param>
+  </call>
+  <result>
+    <outparam id="1" type="INTEGER">143</outparam>
+    <resultset id="1">
+      <row id="1">
+        <col id="1" type="INTEGER">7</col>
+        <col id="2" type="VARCHAR">James Bond</col>
+        <col id="3" type="VARCHAR">Martini</col>
+      </row>
+    </resultset>
+  </result>
+</test>
+]]>
+      </programlisting></para>
+    </section>
+  </chapter>
+</book>

@@ -1,0 +1,335 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: test.xml,v 1.10 2004/08/29 07:47:12 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/postgresql/test.xml,v $
+  Desc: This file is the input specification for running the postgres stored 
+  procedure test suite for postgresql.
+-->
+<sqlunit>
+  <connection>
+    <driver>org.postgresql.Driver</driver>
+    <url>jdbc:postgresql://localhost:5432/sqlunitdb</url>
+    <user>defaultuser</user>
+    <password>defaultuser</password>
+  </connection>
+
+  <setup>
+    <sql><stmt>delete from timecard where 1=1</stmt></sql>
+    <sql><stmt>delete from employee where 1=1</stmt></sql>
+    <sql><stmt>delete from department where 1=1</stmt></sql>
+  </setup>
+
+  <test name="Adding department HR">
+    <sql>
+      <stmt>select AddDept(?)</stmt>
+      <param id="1" type="VARCHAR">Human Resources</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="adddept" type="INTEGER">${deptId_HR}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding department InfoTech using non-Callable form">
+    <sql>
+      <stmt>select AddDept(?)</stmt>
+      <param id="1" type="VARCHAR" inout="out">Information Technology</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="adddept" type="INTEGER">${deptId_IT}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding Employee John Doe to InfoTech">
+    <sql>
+      <stmt>select AddEmployee(?,?,?,?,?,?,?)</stmt>
+      <param id="1" type="VARCHAR">Information Technology</param>
+      <param id="2" type="VARCHAR">John Doe</param>
+      <param id="3" type="DATE">1900-01-01</param>
+      <param id="4" type="VARCHAR">123456789</param>
+      <param id="5" type="NUMERIC">40.00</param>
+      <param id="6" type="FLOAT">10.0</param>
+      <param id="7" type="FLOAT">20.0</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="addemployee" type="INTEGER">${empId_John}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding John Doe again">
+    <sql>
+      <stmt>select AddEmployee(?,?,?,?,?,?,?)</stmt>
+      <param id="1" type="VARCHAR">Information Technology</param>
+      <param id="2" type="VARCHAR">John Doe</param>
+      <param id="3" type="DATE">1900-01-01</param>
+      <param id="4" type="VARCHAR">123456789</param>
+      <param id="5" type="NUMERIC">40.00</param>
+      <param id="6" type="FLOAT">10.0</param>
+      <param id="7" type="FLOAT">20.0</param>
+    </sql>
+    <result>
+      <exception>
+        <code>0</code>
+        <message>ERROR:  Cannot insert a duplicate key into unique index ux2_employee</message>
+      </exception>
+    </result>
+  </test>
+  <test name="Adding Jane Doe to HR">
+    <sql>
+      <stmt>select AddEmployee(?,?,?,?,?,?,?)</stmt>
+      <param id="1" type="VARCHAR">Human Resources</param>
+      <param id="2" type="VARCHAR">Jane Doe</param>
+      <param id="3" type="DATE">1910-01-01</param>
+      <param id="4" type="VARCHAR">143456789</param>
+      <param id="5" type="NUMERIC">45.00</param>
+      <param id="6" type="FLOAT">10.0</param>
+      <param id="7" type="FLOAT">20.0</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="addemployee" type="INTEGER">${empId_Jane}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding Dick Tracy to InfoTech">
+    <sql>
+      <stmt>select AddEmployee(?,?,?,?,?,?,?)</stmt>
+      <param id="1" type="VARCHAR">Information Technology</param>
+      <param id="2" type="VARCHAR">Dick Tracy</param>
+      <param id="3" type="DATE">1920-01-01</param>
+      <param id="4" type="VARCHAR">144456789</param>
+      <param id="5" type="NUMERIC">50.00</param>
+      <param id="6" type="FLOAT">10.0</param>
+      <param id="7" type="FLOAT">20.0</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="addemployee" type="INTEGER">${empId_Dick}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Updating Hourly Rate for John">
+    <sql>
+      <stmt>select UpdateRate(?,?)</stmt>
+      <param id="1" type="VARCHAR">John Doe</param>
+      <param id="2" type="NUMERIC">55.00</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="updaterate" type="NUMERIC">40.00</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Looking up John Doe by name">
+    <sql>
+      <stmt>select * from GetEmployeeByName(?)</stmt>
+      <param id="1" type="VARCHAR">John Doe</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="emp_id" type="INTEGER">${empId_John}</col>
+          <col id="2" name="emp_name" type="VARCHAR">John Doe</col>
+          <col id="3" name="dept_name" type="VARCHAR">Information Technology</col>
+          <col id="4" name="emp_dob" type="DATE">1900-01-01</col>
+          <col id="5" name="emp_ssn" type="VARCHAR">123456789</col>
+          <col id="6" name="rate_per_hour" type="NUMERIC">55.00</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Looking up all employees in InfoTech">
+    <sql>
+      <stmt>select * from GetAllEmpForDept(?)</stmt>
+      <param id="1" type="VARCHAR">Information Technology</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">${deptId_IT}</col>
+          <col id="2" type="INTEGER">${empId_John}</col>
+          <col id="3" type="VARCHAR">John Doe</col>
+          <col id="4" type="DATE">1900-01-01</col>
+          <col id="5" type="VARCHAR">123456789</col>
+          <col id="6" type="NUMERIC">55.00</col>
+          <col id="7" type="OTHER">(10.0,20.0)</col>
+        </row>
+        <row id="2">
+          <col id="1" type="INTEGER">${deptId_IT}</col>
+          <col id="2" type="INTEGER">${empId_Dick}</col>
+          <col id="3" type="VARCHAR">Dick Tracy</col>
+          <col id="4" type="DATE">1920-01-01</col>
+          <col id="5" type="VARCHAR">144456789</col>
+          <col id="6" type="NUMERIC">50.00</col>
+          <col id="7" type="OTHER">(10.0,20.0)</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding timecard for John">
+    <sql>
+      <stmt>select AddTimecard(?,?,?,?)</stmt>
+      <param id="1" type="VARCHAR">John Doe</param>
+      <param id="2" type="DATE">2000-01-01</param>
+      <param id="3" type="VARCHAR">09:00:00</param>
+      <param id="4" type="VARCHAR">17:00:00</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="addtimecard" type="INTEGER">${empId_John}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding another timecard for John">
+    <sql>
+      <stmt>select AddTimecard(?,?,?,?)</stmt>
+      <param id="1" type="VARCHAR">John Doe</param>
+      <param id="2" type="DATE">2000-01-02</param>
+      <param id="3" type="VARCHAR">09:00:00</param>
+      <param id="4" type="VARCHAR">17:00:00</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="addtimecard" type="INTEGER">${empId_John}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding timecard for Dick">
+    <sql>
+      <stmt>select AddTimecard(?,?,?,?)</stmt>
+      <param id="1" type="VARCHAR">Dick Tracy</param>
+      <param id="2" type="DATE">2000-01-01</param>
+      <param id="3" type="VARCHAR">10:00:00</param>
+      <param id="4" type="VARCHAR">23:00:00</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="addtimecard" type="INTEGER">${empId_Jane}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Getting monthly report for InfoTech">
+    <sql>
+      <stmt>select * from GetMonthlyDeptReport(?,?,?)</stmt>
+      <param id="1" type="VARCHAR">Information Technology</param>
+      <param id="2" type="DATE">2000-01-01</param>
+      <param id="3" type="DATE">2000-02-01</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="VARCHAR">Information Technology</col>
+          <col id="2" type="VARCHAR">Dick Tracy</col>
+          <col id="3" type="INTEGER">13</col>
+          <col id="4" type="NUMERIC">50.00</col>
+          <col id="5" type="NUMERIC">650.00</col>
+        </row>
+        <row id="2">
+          <col id="1" type="VARCHAR">Information Technology</col>
+          <col id="2" type="VARCHAR">John Doe</col>
+          <col id="3" type="INTEGER">16</col>
+          <col id="4" type="NUMERIC">55.00</col>
+          <col id="5" type="NUMERIC">880.00</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing putting setup calls in prepare">
+    <prepare>
+      <sql><stmt>delete from department where 1=1</stmt></sql>
+    </prepare>
+    <sql>
+      <stmt>select AddDept(?)</stmt>
+      <param id="2" type="VARCHAR">Human Resources</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="adddept" type="INTEGER">${deptId_HR}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing foreach(start,stop,step)">
+    <prepare>
+      <sql><stmt>delete from foreachtest where 1=1</stmt></sql>
+      <foreach param="id" start="0" stop="10" step="1">
+        <sql><stmt>insert into foreachtest (id,name) values (${id},'name${id}')</stmt></sql>
+      </foreach>
+    </prepare>
+    <sql>
+      <stmt>select count(*) from foreachtest</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="BIGINT">11</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="testing foreach(values)">
+    <prepare>
+      <sql><stmt>delete from foreachtest where 1=1</stmt></sql>
+      <foreach param="id" values="1,3,5,7,9">
+        <sql><stmt>insert into foreachtest (id,name) values (${id},'name${id}')</stmt></sql>
+      </foreach>
+    </prepare>
+    <sql>
+      <stmt>select count(*) from foreachtest</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="BIGINT">5</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="testing foreach(start,count)">
+    <prepare>
+      <sql><stmt>delete from foreachtest where 1=1</stmt></sql>
+      <foreach param="id" start="5" count="5">
+        <sql><stmt>insert into foreachtest (id,name) values (${id},'name${id}')</stmt></sql>
+      </foreach>
+    </prepare>
+    <sql>
+      <stmt>select count(*) from foreachtest</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="BIGINT">5</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

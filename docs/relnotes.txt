@@ -1,0 +1,34 @@
+Release notes for SQLUnit version 5.0
+=====================================
+                                                                                
+Bugs fixed in this release
+--------------------------
+   - Added new mappings for SQL Server, contributed by Andrew Arch.
+   - Bugfix for jarfile-url handling, contributed by Brent Herbert. Allows
+     jarfile-url functionality to be used for Tools.
+   - Compiles cleanly under Java 1.5
+   - Added Ivan Ivanov's patch for multiple reporters. This allows multiple
+     reporters to be configured for a single SQLUnit test run.
+   - Added Paul King's patch for support for ant properties (any sqlunit
+     property which starts with ${ant.xxx}). This patch allows sqlunit 
+     to change ant properties and make it available to ant in a later
+     test.
+   - Applied patch to allow optional name attribute for sqlunit element,
+     contributed by Andreas Kutschera.
+   - Refactoring patches (to make it less unix specific) and library upgrades
+     contributed by Paul King.
+   - MySQL5 patch for stored procedure handling contributed by Lenggi.
+   - Fix for implicit symbol resolution problems with outparams reported by 
+     Sathi Chowdhury and chabatox. Fix provided by Sujit and corrected by
+     Chabatox.
+   - Applied patch to allow OUTPARAMs as nested UDTs, contributed by Douglas
+     Kvidera.
+                                                                                
+Changes in this release
+-----------------------
+                                                                                
+New Features in this release
+----------------------------
+                                                                                
+
+Todo:

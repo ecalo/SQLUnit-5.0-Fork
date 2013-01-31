@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>SQLUnit Project Home Page</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<style type="text/css">
+a:link {
+  color: #044CA5;
+  background: none;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #044CA5;
+  background: none;
+  text-decoration: underline;
+}
+
+A:hover {
+  color:#044CA5;
+  background: none;
+  text-decoration: none;
+}
+
+a:active {
+  color: #044CA5;
+  background: none;
+}
+
+.container {
+border: 1px solid gray;
+margin: 10px;
+margin-left: auto;
+margin-right: auto;
+padding: 10px;
+}
+
+.header {
+padding: 5px;
+margin-bottom: 0;
+background-color: #000000;
+}
+
+.content {
+padding: 5px;
+background-color: #EBEBEB;
+margin-top: 5px;
+margin-left: 205px;
+font-family: "Arial",sans-serif;
+font-size: 100%;
+text-indent: 10px;
+}
+
+.nav {
+float: left;
+width: 200px;
+padding: 0;
+margin-top: 5px;
+background-color: #FFFFFF;
+}
+
+.logo {
+float: left;
+width: 210px;
+height: 62px;
+padding: 0;
+margin-top: 15px;
+background-color: #FFFFFF;
+}
+
+.footer {
+clear: both;
+padding: 5px;
+margin-top: 5px;
+background-color: #000000;
+color: #DDEDFD;
+font-family: "Arial",sans-serif;
+font-size: 75%;
+}
+
+A.footerl:link {
+  COLOR: #DDEDFD; TEXT-DECORATION: underline
+}
+A.footerl:visited {
+  COLOR: #DDEDFD; TEXT-DECORATION: underline
+}
+A.footerl:hover {
+  COLOR: #DDEDFD; TEXT-DECORATION: none
+}
+A.footerl:active {
+  COLOR: #DDEDFD; TEXT-DECORATION: underline
+  }
+
+h2 { color: #DDEDFD; text-align: right; padding: 0; margin: 0; font-family: "Arial",sans-serif; }
+h3 { color: #DDEDFD; text-align: right; padding: 0; margin: 0; font-family: "Arial",sans-serif; }
+h4 { color: #000000; padding: 0; margin: 0; font-family: "Arial",sans-serif; text-indent: 0; }
+
+.square { background-color: #EBEBEB; width: 10px; }
+
+.sectionLinks{
+margin-right: 0;
+padding: 0px;
+font-family: "Arial", sans-serif;
+text-align: left;
+letter-spacing: 3px;
+background-color: #EBEBEB;
+}
+
+.sectionLinks a:link, .sectionLinks a:visited {
+display: block;
+text-decoration: none;
+background-color: #EBEBEB;
+border-bottom: 1px solid #000000;
+font-weight: bold;
+padding: 3px 4px 3px 4px;
+color: #A39F9F;
+font-size: 75%;
+}
+
+.sectionLinks a:hover{
+background-color: #DADADA;
+font-weight: bold;
+text-decoration: none;
+color: #044CA5;
+font-size: 75%;
+text-align: left;
+}
+
+.sectionLinks a {position: relative;}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header"><h2><font color="#1E90FF">SQL</font><font color="#7FFF00">Unit</font></h2><h3>Unit Testing Stored Procedures</h3></div>
+
+<div class="nav">
+  <div class="sectionLinks">
+    <a href="book1.html">Users Guide</a>
+    <a href="http://sourceforge.net/docman/?group_id=77832">FAQ</a>
+    <a href="javadoc/index.html">Javadocs</a>
+    <a href="http://sqlunit.cvs.sourceforge.net/cgi-bin/viewcvs.cgi/sqlunit">CVS</a>
+    <a href="http://sourceforge.net/forum/?group_id=77832">Forums</a>
+    <a href="http://sourceforge.net/tracker/?group_id=77832">Bug Tracker</a>
+    <a href="http://sourceforge.net/project/showfiles.php?group_id=77832">Downloads</a>
+<!--
+    <a href="sqlunit-team.html">Meet the team</a>
+-->
+    <a href="http://sourceforge.net/projects/sqlunit/">Project Page</a>
+  </div>
+  <div class="logo">
+    <h4>Hosted by</h4><br />
+    <a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=77832&type=5" width="190" height="56" border="0" alt="Sourceforge.net Logo" /></a>
+  </div>
+</div>
+
+<div class="content">
+<h4>Abstract</h4><br />
+SQLUnit is a regression and unit testing harness for testing database stored procedures. An SQLUnit test suite would be written as an XML file. The SQLUnit harness, which is written in Java, uses the JUnit unit testing framework to convert the XML test specifications to JDBC calls and compare the results generated from the calls with the specified results.<p />
+Stored procedures are often used to provide an object abstraction to the underlying relational data store. The object abstractions are consumed by Java middleware programs. In shops where this is the case, Java programmers often use the popular JUnit testing framework to unit test their code. Using SQLUnit to unit test the database stored procedures thus becomes a natural extension of the unit testing process, and provides unit testing coverage for a layer that is often neglected in this respect.<p />
+Based on the realization that the stored procedure author need not be the same person who writes the Java code, and may not even know Java or JUnit, SQLUnit provides an XML language to write test suites.  Even for those stored procedure authors who can write JUnit tests, the repetitive nature of JDBC programming would, over time, encourage the author to refactor the common parts of the tests into utility classes. SQLUnit already provides this functionality, except it goes one step further and abstracts the test specification out of Java into XML.<p />
+The XML itself is fairly small and easy to learn for anybody and should be instantly intuitive to a person who is already familiar with JUnit.<p />
+Further, since SQLUnit is written in Java and uses JDBC to communicate with the database, it should be possible, at least in theory, to write unit tests for stored procedures for any database that provides a JDBC driver. In reality, some porting may be needed for each new database, based on proprietary database vendor-specific extensions made over the SQL standard and the subset of the JDBC API implemented by the supplied JDBC driver. However, the porting activity should be relatively painless.<p />
+<br></br>
+
+<h4>News/Release Notes</h4><br />
+<iframe name="iframe" width="100%" height="300" src="relnotes.html" frameborder="0">
+<b>November 04, 2004</b><br />
+<b>Version 4.2 released. </b>This release supports an improved syntax for SQLUnit include files, a feature requested by Satish Chitnis. It also contains a fix for a bug when programatically supplying a Connection to SQLUnit with the Canoo Web Test Reporter plugin, pointed out and fixed by Jan Schroeder. It also adds type mappings for NUMERIC and SMALLINT for the JConnect and jTDS Sybase JDBC drivers, contributed by Mark Niggemann.<br />
+</iframe>
+<br /><br />
+
+<div class="footer">Design Contributed By <a href="http://www.wy-media.co.uk" class="footerl">WY Media</a> (OSWD)</div>
+</div>
+</body>
+</html>

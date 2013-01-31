@@ -1,0 +1,160 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: connectiontests.xml,v 1.4 2006/04/30 22:25:56 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/connectiontests.xml,v $
+  Desc: Input specifications for testing connections
+-->
+<sqlunit>
+  <!-- basic JDBC connection -->
+  <connection connection-id="1">
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+  <!-- basic JNDI connection -->
+  <connection connection-id="2">
+    <datasource>jdbc/mockDSN</datasource>
+    <jndi>
+      <arg name="java.naming.factory.initial"
+          value="net.sourceforge.sqlunit.test.mock.MockInitialContextFactory" />
+    </jndi>
+  </connection>
+  <!-- JDBC connection, properties embedded in URL. This form can
+       also be used to specify additional properties in the URL -->
+  <connection connection-id="3">
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase;user=none;password=none</url>
+    <user />
+    <password />
+  </connection>
+  <!-- JDBC connection using local JAR file -->
+  <connection connection-id="4">
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+    <jarfile-url>file:build/,file:lib/mockrunner.jar,file:lib/log4j-1.2.13.jar,file:lib/commons-lang-2.1.jar</jarfile-url>
+  </connection>
+  <!-- external JDBC connection, load as file -->
+  <connection connection-id="5" 
+      extern="etc/external-jdbc-connection.properties" />
+  <!-- external JNDI connection, load as file -->
+  <connection connection-id="6"
+      extern="etc/external-jndi-connection.properties" />
+  <!-- external JDBC connection, load as resource -->
+  <connection connection-id="7"
+      extern="external-jdbc-connection" />
+  <!-- external JNDI connection, load as resource -->
+  <connection connection-id="8"
+      extern="external-jndi-connection" />
+
+  <test name="Testing basic JDBC connection">
+    <call connection-id="1">
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing basic JNDI connection">
+    <call connection-id="2">
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing JDBC w/embedded props connection">
+    <call connection-id="2">
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing JDBC w/local jar connection"
+      failure-message="Run ant install to generate JAR and move to /tmp">
+    <call connection-id="4">
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing extern JDBC as file connection">
+    <call connection-id="2">
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing extern JNDI as file connection">
+    <call connection-id="2">
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing extern JDBC as resource connection">
+    <call connection-id="2">
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing extern JNDI as resource connection">
+    <call connection-id="2">
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

@@ -1,0 +1,127 @@
+/*
+ * $Id: SymbolParser.jj,v 1.1 2005/01/20 01:36:15 spal Exp $
+ * $Source: /cvsroot/sqlunit/sqlunit/src/net/sourceforge/sqlunit/parsers/SymbolParser.jj,v $
+ * SQLUnit - a test harness for unit testing database stored procedures.
+ * Copyright (C) 2003  The SQLUnit Team
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+options {
+    IGNORE_CASE = false;
+    STATIC = false;
+    DEBUG_PARSER = false;
+    DEBUG_TOKEN_MANAGER = false;
+    DEBUG_LOOKAHEAD = false;
+}
+
+PARSER_BEGIN(SymbolParser)
+
+package net.sourceforge.sqlunit.parsers;
+
+import java.io.StringReader;
+import java.util.Map;
+import java.util.HashMap;
+
+/**
+ * Contains specifications and grammar for parsing Strings and replacing
+ * embedded ant-style variables with values from the SymbolTable.
+ * @author Sujit Pal (sujit.pal@cnet.com)
+ * @version $Revision: 1.1 $
+ */
+public class SymbolParser {
+
+    private static StringBuffer resbuf;
+    private static Map symbolMap;
+    private static boolean partialOk = false;
+
+    /**
+     * This is the method that will be called from the client.
+     * @param str the String with embedded ant-style variables.
+     * @param syms a Map of symbols in the SymbolTable.
+     * @param partialOk if true, exception will not be thrown if 
+     * variable is not found, it is assumed that this will be passed
+     * in later.
+     * @throws ParseException if there was a problem parsing the String,
+     * or if a variable could not be found in the SymbolTable.
+     * @return a String with the variables replaced by their values.
+     */
+    public static String parse(String str, Map syms, boolean partialOk)
+            throws ParseException {
+        resbuf = new StringBuffer();
+        StringReader reader = new StringReader(str);
+        SymbolParser parser = new SymbolParser(reader);
+        SymbolParser.symbolMap = syms;
+        SymbolParser.partialOk = partialOk;
+        parser.Substitute();
+        return resbuf.toString();
+    }
+}
+
+PARSER_END(SymbolParser)
+
+<DEFAULT> TOKEN:
+{
+    <START_VAR: ("${")>: IN_VAR
+  | <CODE_CHAR: ~[] >
+}
+
+<IN_VAR> TOKEN:
+{
+    <END_VAR: "}">: DEFAULT
+  | <VAR_CHAR: ~[] >
+}
+
+void Substitute():
+{
+    Token t;
+    boolean inVar = false;
+    StringBuffer varbuf = null;
+}
+{
+    (
+      <CODE_CHAR>
+      {
+          t = getToken(0);
+          resbuf.append(t.image);
+      }
+    | <START_VAR>
+      {
+          inVar = true;
+          varbuf = new StringBuffer();
+      }
+    | <END_VAR>
+      {
+          String var = varbuf.toString();
+          String varValue = 
+              (String) SymbolParser.symbolMap.get("${" + var + "}");
+          if (varValue == null) {
+              if (SymbolParser.partialOk) {
+                  varValue = "${" + var + "}";
+              } else {
+                  throw new ParseException(
+                      "Variable ${" + var + "} not defined in SymbolTable");
+              }
+          }
+          resbuf.append(varValue);
+          inVar = false;
+      }
+    | <VAR_CHAR>
+      {
+          t = getToken(0);
+          varbuf.append(t.image);
+      }
+    )*
+    (<EOF>)?
+}

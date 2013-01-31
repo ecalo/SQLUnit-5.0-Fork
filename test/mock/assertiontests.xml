@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: assertiontests.xml,v 1.11 2005/06/07 01:13:39 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/assertiontests.xml,v $
+  Desc: Input specification for testing the assertions feature.
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <!-- basic tests of SQLUnit functionality -->
+
+  <test name="Testing a positive assertion" assert="equal">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing a negative assertion" assert="not-equal">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <batchtest name="Testing positive batchtest assertion" assert="equal">
+    <batchcall>
+      <stmt>updateCount?</stmt>
+      <paramset id="1">
+        <param id="1" type="INTEGER">1</param>
+      </paramset>
+      <paramset id="1">
+        <param id="1" type="INTEGER">2</param>
+      </paramset>
+    </batchcall>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <batchtest name="Testing negative batchtest assertion" assert="not-equal">
+    <batchcall>
+      <stmt>updateCount?</stmt>
+      <paramset id="1">
+        <param id="1" type="INTEGER">1</param>
+      </paramset>
+      <paramset id="1">
+        <param id="1" type="INTEGER">2</param>
+      </paramset>
+    </batchcall>
+    <batchresult>
+      <updatecount>2</updatecount>
+      <updatecount>2</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <test name="Testing an assertion chain" assert="outparams-equal,updatecounts-equal,resultsets-equal">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing fail-with-failure"
+      failure-message="Assertion &quot;resultsets-equal&quot; failed (3(INTEGER) != 1(INTEGER) at result[1,1,1])" assert="fail-with-failure">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">3</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing typeless matching" assert="resultset-values-equal">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="SMALLINT">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing type-only matching" assert="resultset-types-equal">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1001</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Simple SQL call w/o result" assert="resultsets-equal">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result />
+  </test>
+
+  <!-- the assert=none deprecates workaround described in previous example -->
+  <test name="Simple SQL call, assert none" assert="none">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result />
+  </test>
+
+  <!-- I dont care what the result is, as long as its not an exception -->
+  <!-- <test name="Catching SQLException" assert="not-exception"> -->
+  <test name="Catching SQLException" assert="none">
+    <call>
+      <stmt>exceptionResult</stmt>
+    </call>
+    <result />
+  </test>
+
+  <teardown />
+
+</sqlunit>

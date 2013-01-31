@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd" [
+    <!ENTITY jdbc-url SYSTEM "test/mssqlserver/jdbc-url.txt">
+]>
+<!-- $Id: TestSQLUnit_TestMultipleOutputParams.xml,v 1.2 2005/06/07 01:13:40 spal Exp $ -->
+<!-- $Source: /cvsroot/sqlunit/sqlunit/test/mssqlserver/TestSQLUnit_TestMultipleOutputParams.xml,v $ -->
+<sqlunit>
+    <!-- ********************************************************************************     //-->
+    <!--                                                                                   //-->
+    <!-- Test Case:    TestSQLUnit_TestMultipleOutputParams                        //-->
+    <!--                                                                                   //-->
+    <!-- Purpose:        This test will perform usage tests of multiple output             //-->
+    <!--                    parameters within SQLUnit.                                    //-->
+    <!--                                                                                   //-->
+    <!--    Issue:                                                                                //-->
+    <!--        https://sourceforge.net/forum/message.php?msg_id=3171389                //-->
+    <!--                                                                                            //-->
+    <!--    Fixed in:    SQLUnit 4.9                                                            //-->
+    <!-- ********************************************************************************     //-->
+    <!-- *************************************************************************     //-->
+    <!-- *****************************    **    //-->
+    <!--  Connection set-up information    //-->
+    <!-- *****************************    **    //-->
+    <connection server-name="microsoft_sql_server">
+        <driver>com.microsoft.jdbc.sqlserver.SQLServerDriver</driver>
+        &jdbc-url;
+        <user>sqlunit</user>
+        <password>sqlunit</password>
+    </connection>
+    <test name="TestSQLUnit_TestMultipleOutputParams_1: Test multiple output-only parameters; set output params to NULL ">
+        <call>
+            <stmt> 
+                {? = call SQLUnit_TestMultipleOutputParams(?,?,?,?)} 
+            </stmt>
+            <param id="1" type="INTEGER" inout="out" is-null="false" name="ReturnValue">${retval}</param>
+            <param id="2" type="INTEGER" inout="in" is-null="false" name="param1">5</param>
+            <param id="3" type="INTEGER" inout="in" is-null="false" name="param2">10</param>
+            <param id="4" type="INTEGER" inout="out" is-null="true" name="param3">NULL</param>
+            <param id="5" type="INTEGER" inout="out" is-null="true" name="param4">NULL</param>
+        </call>
+        <result>
+            <outparam id="1" type="INTEGER">0</outparam>
+            <outparam id="4" type="INTEGER">10</outparam>
+            <outparam id="5" type="INTEGER">20</outparam>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestMultipleOutputParams_2: Test multiple output-only parameters; set output params to non-NULL value">
+        <call>
+            <stmt> 
+                {? = call SQLUnit_TestMultipleOutputParams(?,?,?,?)} 
+            </stmt>
+            <param id="1" type="INTEGER" inout="out" is-null="false" name="ReturnValue">${retval}</param>
+            <param id="2" type="INTEGER" inout="in" is-null="false" name="param1">5</param>
+            <param id="3" type="INTEGER" inout="in" is-null="false" name="param2">10</param>
+            <param id="4" type="INTEGER" inout="out" is-null="false" name="param3">0</param>
+            <param id="5" type="INTEGER" inout="out" is-null="false" name="param4">0</param>
+        </call>
+        <result>
+            <outparam id="1" type="INTEGER">0</outparam>
+            <outparam id="4" type="INTEGER">10</outparam>
+            <outparam id="5" type="INTEGER">20</outparam>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestMultipleOutputParams_3: Test multiple inout parameters; set output params to NULL value">
+        <call>
+            <stmt> 
+                {? = call SQLUnit_TestMultipleOutputParams(?,?,?,?)} 
+            </stmt>
+            <param id="1" type="INTEGER" inout="out" is-null="false" name="ReturnValue">${retval}</param>
+            <param id="2" type="INTEGER" inout="in" is-null="false" name="param1">5</param>
+            <param id="3" type="INTEGER" inout="in" is-null="false" name="param2">10</param>
+            <param id="4" type="INTEGER" inout="inout" is-null="true" name="param3">NULL</param>
+            <param id="5" type="INTEGER" inout="inout" is-null="true" name="param4">NULL</param>
+        </call>
+        <result>
+            <outparam id="1" type="INTEGER">0</outparam>
+            <outparam id="4" type="INTEGER">10</outparam>
+            <outparam id="5" type="INTEGER">20</outparam>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestMultipleOutputParams_4: Test multiple inout parameters; set output params to non-NULL value">
+        <call>
+            <stmt> 
+                {? = call SQLUnit_TestMultipleOutputParams(?,?,?,?)} 
+            </stmt>
+            <param id="1" type="INTEGER" inout="out" is-null="false" name="ReturnValue">${retval}</param>
+            <param id="2" type="INTEGER" inout="in" is-null="false" name="param1">5</param>
+            <param id="3" type="INTEGER" inout="in" is-null="false" name="param2">10</param>
+            <param id="4" type="INTEGER" inout="inout" is-null="false" name="param3">0</param>
+            <param id="5" type="INTEGER" inout="inout" is-null="false" name="param4">0</param>
+        </call>
+        <result>
+            <outparam id="1" type="INTEGER">0</outparam>
+            <outparam id="4" type="INTEGER">10</outparam>
+            <outparam id="5" type="INTEGER">20</outparam>
+        </result>
+    </test>
+    <teardown/>
+</sqlunit>

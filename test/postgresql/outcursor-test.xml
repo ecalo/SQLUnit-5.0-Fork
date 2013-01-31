@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: outcursor-test.xml,v 1.2 2004/06/25 23:31:00 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/postgresql/outcursor-test.xml,v $
+  Desc: This file is the input specification for running the postgres stored 
+  procedure test suite for postgresql.
+-->
+<sqlunit>
+  <connection>
+    <driver>org.postgresql.Driver</driver>
+    <url>jdbc:postgresql://localhost:5432/sqlunitdb</url>
+    <user>defaultuser</user>
+    <password>defaultuser</password>
+  </connection>
+
+  <setup>
+    <sql><stmt>delete from department where 1=1</stmt></sql>
+  </setup>
+
+  <test name="Testing a cursor in outparam in result">
+    <sql>
+      <stmt>select AddDept(?)</stmt>
+      <param id="2" type="VARCHAR">Human Resources</param>
+    </sql>
+    <result>
+      <outparam id="1" type="CURSOR">
+        <resultset id="1">
+          <row id="1">
+            <col id="1" name="adddept" type="INTEGER">${deptId_HR}</col>
+          </row>
+        </resultset>
+      </outparam>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="adddept" type="INTEGER">${deptId_HR}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

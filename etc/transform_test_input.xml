@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- $Id: transform_test_input.xml,v 1.1 2005/05/21 19:38:37 spal Exp $ -->
+<!-- $Source: /cvsroot/sqlunit/sqlunit/etc/transform_test_input.xml,v $ -->
+<!-- Test input to convert to SQLUnit XML format -->
+<SqlCode> 
+   <SQL_CODE>ADDCVD_LIST_001</SQL_CODE> 
+   <SQL_STMT>SELECT nim_adcvd_mftr.case_ref_no , 
+     nim_adcvd_mftr.actual_case_no , 
+     nim_adcvd_mftr.case_no , 
+     nim_adcvd_mftr.shipper_id , 
+     nim_adcvd_mftr.manuf_name , 
+     nim_adcvd_mftr.mid , 
+     nim_adcvd_mftr.deposit_rate1 , 
+     nim_adcvd_mftr.deposit_rate2 , 
+     nim_adcvd_mftr.deposit_rate3 , 
+     nim_adcvd_mftr.eff_entry_date , 
+     nim_adcvd_mftr.expiry_date , 
+     nim_adcvd_mftr.eff_export_date 
+   FROM nim_adcvd_mftr 
+   WHERE NIM_ADCVD_MFTR.CASE_STATUS NOT IN ('R','E','T') </SQL_STMT> 
+   <MAIN_TABLE>nim_adcvd_mftr</MAIN_TABLE> 
+   <UPDATEABLE_COLUMNS/> 
+   <KEY_COLUMNS>nim_adcvd_mftr.case_ref_no,nim_adcvd_mftr.actual_case_no,nim_adcvd_mftr.case_no</KEY_COLUMNS> 
+   <TIMESTAMP_COLUMN/> 
+</SqlCode> 

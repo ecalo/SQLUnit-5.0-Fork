@@ -1,0 +1,12 @@
+net.sourceforge.sqlunit
+net.sourceforge.sqlunit.ant
+net.sourceforge.sqlunit.beans
+net.sourceforge.sqlunit.handlers
+net.sourceforge.sqlunit.matchers
+net.sourceforge.sqlunit.parsers
+net.sourceforge.sqlunit.reporters
+net.sourceforge.sqlunit.test
+net.sourceforge.sqlunit.test.mock
+net.sourceforge.sqlunit.tools
+net.sourceforge.sqlunit.types
+net.sourceforge.sqlunit.utils

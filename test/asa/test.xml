@@ -1,0 +1,289 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: test.xml,v 1.3 2005/01/27 20:51:39 dfishburn Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/asa/test.xml,v $
+  $Revision: 1.3 $
+  Desc: This file is the input specification for running the ASA
+  stored procedure test suite for 
+  Sybase Adaptive Server Anywhere 9.0.1.
+-->
+<sqlunit>
+  <connection reconnect-on-failure="on">
+
+    <!-- This uses the iAnywhere JDBC Driver.
+        You must be using ASA 9.0.1.1883 or higher for this to work.
+        You can verify the version you have by running:
+            dbeng9 -v
+        The %ASANY9%\java\jodbc.jar must be in your classpath.
+    -->
+    <driver>ianywhere.ml.jdbcodbc.IDriver</driver>
+    <url>jdbc:odbc:driver=Adaptive Server Anywhere 9.0</url>
+
+    <!-- This uses the standard Sun JDBC ODBC bridge to access ASA.
+        You must create a new ODBC DSN for your database, then update
+        the URL line by replacing:
+            replace_with_your_dsn 
+        with the DSN you just created.
+    <driver>sun.jdbc.odbc.JdbcOdbcDriver</driver>
+    <url>jdbc:odbc:cons</url>
+    -->
+
+    <!-- This uses the Sybase jConnect driver.
+        The description of the resultset is different when using
+        this driver over the iAnywhere JDBC driver and the 
+        Sun JDBC-ODBC bridge.
+    <driver>com.sybase.jdbc2.jdbc.SybDriver</driver>
+    <url>jdbc:sybase:Tds:localhost:2638</url>
+    -->
+
+    <user>DBA</user>
+    <password>SQL</password>
+  </connection>
+
+  <setup>
+    <include file="test/asa/schema.sql" />
+    <include file="test/asa/add_dept.sql" />
+    <include file="test/asa/add_employee.sql" />
+    <include file="test/asa/add_timecard.sql" />
+    <include file="test/asa/get_depts.sql" />
+    <include file="test/asa/get_emp_by_name.sql" />
+    <include file="test/asa/get_emp_in_dept.sql" />
+    <include file="test/asa/get_mthly_dept_rpt.sql" />
+    <include file="test/asa/upd_rate.sql" />
+  </setup>
+
+  <test name="Adding department HR">
+    <call>
+      <stmt>{call add_dept(?)}</stmt>
+      <param id="1" type="VARCHAR">Human Resources</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">${deptId_HR}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding department IT">
+    <call>
+      <stmt>{call add_dept(?)}</stmt>
+      <param id="1" type="VARCHAR">Information Technology</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">${deptId_IT}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding employee John Doe to IT">
+    <call>
+      <stmt>{call add_employee(?,?,?,?,?)}</stmt>
+      <param id="1" type="VARCHAR">Information Technology</param>
+      <param id="2" type="VARCHAR">John Doe</param>
+      <param id="3" type="DATE">1970-11-29</param>
+      <param id="4" type="VARCHAR">123456789</param>
+      <param id="5" type="NUMERIC">40.00</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">${empId_John}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding John Doe again">
+    <call>
+      <stmt>{call add_employee(?,?,?,?,?)}</stmt>
+      <param id="1" type="VARCHAR">Information Technology</param>
+      <param id="2" type="VARCHAR">John Doe</param>
+      <param id="3" type="DATE">1970-11-29</param>
+      <param id="4" type="VARCHAR">123456789</param>
+      <param id="5" type="NUMERIC">40.00</param>
+    </call>
+    <result>
+      <exception>
+        <code>-20746</code>
+        <message>[Sybase][ODBC Driver][Adaptive Server Anywhere]RAISERROR executed:  add_employee: Employee already exists
+        </message>
+      </exception>
+    </result>
+  </test>
+  <test name="Adding Jane Doe to HR">
+    <call>
+      <stmt>{call add_employee(?,?,?,?,?)}</stmt>
+      <param id="1" type="VARCHAR">Human Resources</param>
+      <param id="2" type="VARCHAR">Jane Doe</param>
+      <param id="3" type="DATE">1980-12-13</param>
+      <param id="4" type="VARCHAR">234567890</param>
+      <param id="5" type="NUMERIC">45.00</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">${empId_Jane}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding Dick Tracy to IT">
+    <call>
+      <stmt>{call add_employee(?,?,?,?,?)}</stmt>
+      <param id="1" type="VARCHAR">Information Technology</param>
+      <param id="2" type="VARCHAR">Dick Tracy</param>
+      <param id="3" type="DATE">1920-05-24</param>
+      <param id="4" type="VARCHAR">345678901</param>
+      <param id="5" type="NUMERIC">50.00</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">${empId_Dick}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Updating Hourly Rate for John">
+    <call>
+      <stmt>{call upd_rate(?,?)}</stmt>
+      <param id="1" type="VARCHAR">John Doe</param>
+      <param id="2" type="NUMERIC">55.00</param>
+    </call>
+    <result>
+    </result>
+  </test>
+  <test name="Looking up John Doe by name">
+    <call>
+      <stmt>{call get_emp_by_name(?)}</stmt>
+      <param id="1" type="VARCHAR">John Doe</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">${empId_John}</col>
+          <col id="2" type="VARCHAR">John Doe</col>
+          <col id="3" type="VARCHAR">Information Technology</col>
+          <col id="4" type="DATE">1970-11-29</col>
+          <col id="5" type="VARCHAR">123456789</col>
+          <col id="6" type="NUMERIC">55.00</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Looking up all employees in IT">
+    <call>
+      <stmt>{call get_emp_in_dept(?)}</stmt>
+      <param id="1" type="VARCHAR">Information Technology</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">${deptId_IT}</col>
+          <col id="2" type="INTEGER">${empId_John}</col>
+          <col id="3" type="VARCHAR">John Doe</col>
+          <col id="4" type="DATE">1970-11-29</col>
+          <col id="5" type="VARCHAR">123456789</col>
+          <col id="6" type="NUMERIC">55.00</col>
+        </row>
+        <row id="2">
+          <col id="1" type="INTEGER">${deptId_IT}</col>
+          <col id="2" type="INTEGER">${empId_Dick}</col>
+          <col id="3" type="VARCHAR">Dick Tracy</col>
+          <col id="4" type="DATE">1920-05-24</col>
+          <col id="5" type="VARCHAR">345678901</col>
+          <col id="6" type="NUMERIC">50.00</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding timecard for John" assert="resultset-types-equal">
+    <!-- Use  assert="resultset-types-equal"  since we are not interested
+         in the actual value being returned, only that it is an integer -->
+    <call>
+      <stmt>{call add_timecard(?,?,?)}</stmt>
+      <param id="1" type="VARCHAR">John Doe</param>
+      <param id="2" type="DATE">2004-06-16</param>
+      <param id="3" type="INTEGER">8</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding another timecard for John" assert="resultset-types-equal">
+    <!-- Use  assert="resultset-types-equal"  since we are not interested
+         in the actual value being returned, only that it is an integer -->
+    <call>
+      <stmt>{call add_timecard(?,?,?)}</stmt>
+      <param id="1" type="VARCHAR">John Doe</param>
+      <param id="2" type="DATE">2004-06-17</param>
+      <param id="3" type="INTEGER">8</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding timecard for Dick" assert="resultset-types-equal">
+    <!-- Use  assert="resultset-types-equal"  since we are not interested
+         in the actual value being returned, only that it is an integer -->
+    <call>
+      <stmt>{call add_timecard(?,?,?)}</stmt>
+      <param id="1" type="VARCHAR">Dick Tracy</param>
+      <param id="2" type="DATE">2004-06-17</param>
+      <param id="3" type="INTEGER">10</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">3</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Getting monthly report for IT">
+    <call>
+      <stmt>{call get_mthly_dept_rpt(?,?,?)}</stmt>
+      <param id="1" type="VARCHAR">Information Technology</param>
+      <param id="2" type="DATE">2004-06-01</param>
+      <param id="3" type="DATE">2004-07-01</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="VARCHAR">Information Technology</col>
+          <col id="2" type="DATE">2004-06-01</col>
+          <col id="3" type="DATE">2004-07-01</col>
+          <col id="4" type="INTEGER">${empId_John}</col>
+          <col id="5" type="VARCHAR">John Doe</col>
+          <col id="6" type="INTEGER">16</col>
+          <col id="7" type="NUMERIC">55.00</col>
+          <col id="8" type="NUMERIC">880.00</col>
+        </row>
+        <row id="2">
+          <col id="1" type="VARCHAR">Information Technology</col>
+          <col id="2" type="DATE">2004-06-01</col>
+          <col id="3" type="DATE">2004-07-01</col>
+          <col id="4" type="INTEGER">${empId_Dick}</col>
+          <col id="5" type="VARCHAR">Dick Tracy</col>
+          <col id="6" type="INTEGER">10</col>
+          <col id="7" type="NUMERIC">50.00</col>
+          <col id="8" type="NUMERIC">500.00</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

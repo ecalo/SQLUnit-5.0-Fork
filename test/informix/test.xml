@@ -1,0 +1,261 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: test.xml,v 1.2 2004/06/25 23:30:59 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/informix/test.xml,v $
+  Desc: This file is the input specification for running the informix
+  stored procedure test suite for Informix SE 7.2
+-->
+<sqlunit>
+  <connection>
+    <driver>com.informix.jdbc.IfxDriver</driver>
+    <url>jdbc:informix-sqli://localhost:1001//home/informix/data/demodb:INFORMIXSERVER=avalanche_soc;user=defaultuser;password=defaultus3r</url>
+    <user />
+    <password />
+  </connection>
+
+  <setup>
+  </setup>
+
+  <test name="Adding department HR">
+    <call>
+      <stmt>{call add_dept(?)}</stmt>
+      <param id="1" type="CHAR">Human Resources</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+          <col id="2" type="INTEGER">${deptId_HR}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding department IT">
+    <call>
+      <stmt>{call add_dept(?)}</stmt>
+      <param id="1" type="CHAR">Information Technology</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+          <col id="2" type="INTEGER">${deptId_IT}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding employee John Doe to IT">
+    <call>
+      <stmt>{call add_employee(?,?,?,?,?)}</stmt>
+      <param id="1" type="CHAR">Information Technology</param>
+      <param id="2" type="CHAR">John Doe</param>
+      <param id="3" type="DATE">01/01/1900</param>
+      <param id="4" type="CHAR">123456789</param>
+      <param id="5" type="NUMERIC">40.00</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+          <col id="2" type="INTEGER">${empId_John}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding John Doe again">
+    <call>
+      <stmt>{call add_employee(?,?,?,?,?)}</stmt>
+      <param id="1" type="CHAR">Information Technology</param>
+      <param id="2" type="CHAR">John Doe</param>
+      <param id="3" type="DATE">01/01/1900</param>
+      <param id="4" type="CHAR">123456789</param>
+      <param id="5" type="NUMERIC">40.00</param>
+    </call>
+    <result>
+      <exception>
+        <code>-746</code>
+        <message>add_employee: Employee already exists</message>
+      </exception>
+    </result>
+  </test>
+  <test name="Adding Jane Doe to HR">
+    <call>
+      <stmt>{call add_employee(?,?,?,?,?)}</stmt>
+      <param id="1" type="CHAR">Human Resources</param>
+      <param id="2" type="CHAR">Jane Doe</param>
+      <param id="3" type="DATE">01/01/1900</param>
+      <param id="4" type="CHAR">234567890</param>
+      <param id="5" type="NUMERIC">45.00</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+          <col id="2" type="INTEGER">${empId_Jane}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding Dick Tracy to IT">
+    <call>
+      <stmt>{call add_employee(?,?,?,?,?)}</stmt>
+      <param id="1" type="CHAR">Information Technology</param>
+      <param id="2" type="CHAR">Dick Tracy</param>
+      <param id="3" type="DATE">01/01/1920</param>
+      <param id="4" type="CHAR">345678901</param>
+      <param id="5" type="NUMERIC">50.00</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+          <col id="2" type="INTEGER">${empId_Dick}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Updating Hourly Rate for John">
+    <call>
+      <stmt>{call upd_rate(?,?)}</stmt>
+      <param id="1" type="CHAR">John Doe</param>
+      <param id="2" type="NUMERIC">55.00</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+          <col id="2" type="NUMERIC">40.00</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Looking up John Doe by name">
+    <call>
+      <stmt>{call get_emp_by_name(?)}</stmt>
+      <param id="1" type="CHAR">John Doe</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+          <col id="2" type="INTEGER">${empId_John}</col>
+          <col id="3" type="CHAR">John Doe</col>
+          <col id="4" type="CHAR">Information Technology</col>
+          <col id="5" type="DATE">01/01/1900</col>
+          <col id="6" type="CHAR">123456789</col>
+          <col id="7" type="NUMERIC">55.00</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Looking up all employees in IT">
+    <call>
+      <stmt>{call get_emp_in_dept(?)}</stmt>
+      <param id="1" type="CHAR">Information Technology</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">${deptId_IT}</col>
+          <col id="2" type="INTEGER">${empId_John}</col>
+          <col id="3" type="CHAR">John Doe</col>
+          <col id="4" type="DATE">01/01/1900</col>
+          <col id="5" type="CHAR">123456789</col>
+          <col id="6" type="NUMERIC">55.00</col>
+        </row>
+        <row id="2">
+          <col id="1" type="INTEGER">${deptId_IT}</col>
+          <col id="2" type="INTEGER">${empId_Dick}</col>
+          <col id="3" type="CHAR">Dick Tracy</col>
+          <col id="4" type="DATE">01/01/1920</col>
+          <col id="5" type="CHAR">345678901</col>
+          <col id="6" type="NUMERIC">50.00</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding timecard for John">
+    <call>
+      <stmt>{call add_timecard(?,?,?)}</stmt>
+      <param id="1" type="CHAR">John Doe</param>
+      <param id="2" type="DATE">01/01/2000</param>
+      <param id="3" type="INTEGER">8</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+          <col id="2" type="INTEGER">${tcId_John}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding another timecard for John">
+    <call>
+      <stmt>{call add_timecard(?,?,?)}</stmt>
+      <param id="1" type="CHAR">John Doe</param>
+      <param id="2" type="DATE">01/02/2000</param>
+      <param id="3" type="INTEGER">8</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+          <col id="2" type="INTEGER">${tcId_John}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Adding timecard for Dick">
+    <call>
+      <stmt>{call add_timecard(?,?,?)}</stmt>
+      <param id="1" type="CHAR">Dick Tracy</param>
+      <param id="2" type="DATE">01/02/2000</param>
+      <param id="3" type="INTEGER">10</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">0</col>
+          <col id="2" type="INTEGER">${tcId_Dick}</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+  <test name="Getting monthly report for IT">
+    <call>
+      <stmt>{call get_mthly_dept_rpt(?,?,?)}</stmt>
+      <param id="1" type="CHAR">Information Technology</param>
+      <param id="2" type="DATE">01/01/2000</param>
+      <param id="3" type="DATE">02/01/2000</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="CHAR">Information Technology</col>
+          <col id="2" type="DATE">01/01/2000</col>
+          <col id="3" type="DATE">02/01/2000</col>
+          <col id="4" type="INTEGER">${empId_John}</col>
+          <col id="5" type="CHAR">John Doe</col>
+          <col id="6" type="INTEGER">16</col>
+          <col id="7" type="NUMERIC">55.00</col>
+          <col id="8" type="NUMERIC">880.00</col>
+        </row>
+        <row id="2">
+          <col id="1" type="CHAR">Information Technology</col>
+          <col id="2" type="DATE">01/01/2000</col>
+          <col id="3" type="DATE">02/01/2000</col>
+          <col id="4" type="INTEGER">${empId_Dick}</col>
+          <col id="5" type="CHAR">Dick Tracy</col>
+          <col id="6" type="INTEGER">10</col>
+          <col id="7" type="NUMERIC">50.00</col>
+          <col id="8" type="NUMERIC">500.00</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

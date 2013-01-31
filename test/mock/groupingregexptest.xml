@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: groupingregexptest.xml,v 1.2 2005/07/09 01:39:20 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/groupingregexptest.xml,v $
+  Desc: Input specification for matching tests if the global category is a
+  regular expression. The regular expression this test expects is:
+  (.*)SimpleCat(.*). To run this from ant, use the following command:
+  ant sqlunit-flat -Dtestfile=test/mock/groupingregexptest.xml \
+      -Dsqlunit.category=(.*)SimpleCat(.*)
+-->
+
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <setup />
+
+  <test name="Testing with simpleCat">
+    <classifiers>
+      <category>SimpleCat</category>
+    </classifiers>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing with aSimpleCatAgain">
+    <classifiers>
+      <category>aSimpleCatAgain</category>
+    </classifiers>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing with ComplexCat">
+    <classifiers>
+      <category>ComplexCat</category>
+    </classifiers>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing with evenMoreComplexCat">
+    <classifiers>
+      <category>evenMoreComplexCat</category>
+    </classifiers>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing with several categories[1]">
+    <classifiers>
+      <category>ComplexCat, NiceCat, PrettyCat</category>
+    </classifiers>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing with several categories[2]">
+    <classifiers>
+      <category>ComplexCat, ASimpleCatToMatch, PrettyCat</category>
+    </classifiers>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+</sqlunit>

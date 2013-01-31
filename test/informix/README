@@ -1,0 +1,78 @@
+# $Id: README,v 1.2 2003/05/24 18:43:17 spal Exp $
+# $Source: /cvsroot/sqlunit/sqlunit/test/informix/README,v $
+
+Background Information
+----------------------
+The port of Informix was started but could not be completed because the 
+version of Informix SE 7.24 that I have will not play nice with the Linux 
+version (RH 7.3) I am using currently. Specifically, RH started using MD5 
+encryption and PAM (pluggable authentication module, using shadow passwords)
+for authentication sometime around version 7.0 or earlier, and Informix 
+SE 7.24 will not recognize this. No problems are encountered when developing
+the stored procedures and adding them to the database locally using 
+dbaccess, but since the JDBC driver accesses the database from a socket
+connection, the authentication fails since Informix SE 7.24 does not 
+understand MD5 passwords. Or so I gather. No workaround is available
+except to downgrade the operating system to a point when MD5/PAM was
+not implemented. My RH 6.2 machine used to work like this.
+
+I got the the Informix SE 7.24 when Informix was giving away a free copy
+for Linux sometime around 1999-2000.
+
+The reason Informix was chosen, apart from it being available , is
+because, unlike PostgreSQL, Informix does not have stored functions but
+does have stored procedures. So a port to Informix is likely to exercise
+SQLUnit's CallHandler module and in the process, make the SQLUnit testing
+more complete.
+
+If someone with a recent version of Informix database and JDBC driver 
+would undertake the task of running the included tests, and either sending
+me any errors or debugging it himself, that would be very helpful for
+people who are looking to use SQLUnit with Informix. All the stored 
+procedures supplied in this directory run fine through dbaccess.
+
+I have had to use DATE and CHAR(n) instead of the more appropriate (to this
+situation) DATETIME and VARCHAR in the stored procedures and the schema,
+since SE 7.24 did not have DATETIME and VARCHAR support. Feel free to 
+change these datatypes if you want to. Also you may want to write additional
+procedures that take advantage of features of current versions of Informix.
+Please let me know (spal@users.sourceforge.net) if you would be interested
+in completing the Informix port.
+
+The test suite that is currently implemented is described below.
+
+How to run the test
+-------------------
+  1) The database DDL is provided in the schema.sql. You will need to
+install the database first. Its called demodb, but it could be called
+anything. It models a very simple-minded Human Resources database with
+only three tables: department, employee and timecard.
+
+  2) The stored procedures need to be loaded into the database. Here is 
+a list of stored procedures and what they do.
+     add_dept.sql - adds a named department to the department table.
+     add_employee.sql - adds a named employee to the employee table
+       and assigns him to the named department.
+     add_timecard.sql - adds a timecard for a given employee and a 
+       given date. Rudimentary checking is done, eg, 0 < logged_time < 24.
+     get_emp_in_dept.sql - returns a list of all employees in a named
+       department.
+     get_emp_by_name.sql - returns the employee record for a named 
+       employee.
+     get_mthly_dept_rpt.sql - returns a report of hours worked by employee
+       for a given department and a given date range.
+     upd_rate.sql - updates the hourly rate for a particular employee.
+
+  3) The test.xml file contains the test suite. You can run it with the
+following command at the command prompt from the sqlunit root directory:
+     ant sqlunit -Dtestfile=test/informix/test.xml
+
+  4) If there are errors reported, they may be of either the SQLUnit variety
+or the Java variety. Examples of the SQLUnit variety might include things
+like variable mismatches and so on. Examples of the Java variety might
+include things like NullPointerException and such, although I am pretty
+confident that they wont appear. In case they do appear, you may get a 
+better handle on it if you set the debug variable in SQLUnit.java to true.
+You can choose to fix the code yourself or send the test results back to 
+me, although the former would probably be less frustrating.
+

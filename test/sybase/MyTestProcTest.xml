@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: MyTestProcTest.xml,v 1.2 2005/03/26 22:35:24 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/sybase/MyTestProcTest.xml,v $
+  Desc: This file runs a variety of tests, contributed by James Henderson,
+  to test NUMERIC and DECIMAL outparam functionality. The stored procedure
+  used for this test is MyTestProc.sql. These were originally for Microsoft
+  SQL Server 2000, but have been adapted for Sybase ASE version 12.5, with
+  some minor modifications. See the message "Problems with NUMERIC, DECIMAL
+  in SQLUnit 4.2" on the Open Discussion Forum for details about the original
+  bug.
+-->
+<sqlunit>
+  <connection transaction-support="off">
+    <driver>com.sybase.jdbc2.jdbc.SybDriver</driver>
+    <url>jdbc:sybase:Tds:host:port/db</url>
+    <user>user</user>
+    <password>pass</password>
+  </connection>
+
+  <setup>
+    <sql><stmt>set chained off</stmt></sql>
+  </setup>
+
+  <test name="Testing all NUMERIC and DECIMAL"> 
+    <sql> 
+      <stmt> 
+         select convert(numeric(5,2),'300.12') as numeric_f
+         , convert(decimal(5,2), '301.13') as decimal_f
+      </stmt> 
+    </sql> 
+    <result> 
+      <resultset id="1"> 
+        <row id="1"> 
+          <col id="01" name="numeric_f" type="NUMERIC">300.12</col> 
+          <col id="02" name="decimal_f" type="DECIMAL">301.13</col> 
+        </row> 
+      </resultset> 
+    </result> 
+  </test> 
+
+  <test name="Testing MyProc with param1 as output only NUMERIC"> 
+    <call> 
+      <stmt>{call MyTestProc(?)}</stmt> 
+      <param id="1" type="NUMERIC" inout="out" is-null="true" scale="2"
+          name="param1"/> 
+    </call> 
+    <result> 
+      <outparam id="1" name="param1" type="NUMERIC">5.26</outparam> 
+    </result> 
+  </test> 
+
+  <test name="Testing MyProc with param1 as inout NUMERIC"> 
+    <call> 
+      <stmt>{call MyTestProc(?)}</stmt> 
+      <param id="1" type="NUMERIC" inout="inout" is-null="false" name="param1">300.00</param> 
+      </call> 
+    <result> 
+      <outparam id="1" name="param1" type="NUMERIC">300.01</outparam> 
+    </result> 
+  </test> 
+
+  <test name="Testing MyProc with param1 as output only DECIMAL"> 
+    <call> 
+      <stmt>{call MyTestProc(?)}</stmt> 
+      <param id="1" type="DECIMAL" inout="out" is-null="true" scale="2"
+          name="param1"/> 
+    </call> 
+    <result> 
+      <outparam id="1" name="param1" type="DECIMAL">5.26</outparam> 
+    </result> 
+  </test> 
+
+  <test name="Testing MyProc with param1 as inout DECIMAL"> 
+    <call> 
+      <stmt>{call MyTestProc(?)}</stmt> 
+      <param id="1" type="DECIMAL" inout="inout" is-null="false" name="param1">300.00</param> 
+    </call> 
+    <result> 
+      <outparam id="1" name="param1" type="DECIMAL">300.01</outparam> 
+    </result> 
+  </test> 
+
+  <teardown />
+
+</sqlunit>

@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: numdectests.xml,v 1.4 2005/06/07 01:13:40 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/numdectests.xml,v $
+  Desc: Input specification for running SQLUnit tests for NUMERIC and DECIMAL
+  against a mock database.
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <setup />
+
+  <test name="Testing NUMERIC and DECIMAL">
+    <sql><stmt>returnNumericAndDecimalInResultSet</stmt></sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="numeric_f" type="NUMERIC">300.12</col>
+          <col id="2" name="decimal_f" type="DECIMAL">301.13</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing NUMERIC outparam">
+    <call>
+      <stmt>returnNumericOutParam</stmt>
+      <param id="1" name="param1" type="NUMERIC" inout="out">${out1}</param>
+    </call>
+    <result>
+      <outparam id="1" name="param1" type="NUMERIC">5.26</outparam>
+    </result>
+  </test>
+
+  <test name="Testing NUMERIC inout param">
+    <call>
+      <stmt>incrementNumericAndReturn</stmt>
+      <param id="1" type="NUMERIC" inout="inout" name="param1">300.00</param>
+    </call>
+    <result>
+      <outparam id="1" name="param1" type="NUMERIC">300.01</outparam>
+    </result>
+  </test>
+
+  <test name="Testing DECIMAL outparam">
+    <call>
+      <stmt>returnDecimalOutParam</stmt>
+      <param id="1" name="param1" type="DECIMAL" inout="out">${out1}</param>
+    </call>
+    <result>
+      <outparam id="1" name="param1" type="DECIMAL">5.26</outparam>
+    </result>
+  </test>
+
+  <test name="Testing DECIMAL inout param">
+    <call>
+      <stmt>incrementDecimalAndReturn</stmt>
+      <param id="1" type="DECIMAL" inout="inout" name="param1">300.00</param>
+    </call>
+    <result>
+      <outparam id="1" name="param1" type="DECIMAL">300.01</outparam>
+    </result>
+  </test>
+
+  <test name="Testing DECIMAL inout with scale .GT. precision">
+    <call>
+      <stmt>incrementDecimalAndReturn</stmt>
+      <param id="1" type="DECIMAL" scale="3" inout="inout" name="param1">300.00</param>
+    </call>
+    <result>
+      <outparam id="1" name="param1" type="DECIMAL">300.01</outparam>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

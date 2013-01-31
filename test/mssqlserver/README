@@ -1,0 +1,34 @@
+# $Id: README,v 1.1 2005/06/03 01:02:46 spal Exp $
+# $Source: /cvsroot/sqlunit/sqlunit/test/mssqlserver/README,v $
+#
+Introduction
+============
+This text file contains instructions on how to run some canned tests
+provided by James Henderson to test SQLUnit on MS SQL Server.
+
+Steps
+=====
+1. If MS SQL Server is used as the database server, then the JAR files
+associated with the JDBC driver for MS SQL Server must be placed within
+the "lib" directory.  AS of this writing, those files are msbase.jar, 
+mssqlserver.jar, and msutil.jar.  (These JAR files can usually be found in 
+C:\Program Files\Microsoft SQL Server 2000 Driver for JDBC\lib.)
+
+2. Add the stored procedures within the "mssqlserver" folder, if the
+stored procedures do not already exist within the target test database. 
+
+
+3. Modify the jdbc-url.txt under the "mssqlserver" folder to use the 
+URL for the target test database to be used for the MS SQL Server tests.
+
+
+4. Obtain a command prompt at the root directory for the version of the SQLUnit 
+installation that you installed.  Run the mssqlserver test suite to ensure that 
+it passes.  Issue the command:
+
+    ant sqlunit-nested -Dtestdir="mssqlserver"
+
+5. Examine results on the console to ensure that there are no test failures.
+
+These tests ensure that issues that have been addressed in previous versions
+of SQLUnit still function as advertised.

@@ -1,0 +1,27 @@
+<body>
+Mock Testing framework for SQLUnit. Provides a framework to test SQLUnit code without a database. The database independence is achieved by using the <a href="http://mockrunner.sourceforge.net">MockRunner JDBC framework</a>.<p />
+Instead of a real database, the testing framework relies on introspecting a specified class. The class implements the IMockDatabase interface and contains methods with the signature:
+<code>public MockResultSet methodName(Integer resultSetId);</code>
+The IMockDatabase interface mandates a getResultSet(String,int) method which returns a MockResultSet. The implementation of this method is provided in the AbstractMockDatabase class. Clients wishing to develop their own mock database classes should extend this class.<p />
+Examples of methods that mimic the behavior of stored procedures can be found in the SQLUnitMockDatabase class which extends AbstractMockDatabase. Things to note are:
+<ol>
+  <li>The count of the number of results (used for the Statement.execute() and CallableStatement.getMoreResults()) is returned in wrapped in result set 0.</li>
+  <li>Outparam values are generated internally using the negative of the supplied index. Thus, the value of OUTPARAM at position 1 will be wrapped in the resultset that is returned by invoking the appropriate method with -1. Scalar OUTPARAM values are specified as Strings, but are converted to the appropriate Object on retrieval. REF CURSOR OUTPARAM objects are returned as themselves since they are essentially ResultSet objects.</li>
+  <li>Exceptions are not thrown directly, but they are wrapped in the resultset that is being made to throw the exception.</li>
+  <li>ResultSets are returned from the method using the supplied index. Thus the first ResultSet will be returned by invoking the method with Integer(1).</li>
+</ol>
+The functionality of wrapping and unwrapping scalar and SQLException objects back and forth from MockResultSet objects can be found in the MockResultSetUtils class.<p />
+To make this work with the MockRunner framework, the following classes were extended from the MockRunner distribution:
+<ol>
+  <li><b>SQLUnitMockConnection</b> extends com.mockrunner.mock.jdbc.MockConnection. The extensions were mainly to call the Introspecting versions of the ResultSetHandler classes instead of MockRunner's ResultSetHandlers.</li>
+  <li><b>SQLUnitMockDriver</b> extends com.mockrunner.mock.jdbc.MockDriver. This version provides a URL signature which the mock framework will respond to.</li>
+  <li><b>SQLUnitMockStatement</b> extends com.mockrunner.mock.jdbc.MockStatement. Calls the Introspecting version of the ResultSetHandler.</li>
+  <li><b>SQLUnitMockPreparedStatement</b> extends com.mockrunner.mock.jdbc.MockPreparedStatement. Calls the Introspecting version of the ResultSetHandler.</li>
+  <li><b>SQLUnitMockCallableStatement</b> extends com.mockrunner.mock.jdbc.MockStatement. Calls the Introspecting version of the ResultSetHandler.</li>
+  <li><b>IntrospectingStatementResultSetHandler</b> extends com.mockrunner.jdbc.StatementResultSetHandler. Invokes the IntrospectingResultSetFactory to execute Statement objects.</li>
+  <li><b>IntrospectingPreparedStatementResultSetHandler</b> extends com.mockrunner.jdbc.PreparedStatementResultSetHandler. Invokes the IntrospectingResultSetFactory to execute PreparedStatement objects.</li>
+  <li><b>IntrospectingCallableStatementResultSetHandler</b> extends com.mockrunner.jdbc.CallableStatementResultSetHandler. Invokes the IntrospectingResultSetFactory to execute CallableStatement objects.</li>
+  <li><b>IntrospectingResultSetHandler</b> implements the com.mockrunner.jdbc.ResultSetHandler. Implements multi-resultset handling and getting the result sets using Introspection.</li>
+</ol>
+A sample test file which uses the SQLUnit mock testing framework can be found at test/mock/test.xml in the distribution.
+</body>

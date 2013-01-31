@@ -1,0 +1,179 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: batchtest.xml,v 1.3 2004/06/25 23:31:00 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mysql/batchtest.xml,v $
+  Desc: This is an alternate spec for my laptop which does not have
+  PostgreSQL installed.
+-->
+<sqlunit>
+  <connection>
+    <driver>com.mysql.jdbc.Driver</driver>
+    <url>jdbc:mysql://localhost:3306/sqlunitdb</url>
+    <user>defaultuser</user>
+    <password>defaultuser</password>
+  </connection>
+
+  <setup>
+    <sql><stmt>delete from customer where 1=1</stmt></sql>
+    <sql><stmt>insert into customer values(1,'Sujit Pal','secret','en_US',null,0,now())</stmt></sql>
+  </setup>
+
+  <!-- Testing basic batchtest functionality -->
+  <batchtest name="Testing basic batchtest functionality">
+    <batchsql>
+      <stmt>delete from customer where custId=1</stmt>
+      <stmt>insert into customer values(1,'Some One','secret','en_US',null,0,now())</stmt>
+      <stmt>insert into customer values(1,'Someone Else','secret','en_US',null,0,now())</stmt>
+      <stmt>delete from customer where 1=1</stmt>
+    </batchsql>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>1</updatecount>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <!-- Testing expected-count functionality -->
+  <batchtest name="Testing expected-count functionality">
+    <batchsql>
+      <stmt>delete from customer where custId=1</stmt>
+      <stmt>insert into customer values(1,'Some One','secret','en_US',null,0,now())</stmt>
+      <stmt>insert into customer values(1,'Someone Else','secret','en_US',null,0,now())</stmt>
+      <stmt>delete from customer where 1=1</stmt>
+    </batchsql>
+    <batchresult expected-count="4" />
+  </batchtest>
+
+  <!-- Testing failed-at functionality -->
+  <batchtest name="Testing failed-at functionality">
+    <batchsql>
+      <stmt>delete from customer where custId=1</stmt>
+      <stmt>insert into customer values(1,'Some One','secret','en_US',null,0,now())</stmt>
+      <stmt>insert into customer values(1,'Someone Else','secret','en_US',null,0,now())</stmt>
+      <stmt>select count(*) from customer</stmt>
+      <stmt>delete from customer where 1=1</stmt>
+    </batchsql>
+    <batchresult failed-at="3" />
+  </batchtest>
+
+  <!-- Testing basic batchtest functionality with failed-at -->
+  <batchtest name="Testing basic batchtest functionality">
+    <batchsql>
+      <stmt>delete from customer where custId=1</stmt>
+      <stmt>insert into customer values(1,'Some One','secret','en_US',null,0,now())</stmt>
+      <stmt>insert into customer values(1,'Someone Else','secret','en_US',null,0,now())</stmt>
+      <stmt>delete from customer where 1=1</stmt>
+    </batchsql>
+    <batchresult failed-at="0">
+      <updatecount>1</updatecount>
+      <updatecount>1</updatecount>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <!-- Testing basic batchtest functionality with batchcall -->
+  <batchtest name="Testing batchcall #1">
+    <batchcall>
+      <stmt>insert into customer values(?,?,?,?,?,?,now())</stmt>
+      <paramset id="1">
+        <param id="1" type="INTEGER">1</param>
+        <param id="2" type="VARCHAR">Some One</param>
+        <param id="3" type="VARCHAR">secret</param>
+        <param id="4" type="VARCHAR">en_US</param>
+        <param id="5" type="VARCHAR">SQLUnit</param>
+        <param id="6" type="INTEGER">0</param>
+      </paramset>
+      <paramset id="2">
+        <param id="1" type="INTEGER">2</param>
+        <param id="2" type="VARCHAR">Someone Else</param>
+        <param id="3" type="VARCHAR">secret</param>
+        <param id="4" type="VARCHAR">en_US</param>
+        <param id="5" type="VARCHAR">SQLUnit</param>
+        <param id="6" type="INTEGER">0</param>
+      </paramset>
+    </batchcall>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>1</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <!-- Testing basic batchtest functionality with batchcall -->
+  <batchtest name="Testing batchcall #2">
+    <batchcall>
+      <stmt>delete from customer where custId = ?</stmt>
+      <paramset id="1">
+        <param id="1" type="INTEGER">1</param>
+      </paramset>
+      <paramset id="2">
+        <param id="1" type="INTEGER">2</param>
+      </paramset>
+    </batchcall>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>1</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <!-- Testing batchtest/batchcall functionality with expected-count -->
+  <batchtest name="Testing batchcall with expected-count">
+    <batchcall>
+      <stmt>insert into customer values(?,?,?,?,?,?,now())</stmt>
+      <paramset id="1">
+        <param id="1" type="INTEGER">1</param>
+        <param id="2" type="VARCHAR">Some One</param>
+        <param id="3" type="VARCHAR">secret</param>
+        <param id="4" type="VARCHAR">en_US</param>
+        <param id="5" type="VARCHAR">SQLUnit</param>
+        <param id="6" type="INTEGER">0</param>
+      </paramset>
+      <paramset id="2">
+        <param id="1" type="INTEGER">2</param>
+        <param id="2" type="VARCHAR">Someone Else</param>
+        <param id="3" type="VARCHAR">secret</param>
+        <param id="4" type="VARCHAR">en_US</param>
+        <param id="5" type="VARCHAR">SQLUnit</param>
+        <param id="6" type="INTEGER">0</param>
+      </paramset>
+    </batchcall>
+    <batchresult expected-count="2" />
+  </batchtest>
+
+  <!-- Reset data for next test -->
+  <batchtest name="Resetting data">
+    <batchsql>
+      <stmt>delete from customer where 1=1</stmt>
+    </batchsql>
+    <batchresult expected-count="1" />
+  </batchtest>
+
+  <!-- Testing batchtest/batchcall functionality with failed-at -->
+  <batchtest name="Testing batchcall with failed-at">
+    <batchcall>
+      <stmt>insert into customer values(?,?,?,?,?,?,now())</stmt>
+      <paramset id="1">
+        <param id="1" type="INTEGER" is-null="true"></param>
+        <param id="2" type="VARCHAR">Some One</param>
+        <param id="3" type="VARCHAR">secret</param>
+        <param id="4" type="VARCHAR">en_US</param>
+        <param id="5" type="VARCHAR">SQLUnit</param>
+        <param id="6" type="INTEGER">0</param>
+      </paramset>
+      <paramset id="2">
+        <param id="1" type="INTEGER" is-null="true"></param>
+        <param id="2" type="VARCHAR">Someone Else</param>
+        <param id="3" type="VARCHAR">secret</param>
+        <param id="4" type="VARCHAR">en_US</param>
+        <param id="5" type="VARCHAR">SQLUnit</param>
+        <param id="6" type="INTEGER">0</param>
+      </paramset>
+    </batchcall>
+    <batchresult expected-count="2" failed-at="0" />
+  </batchtest>
+
+  <teardown />
+
+</sqlunit>

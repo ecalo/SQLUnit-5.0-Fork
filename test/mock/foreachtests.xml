@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: foreachtests.xml,v 1.6 2005/06/07 01:13:39 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/foreachtests.xml,v $
+  Desc: Input specification for running SQLUnit tests against a mock database.
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <test name="Testing prepare tag (per test setup)">
+    <prepare>
+      <set name="${var}" value="a" />
+    </prepare>
+    <sql>
+      <stmt>?SimpleResult</stmt>
+      <param id="1" type="VARCHAR">${var}</param>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing foreach(start,stop,step)">
+    <prepare>
+      <sql><stmt>deleteRows</stmt></sql>
+      <foreach param="id" start="1" stop="2" step="1">
+        <sql><stmt>insert${id}Row</stmt></sql>
+      </foreach>
+    </prepare>
+    <sql>
+      <stmt>returnCountOfRowsInserted</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">3</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing foreach(values)">
+    <prepare>
+      <sql><stmt>deleteRows</stmt></sql>
+      <foreach param="id" values="1,2">
+        <sql><stmt>insert${id}Row</stmt></sql>
+      </foreach>
+    </prepare>
+    <sql>
+      <stmt>returnCountOfRowsInserted</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">3</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing foreach(value set)">
+    <prepare>
+      <sql><stmt>deleteRows</stmt></sql>
+      <foreach param="id" values="insert;1;Row,insert;2;Row">
+        <sql><stmt>${id.0}${id.1}${id.2}</stmt></sql>
+      </foreach>
+    </prepare>
+    <sql>
+      <stmt>returnCountOfRowsInserted</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">3</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing foreach(start,count)">
+    <prepare>
+      <sql><stmt>deleteRows</stmt></sql>
+      <foreach param="id" start="1" count="2">
+        <sql><stmt>insert${id}Row</stmt></sql>
+      </foreach>
+    </prepare>
+    <sql>
+      <stmt>returnCountOfRowsInserted</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">3</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

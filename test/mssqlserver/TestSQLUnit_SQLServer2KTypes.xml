@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd" [
+    <!ENTITY jdbc-url SYSTEM "test/mssqlserver/jdbc-url.txt">
+]>
+<!-- $Id: TestSQLUnit_SQLServer2KTypes.xml,v 1.2 2005/06/07 01:13:40 spal Exp $ -->
+<!-- $Source: /cvsroot/sqlunit/sqlunit/test/mssqlserver/TestSQLUnit_SQLServer2KTypes.xml,v $ -->
+<sqlunit>
+    <!-- ********************************************************************************     //-->
+    <!--                                                                                   //-->
+    <!-- Test Case:    TestSQLUnit_SQLServer2KTypes                                    //-->
+    <!--                                                                                   //-->
+    <!-- Purpose:        This test will data type test for data types                  //-->
+    <!--                    within MS SQL Server 2000.                                    //-->
+    <!--                                                                                            //-->
+    <!--    Issue:                                                                                //-->
+    <!--        http://sourceforge.net/forum/forum.php?thread_id=1176084&forum_id=265576    //-->
+    <!--                                                                                            //-->
+    <!--    Fixed in:    SQLUnit 4.2, 4.6                                                    //-->
+    <!-- ********************************************************************************     //-->
+    <!-- *****************************    **    //-->
+    <!--  Connection set-up information    //-->
+    <!-- *****************************    **    //-->
+    <connection server-name="microsoft_sql_server">
+        <driver>com.microsoft.jdbc.sqlserver.SQLServerDriver</driver>
+        &jdbc-url;
+        <user>sqlunit</user>
+        <password>sqlunit</password>
+    </connection>
+    <test name="TestSQLUnit_SQLServer2KTypes_1: Test all MS SQL Server 2000 Data types">
+        <sql>
+            <stmt>
+                <!--            
+    The following two types do not currently work.
+    
+                     , cast(32767 as SMALLINT) as "SmallIntValue"
+                     , cast(255 as TINYINT) as "TinyIntValue"
+-->                     
+                select cast(9223372036854775807 as BIGINT) as "BigIntValue"
+                     , cast(-2147483648 as INTEGER) as "IntegerValue"
+                     , cast(1 as BIT) as "BitValue"
+                      , cast('300.12' as NUMERIC(5,2)) as "NumericValue"
+                     , cast('301.13' as DECIMAL(5,2)) as "DecimalValue"
+                     , cast('402.14' AS FLOAT) as "FloatValue"
+                     , cast('403.15' AS REAL) as "RealValue"
+                     , cast('100.12' as MONEY) as "MoneyValue"
+                     , cast('101.13' as SMALLMONEY) as "SmallMoneyValue"
+                     , cast('1900-01-01 13:02:55' as DATETIME) as "DateTimeValue"
+                     , cast('1901-01-01' as SMALLDATETIME) as "SmallDateTimeValue"
+                     , cast('1902-01-01' as TIMESTAMP) as "TimestampValue"
+                     , cast('char' as CHAR(4)) as "CharValue"
+                     , cast('varchar' AS VARCHAR(7)) as "VarCharValue"
+                     , cast('text' as TEXT(4)) as "TextValue"
+                     , cast('nchar' as NCHAR(5)) as "NCharValue"
+                     , cast('nvarchar' as NVARCHAR(8)) as "NVarCharValue"
+                     , cast('ntext' as NTEXT(5)) as "NTextValue"                     
+                     , cast('binary' AS BINARY(6)) as "BinaryValue"
+                     , cast('varbinary' AS VARBINARY(9)) as "VarBinaryValue"
+          </stmt>
+        </sql>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="01" name="BigIntValue" type="BIGINT">9223372036854775807</col>
+                    <col id="02" name="IntegerValue" type="INTEGER">-2147483648</col>
+                    <col id="03" name="BitValue" type="BIT">true</col>
+                    <col id="04" name="NumericValue" type="NUMERIC">300.12</col>
+                    <col id="05" name="DecimalValue" type="DECIMAL">301.13</col>
+                    <col id="06" name="FloatValue" type="FLOAT">402.14</col>
+                    <col id="07" name="RealValue" type="REAL">403.15</col>
+                    <!-- MONEY maps to DECIMAL -->
+                    <col id="08" name="MoneyValue" type="DECIMAL">100.12</col>
+                    <!-- SMALLMONEY maps to DECIMAL -->
+                    <col id="09" name="SmallMoneyValue" type="DECIMAL">101.13</col>
+                    <!-- DATETIME maps to TIMESTAMP-->
+                    <col id="10" name="DateTimeValue" type="TIMESTAMP">1900-01-01 13:02:55.000</col>
+                    <!-- SMALLDATETIME maps to TIMESTAMP-->
+                    <col id="11" name="SmallDateTimeValue" type="TIMESTAMP">1901-01-01 00:00:00.000</col>
+                    <col id="12" name="TimestampValue" type="BINARY">md5:1bd51fcf27e899287ff72ebb50b55c31</col>
+                    <col id="13" name="CharValue" type="CHAR">char</col>
+                    <col id="14" name="VarCharValue" type="VARCHAR">varchar</col>
+                    <col id="15" name="TextValue" type="LONGVARCHAR">md5:1cb251ec0d568de6a929b520c4aed8d1</col>
+                    <col id="16" name="NCharValue" type="CHAR">nchar</col>
+                    <col id="17" name="NVarCharValue" type="VARCHAR">nvarchar</col>
+                    <col id="18" name="NTextValue" type="LONGVARCHAR">md5:a5b5641e2204b99e018fe0208f2a8996</col>
+                    <col id="19" name="BinaryValue" type="BINARY">md5:9d7183f16acce70658f686ae7f1a4d20</col>
+                    <col id="20" name="VarBinaryValue" type="VARBINARY">varbinary</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <teardown/>
+</sqlunit>

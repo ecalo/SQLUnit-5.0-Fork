@@ -1,0 +1,179 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: methodInvokerTests.xml,v 1.3 2005/06/07 01:13:40 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/oracle/methodInvokerTests.xml,v $
+  Description: Oracle specific test cases for the methodinvoker and
+  dynamicsql tags, contributed by Mario Laureti, author of these two tags.
+-->
+
+<sqlunit>
+  <connection>
+    <driver>oracle.jdbc.driver.OracleDriver</driver>
+
+    <url>jdbc:oracle:thin:@198.73.83.161:1521:ora9D1</url>
+    <user>DEV2</user>
+    <password>DEV2</password>
+  </connection>
+
+  <setup>
+   <set name="${startAt}" value="0" />
+   <set name="${stopAt}" value="5" />
+   <set name="${step}" value="1" />
+   <set name="${user}" value="mlaureti" />
+  </setup>
+
+  <test name="methodinvoker constructor with Object types" failure-message="FAIL: methodinvoker constructor with Object types">
+    <methodinvoker class="net.sourceforge.sqlunit.utils.TestArgument" method="toString" >
+      <constructorArgs>
+        <arg name="c1" type="java.lang.Byte" value="-128" />
+        <arg name="c2" type="java.lang.Short" value="-32768" />
+        <arg name="c3" type="java.lang.Integer" value="-2147483648" />
+        <arg name="c4" type="java.lang.Long" value="-9223372036854775808" />
+        <arg name="c5" type="java.lang.Character" value="a" />
+        <arg name="c6" type="java.lang.Float" value="1.1" />
+        <arg name="c7" type="java.lang.Double" value="2.2" />
+        <arg name="c8" type="java.lang.String" value="Some text" />
+      </constructorArgs>
+    </methodinvoker>
+    <result>
+    </result>
+  </test>
+
+  <test name="methodinvoker method with primary types" failure-message="FAIL: methodinvoker method with primary types">
+    <methodinvoker class="net.sourceforge.sqlunit.utils.TestArgument" method="toString" >
+      <constructorArgs>
+        <arg name="c1" type="java.lang.Byte.TYPE" value="127" />
+        <arg name="c2" type="java.lang.Short.TYPE" value="32767" />
+        <arg name="c3" type="java.lang.Integer.TYPE" value="2147483647" />
+        <arg name="c4" type="java.lang.Long.TYPE" value="9223372036854775807" />
+        <arg name="c5" type="java.lang.Character.TYPE" value="b" />
+        <arg name="c6" type="java.lang.Float.TYPE" value="11.11" />
+        <arg name="c7" type="java.lang.Double.TYPE" value="22.22" />
+      </constructorArgs>
+    </methodinvoker>
+    <result>
+    </result>
+  </test>
+
+  <test name="methodinvoker method with Object types" failure-message="FAIL: methodinvoker method with Object types">
+    <methodinvoker class="net.sourceforge.sqlunit.utils.TestArgument" method="testMethodObjectArgument" >
+      <methodArgs>
+        <arg name="m1" type="java.lang.Byte" value="-128" />
+        <arg name="m2" type="java.lang.Short" value="-32768" />
+        <arg name="m3" type="java.lang.Integer" value="-2147483648" />
+        <arg name="m4" type="java.lang.Long" value="-9223372036854775808" />
+        <arg name="m5" type="java.lang.Character" value="a" />
+        <arg name="m6" type="java.lang.Float" value="1.1" />
+        <arg name="m7" type="java.lang.Double" value="2.2" />
+        <arg name="m8" type="java.lang.String" value="Some text" />
+      </methodArgs>
+    </methodinvoker>
+    <result>
+    </result>
+  </test>
+
+  <test name="methodinvoker method with primary types" failure-message="FAIL: methodinvoker method with primary types">
+    <methodinvoker class="net.sourceforge.sqlunit.utils.TestArgument" method="testMethodPrimaryArgument" >
+      <methodArgs>
+        <arg name="m1" type="java.lang.Byte.TYPE" value="127" />
+        <arg name="m2" type="java.lang.Short.TYPE" value="32767" />
+        <arg name="m3" type="java.lang.Integer.TYPE" value="2147483647" />
+        <arg name="m4" type="java.lang.Long.TYPE" value="9223372036854775807" />
+        <arg name="m5" type="java.lang.Character.TYPE" value="b" />
+        <arg name="m6" type="java.lang.Float.TYPE" value="11.11" />
+        <arg name="m7" type="java.lang.Double.TYPE" value="22.22" />
+      </methodArgs>
+    </methodinvoker>
+    <result>
+    </result>
+  </test>
+
+  <test name="methodinvoker/static/primary type arguments (int)" failure-message="FAIL: methodinvoker/static/primary type arguments">
+    <methodinvoker class="java.lang.Math" method="max" static="true">
+      <methodArgs>
+        <arg name="m1" type="java.lang.Integer.TYPE" value="1" />
+        <arg name="m1" type="java.lang.Integer.TYPE" value="8" />
+      </methodArgs>
+    </methodinvoker>
+    <result>
+    </result>
+  </test>
+
+  <test name="methodinvoker/static/primary type arguments (boolean)" failure-message="FAIL: methodinvoker/static/primary type arguments 2">
+    <methodinvoker class="java.lang.Boolean" method="valueOf" static="true">
+      <methodArgs>
+        <arg name="m1" type="java.lang.Boolean.TYPE" value="true" />
+      </methodArgs>
+    </methodinvoker>
+    <result>
+    </result>
+  </test>
+
+  <test name="Method invoker/static method no arguments " failure-message="FAIL: Method invoker/static method no arguments">
+    <methodinvoker class="java.lang.Math" method="random" static="true">
+    </methodinvoker>
+    <result>
+    </result>
+  </test>
+
+  <test name="Method invoke/static method with arguments " failure-message="FAIL: Method invoke/static method with arguments">
+    <methodinvoker class="java.lang.Integer" method="parseInt" static="true">
+      <methodArgs>
+        <arg name="m1" type="java.lang.String" value="123" />
+      </methodArgs>
+    </methodinvoker>
+    <result>
+    </result>
+  </test>
+
+
+  <test name="Method invoker:constructor/arguments " failure-message="FAIL: Method invoker:constructor/arguments">
+    <methodinvoker class="java.lang.Integer" method="floatValue">
+      <constructorArgs>
+        <arg name="c1" type="java.lang.String" value="123" />
+      </constructorArgs>
+    </methodinvoker>
+    <result>
+    </result>
+  </test>
+
+  <test name="Method invoker:constructor/arguments method/argument " failure-message="FAIL: Method invoker:constructor/arguments method/argument">
+    <methodinvoker class="java.lang.String" method="startsWith">
+      <constructorArgs>
+        <arg name="c1" type="java.lang.String" value="hello you" />
+      </constructorArgs>
+      <methodArgs>
+        <arg name="m1" type="java.lang.String" value="hello" />
+      </methodArgs>
+    </methodinvoker>
+    <result>
+    </result>
+  </test>
+
+  <test name="DynamicSqlHandler " failure-message="FAIL: DynamicSqlHandler">
+    <dynamicsql class="net.sourceforge.sqlunit.utils.TestArgument"  static="true" method="getGeneratedOracleSqlString">
+    </dynamicsql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="VARCHAR">X</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="DynamicSqlHandler " failure-message="FAIL: DynamicSqlHandler">
+    <dynamicsql class="net.sourceforge.sqlunit.utils.TestArgument"  static="true" method="getGeneratedOracleSqlString2">
+    </dynamicsql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="VARCHAR">X</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+
+</sqlunit>

@@ -1,0 +1,40 @@
+# $Id: README,v 1.2 2003/09/30 00:49:00 spal Exp $
+# $Source: /cvsroot/sqlunit/sqlunit/test/sybase/README,v $
+
+Background Information
+----------------------
+We dont supply the actual stored procedures here, since there could be
+intellectual property issues in doing so, but we will supply the tests
+and make SQLUnit work with Sybase ASE version 12.5.
+
+This port should also be valid for Microsoft SQL Server since it is very 
+similar to Sybase.
+
+If someone can create source code for stored procedures similar to that
+described below and modify the sample test.xml file accordingly, that
+would be very helpful for people who are trying to use SQLUnit with
+Sybase and/or MS-SQL, or trying to write Sybase or MS-SQL stored procedures
+for the very first time.
+
+Description of the test cases
+-----------------------------
+  1) Running a callable statement with a single argument and with a single
+return value. This is vanilla code, simply have a select [tuple] from table
+where [condition]. This was used to fix some bugs in the CallHandler code.
+  2) Running a callable statement with no input parameters and a single
+return value. Also vanilla code, this returns a multi-row resultset from
+the database.
+  3) Running a callable statement with a single input argument and a 
+single return value, but which returns multiple resultsets in its result
+object. This is possible, at least to my knowledge, with Sybase and MS-SQL
+only, so this is important to check out. Some of the resultsets could be
+empty, in which case they are represented with an empty resultset tag
+(see the sample test.xml included).
+
+The following sprocs were created to test a reported bug
+--------------------------------------------------------
+TestDataDump.sql -- this is a dummy sproc that just dumps out hardcoded
+                    data to match with the sp_TestDataDump test.
+TestConvertToNumeric.sql -- this is a wrapper for a char to int convertor
+                    using the CONVERT function.
+

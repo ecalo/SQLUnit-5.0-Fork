@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+    $Id: test.xml,v 1.2 2004/06/25 23:31:00 spal Exp $
+    $Source: /cvsroot/sqlunit/sqlunit/test/oracle/test.xml,v $
+    Desc: Input specification for testing Oracle PL/SQL stored procedures.
+          Contributed by Satheesh Donthy.
+-->
+<!-- Execute a Oracle Stored proc to retrieve a REF_CURSOR -->
+<test name="Find Department List" failure-message="Failed to find Department List">
+  <call connection-id="1">
+    <stmt>{call prc_ica_sel_usr_dept_list(?,?,?,?,?)}</stmt>
+    <param id="1" name="p_return_value" type="INTEGER" inout="out">${p_return_value}</param>
+    <param id="2" name="p_error_code" type="VARCHAR" inout="out">${p_error_code}</param>
+    <param id="3" name="p_error_msg" type="VARCHAR" inout="out">${p_error_msg}</param>
+    <param id="4" name="p_cursor" type="CURSOR" inout="out">${p_cursor}</param>
+    <param id="5" name="p_dept_nm" type="VARCHAR" inout="in">604</param>
+  </call>
+  <result>
+    <outparam id="4" type="CURSOR">
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="NUMERIC">100</col>
+          <col id="2" type="VARCHAR">bcfg</col>
+          <col id="3" type="VARCHAR">Bond &amp; Corporate Finance Group</col>
+          <col id="4" type="NUMERIC">NULL</col>
+          <col id="5" type="VARCHAR">Investment Program</col>
+          <col id="6" type="VARCHAR">Portfolio/Fund</col>
+          <col id="7" type="VARCHAR">Investor</col>
+          <col id="8" type="VARCHAR">Part D Label</col>
+          <col id="9" type="VARCHAR">Report Type</col>
+        </row>
+      </resultset>
+    </outparam>
+  </result>
+</test>
+
+<!-- Execute a Stored Proc to generate an SQL Exception -->
+<test name="Bad Person ID Test" failure-message="Got wrong exception for bad person ID.">
+  <call connection-id="1">
+    <stmt>{call prc_ica_sel_usr_dept_list(?,?,?,?,?)}</stmt>
+    <param id="1" name="p_return_value" type="INTEGER" inout="out">${p_return_value}</param>
+    <param id="2" name="p_error_code" type="VARCHAR" inout="out">${p_error_code}</param>
+    <param id="3" name="p_error_msg" type="VARCHAR" inout="out">${p_error_msg}</param>
+    <param id="4" name="p_cursor" type="CURSOR" inout="out">${p_cursor}</param>
+    <param id="5" name="p_dept_nm" type="VARCHAR" inout="in">xyz</param>
+  </call>
+  <result>
+    <exception>
+      <code>1002</code>
+      <message>ORA-01002: fetch out of sequence</message>
+    </exception>
+  </result>
+</test>

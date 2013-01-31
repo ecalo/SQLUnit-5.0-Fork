@@ -1,0 +1,9 @@
+<body>
+Contains tools to build SQLUnit test cases. These tools were moved from their
+old locations and merged into a single tools package to take advantage of 
+code reuse possibilities.<p />
+<h4>Backward compatibility information</h4>
+To those using these tools for the first time, there should be no issues at all. Each tool has an associated configuration file which can be used to predefine information such as JDBC parameters. The only changes to this file are as follows:<p />
+<b>guiconfig.properties.sample: </b>The addition of a new indentsize property which allows you to specify how many characters per indent you want. It defaults to 2, so if thats OK, you dont need to change your properties file.<p />
+<b>tuirc.properties.sample: </b>The captureFile property has been renamed to capturefile so as to be in line with the similarly named property in the guiconfig.properties.sample file. This was necessary to take advantage of the code sharing mentioned above.<p />
+</body>

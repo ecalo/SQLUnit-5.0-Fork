@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: exceptiontests.xml,v 1.5 2005/06/07 01:13:39 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/exceptiontests.xml,v $
+  Desc: Tests of the exception element.
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <!-- basic exception test -->
+  <test name="Testing throwing SQLException">
+    <call>
+      <stmt>exceptionResult</stmt>
+    </call>
+    <result>
+      <exception>
+        <code>1234</code>
+        <message>Test Exception</message>
+      </exception>
+    </result>
+  </test>
+
+  <!-- testing empty exception element -->
+  <test name="Testing empty exception element">
+    <call>
+      <stmt>exceptionResult</stmt>
+    </call>
+    <result>
+      <exception />
+    </result>
+  </test>
+
+  <!-- testing unexpected exception -->
+  <test name="Testing unexpected exception" assert="not-equal">
+    <call>
+      <stmt>exceptionResult</stmt>
+    </call>
+    <result>
+      <resultset id="1" />
+    </result>
+  </test>
+
+  <!-- testing result code and exception -->
+  <test name="Testing result code and exception">
+    <call>
+      <stmt>resultAndException</stmt>
+      <param id="1" name="rc" type="INTEGER" inout="out">${rc}</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">-2001</outparam>
+      <exception>
+        <code>1234</code>
+        <message>Test Exception</message>
+      </exception>
+    </result>
+  </test>
+
+  <test name="Testing result code and multi-line exception">
+    <call>
+      <stmt>resultAndMultilineException</stmt>
+      <param id="1" name="rc" type="INTEGER" inout="out">${rc}</param>
+    </call>
+    <result>
+      <outparam id="1" type="INTEGER">-2001</outparam>
+      <exception>
+        <code>1234</code>
+        <message>
+Test Exception
+Multiline Exception
+        </message>
+      </exception>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

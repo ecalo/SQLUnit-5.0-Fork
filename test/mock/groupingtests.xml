@@ -1,0 +1,391 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: groupingtests.xml,v 1.2 2005/06/10 05:52:42 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/groupingtests.xml,v $
+  Desc: Input specification for grouping tests.
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <setup>
+    <funcdef name="dbname1def" query="selectDatabase"
+        description="Defining a func without parameters" />
+  </setup>
+
+  <!-- tests for grouping -->
+
+  <test name="Testing with no skip">
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing with skip=false and reason">
+    <skip value="false">Skipping</skip>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing with skip=true and reason">
+    <skip value="true">Skipping</skip>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing with skip=true no reason">
+    <skip value="true" />
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing classifiers low severity">
+    <classifiers>
+      <severity>INFO</severity>
+      <category>GroupTestCategory</category>
+    </classifiers>
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing classifiers invalid severity">
+    <classifiers>
+      <severity>SEVERE</severity>
+      <category>GroupTestCategory</category>
+    </classifiers>
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing classifiers higher severity">
+    <classifiers>
+      <severity>ERROR</severity>
+      <category>GroupTestCategory</category>
+    </classifiers>
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing classifiers exact match">
+    <classifiers>
+      <severity>WARN</severity>
+      <category>GroupTestCategory</category>
+    </classifiers>
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing classifiers different category">
+    <classifiers>
+      <severity>ERROR</severity>
+      <category>SomeOtherTestCategory</category>
+    </classifiers>
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing classifiers multiple categories">
+    <classifiers>
+      <severity>WARN</severity>
+      <category>GroupTestCategory,SomeOtherTestCategory</category>
+    </classifiers>
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing classifiers multiple categories 2">
+    <classifiers>
+      <severity>WARN</severity>
+      <category>OtherCategory,GroupTestCategory,SomeOtherTestCategory</category>
+    </classifiers>
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing classifiers multiple categories 3">
+    <classifiers>
+      <severity>WARN</severity>
+      <category>OtherCategory,SomeOtherTestCategory</category>
+    </classifiers>
+    <sql>
+      <stmt>aSimpleResult</stmt>
+    </sql>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <diff name="Diff with no skip">
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>aSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Diff with skip no reason">
+    <skip value="true" />
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>aSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Diff with skip with reason">
+    <skip value="true">Skipping</skip>
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>aSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Diff with classifiers match">
+    <classifiers>
+      <severity>WARN</severity>
+      <category>GroupTestCategory</category>
+    </classifiers>
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>aSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Diff with classifiers unmatched category">
+    <classifiers>
+      <severity>WARN</severity>
+      <category>OtherCategory</category>
+    </classifiers>
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>aSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Diff with classifiers unmatched severity">
+    <classifiers>
+      <severity>INFO</severity>
+      <category>GroupTestCategory</category>
+    </classifiers>
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>aSimpleResult</stmt></sql>
+  </diff>
+
+  <diff name="Diff with classifiers higher severity">
+    <classifiers>
+      <severity>ERROR</severity>
+      <category>GroupTestCategory</category>
+    </classifiers>
+    <sql><stmt>aSimpleResult</stmt></sql>
+    <sql><stmt>aSimpleResult</stmt></sql>
+  </diff>
+
+  <batchtest name="Batchtest without skip">
+    <batchsql>
+      <stmt>updateCount1</stmt>
+      <stmt>updateCount2</stmt>
+      <stmt>updateCount1</stmt>
+    </batchsql>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+      <updatecount>1</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <batchtest name="Batchtest with skip no reason">
+    <skip value="true" />
+    <batchsql>
+      <stmt>updateCount1</stmt>
+      <stmt>updateCount2</stmt>
+      <stmt>updateCount1</stmt>
+    </batchsql>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+      <updatecount>1</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <batchtest name="Batchtest with skip and reason">
+    <skip value="true">Skipping</skip>
+    <batchsql>
+      <stmt>updateCount1</stmt>
+      <stmt>updateCount2</stmt>
+      <stmt>updateCount1</stmt>
+    </batchsql>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+      <updatecount>1</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <batchtest name="Batchtest with low severity">
+    <classifiers>
+      <severity>INFO</severity>
+      <category>GroupTestCategory</category>
+    </classifiers>
+    <batchsql>
+      <stmt>updateCount1</stmt>
+      <stmt>updateCount2</stmt>
+      <stmt>updateCount1</stmt>
+    </batchsql>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+      <updatecount>1</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <batchtest name="Batchtest with high severity">
+    <classifiers>
+      <severity>ERROR</severity>
+      <category>GroupTestCategory</category>
+    </classifiers>
+    <batchsql>
+      <stmt>updateCount1</stmt>
+      <stmt>updateCount2</stmt>
+      <stmt>updateCount1</stmt>
+    </batchsql>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+      <updatecount>1</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <batchtest name="Batchtest with unmatched category">
+    <classifiers>
+      <severity>INFO</severity>
+      <category>SomeOtherCategory</category>
+    </classifiers>
+    <batchsql>
+      <stmt>updateCount1</stmt>
+      <stmt>updateCount2</stmt>
+      <stmt>updateCount1</stmt>
+    </batchsql>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+      <updatecount>1</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <batchtest name="Batchtest with exact match classifiers">
+    <classifiers>
+      <severity>WARN</severity>
+      <category>GroupTestCategory</category>
+    </classifiers>
+    <batchsql>
+      <stmt>updateCount1</stmt>
+      <stmt>updateCount2</stmt>
+      <stmt>updateCount1</stmt>
+    </batchsql>
+    <batchresult>
+      <updatecount>1</updatecount>
+      <updatecount>2</updatecount>
+      <updatecount>1</updatecount>
+    </batchresult>
+  </batchtest>
+
+  <func name="dbname1" lookup="dbname1def" />
+
+  <func name="dbname1" lookup="dbname1def">
+    <skip value="true">Skipping</skip>
+  </func>
+
+  <func name="dbname1" lookup="dbname1def">
+    <classifiers>
+      <severity>INFO</severity>
+      <category>GroupTestCategory</category>
+    </classifiers>
+  </func>
+
+  <teardown />
+
+</sqlunit>

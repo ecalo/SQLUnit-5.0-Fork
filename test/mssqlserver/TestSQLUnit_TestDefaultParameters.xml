@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd" [
+    <!ENTITY jdbc-url SYSTEM "file:test/mssqlserver/jdbc-url.txt">
+]>
+<!-- $Id: TestSQLUnit_TestDefaultParameters.xml,v 1.2 2005/06/07 01:13:40 spal Exp $ -->
+<!-- $Source: /cvsroot/sqlunit/sqlunit/test/mssqlserver/TestSQLUnit_TestDefaultParameters.xml,v $ -->
+<sqlunit>
+    <!-- ********************************************************************************     //-->
+    <!--                                                                                   //-->
+    <!-- Test Case:    TestSQLUnit_TestDefaultParameterValues                    //-->
+    <!--                                                                                   //-->
+    <!-- Purpose:        This test will perform usage tests parameters with default        //-->
+    <!--                    values within SQLUnit.                                            //-->
+    <!--                                                                                   //-->
+    <!--    Issue:                                                                                //-->
+    <!--        http://sourceforge.net/forum/forum.php?thread_id=1129271&forum_id=265576    //-->
+    <!--                                                                                            //-->
+    <!--    Fixed in:    SQLUnit 3.9                                                            //-->
+    <!-- ********************************************************************************     //-->
+    <!-- *****************************    **    //-->
+    <!--  Connection set-up information    //-->
+    <!-- *****************************    **    //-->
+    <connection server-name="microsoft_sql_server">
+        <driver>com.microsoft.jdbc.sqlserver.SQLServerDriver</driver>
+        &jdbc-url;
+        <user>sqlunit</user>
+        <password>sqlunit</password>
+    </connection>
+    <setup/>
+    <test name="TestSQLUnit_TestDefaultParameterValues_1: Call stored proc using all default parameters values">
+        <call>
+            <stmt>{call SQLUnit_TestDefaultParameterValues()}</stmt>
+        </call>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">0</col>
+                    <col id="2" type="INTEGER">1</col>
+                    <col id="3" type="INTEGER">2</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestDefaultParameterValues_2: Call stored proc using only last parameter with default value">
+        <call>
+            <stmt>{call SQLUnit_TestDefaultParameterValues(?,?)}</stmt>
+            <param id="1" type="INTEGER">3</param>
+            <param id="2" type="INTEGER">4</param>
+        </call>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">3</col>
+                    <col id="2" type="INTEGER">4</col>
+                    <col id="3" type="INTEGER">2</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestDefaultParameterValues_3: Call stored proc using only first parameter with default value">
+        <call>
+            <stmt>{call SQLUnit_TestDefaultParameterValues(@beta=?,@gamma=?)}</stmt>
+            <param id="1" type="INTEGER">5</param>
+            <param id="2" type="INTEGER">6</param>
+        </call>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">0</col>
+                    <col id="2" type="INTEGER">5</col>
+                    <col id="3" type="INTEGER">6</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestDefaultParameterValues_4: Call stored proc using only middle parameter with default value">
+        <call>
+            <stmt>{call SQLUnit_TestDefaultParameterValues(@alpha=?,@gamma=?)}</stmt>
+            <param id="1" type="INTEGER">7</param>
+            <param id="2" type="INTEGER">8</param>
+        </call>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">7</col>
+                    <col id="2" type="INTEGER">1</col>
+                    <col id="3" type="INTEGER">8</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestDefaultParameterValues_5: Call stored proc replacing all default parameters">
+        <call>
+            <stmt>{call SQLUnit_TestDefaultParameterValues(?,?,?)}</stmt>
+            <param id="1" type="INTEGER">9</param>
+            <param id="2" type="INTEGER">10</param>
+            <param id="3" type="INTEGER">11</param>
+        </call>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">9</col>
+                    <col id="2" type="INTEGER">10</col>
+                    <col id="3" type="INTEGER">11</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <test name="TestSQLUnit_TestDefaultParameterValues_5: Call stored proc using named parameters">
+        <call>
+            <stmt>{call SQLUnit_TestDefaultParameterValues(@gamma=?,@alpha=?,@beta=?)}</stmt>
+            <param id="1" type="INTEGER">12</param>
+            <param id="2" type="INTEGER">13</param>
+            <param id="3" type="INTEGER">14</param>
+        </call>
+        <result>
+            <resultset id="1">
+                <row id="1">
+                    <col id="1" type="INTEGER">13</col>
+                    <col id="2" type="INTEGER">14</col>
+                    <col id="3" type="INTEGER">12</col>
+                </row>
+            </resultset>
+        </result>
+    </test>
+    <teardown/>
+</sqlunit>

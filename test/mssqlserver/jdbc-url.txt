@@ -1,0 +1,2 @@
+<url>jdbc:microsoft:sqlserver://MySystem:6666;databaseName=mydb</url>
+

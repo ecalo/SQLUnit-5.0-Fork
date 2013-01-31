@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: matchertests.xml,v 1.5 2006/04/30 22:25:56 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/matchertests.xml,v $
+  Desc: Specification for matchers
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <setup>
+    <include file="test/mock/included.sql" />
+  </setup>
+
+  <setup />
+
+  <test name="Testing embedded match element">
+    <match resultset-id="1" row-id="*" col-id="*"
+        matcher="net.sourceforge.sqlunit.matchers.AllOrNothingMatcher">
+      <arg name="match" value="true" />
+    </match>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing embedded match element #2" assert="not-equal">
+    <match resultset-id="1" row-id="*" col-id="*"
+        matcher="net.sourceforge.sqlunit.matchers.AllOrNothingMatcher">
+      <arg name="match" value="false" />
+    </match>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing match with expression matcher">
+    <match resultset-id="1" row-id="*" col-id="*"
+        matcher="net.sourceforge.sqlunit.matchers.ExpressionMatcher">
+      <arg name="expression" value="expected.value gt actual.value" />
+    </match>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing non-match with expression matcher" assert="not-equal">
+    <match resultset-id="1" row-id="*" col-id="*"
+        matcher="net.sourceforge.sqlunit.matchers.ExpressionMatcher">
+      <arg name="expression" value="expected.value le actual.value" />
+    </match>
+    <call>
+      <stmt>aSimpleResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing regex with expression matcher" assert="resultsets-equal">
+    <match resultset-id="1" row-id="1" col-id="2"
+        matcher="net.sourceforge.sqlunit.matchers.ExpressionMatcher">
+      <arg name="expression" value="actual.value.matches(expected.value)" />
+    </match>
+    <call>
+      <stmt>resultAndOneResultSet</stmt>
+      <param id="1" type="INTEGER" inout="out">${rc}</param>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">7</col>
+          <col id="2" type="VARCHAR">James.*</col>
+          <col id="3" type="VARCHAR">Martini</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing match foo with bar" assert="not-equal">
+    <match resultset-id="*" row-id="*" col-id="*"
+        matcher="net.sourceforge.sqlunit.matchers.ExpressionMatcher">
+      <arg name="expression" value="actual.value.matches(expected.value)" />
+    </match>
+    <call>
+      <stmt>aSimpleStringResult</stmt>
+    </call>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="foo" type="VARCHAR">bar</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>

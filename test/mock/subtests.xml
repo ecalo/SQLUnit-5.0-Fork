@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!DOCTYPE sqlunit SYSTEM "file:docs/sqlunit.dtd">
+<!--
+  $Id: subtests.xml,v 1.3 2005/06/07 01:13:40 spal Exp $
+  $Source: /cvsroot/sqlunit/sqlunit/test/mock/subtests.xml,v $
+  Desc: Test suite for testing subdef and sub functionality
+-->
+<sqlunit>
+  <connection>
+    <driver>net.sourceforge.sqlunit.test.mock.SQLUnitMockDriver</driver>
+    <url>jdbc:mock:net.sourceforge.sqlunit.test.mock.SQLUnitMockDatabase</url>
+    <user />
+    <password />
+  </connection>
+
+  <setup>
+    <subdef name="SubWithoutParamsDef" query="aSimpleResult" type="call" />
+    <subdef name="SubWithInParamDef" query="?SimpleResult" type="call">
+      <param id="1" name="param1" type="VARCHAR">?</param>
+    </subdef>
+    <subdef name="SubWithOutParamDef" query="resultAndOneResultSet"
+        type="call">
+      <param id="1" name="param1" type="INTEGER" inout="out">${rc1}</param>
+    </subdef>
+  </setup>
+
+  <test name="Testing sub without parameters">
+    <sub lookup="SubWithoutParamsDef" />
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing sub with input parameters">
+    <sub lookup="SubWithInParamDef">
+      <subparam name="param1" value="a" />
+    </sub>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">1</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing overriding input parameters">
+    <sub lookup="SubWithInParamDef">
+      <subparam name="param1" value="another" />
+    </sub>
+    <result>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" name="col1" type="INTEGER">2</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <test name="Testing sub with outparam only">
+    <sub lookup="SubWithOutParamDef" />
+    <result>
+      <outparam id="1" type="INTEGER">143</outparam>
+      <resultset id="1">
+        <row id="1">
+          <col id="1" type="INTEGER">7</col>
+          <col id="2" type="VARCHAR">James Bond</col>
+          <col id="3" type="VARCHAR">Martini</col>
+        </row>
+      </resultset>
+    </result>
+  </test>
+
+  <teardown />
+
+</sqlunit>
