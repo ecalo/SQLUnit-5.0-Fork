@@ -1,0 +1,21 @@
+Process steps for unit testing ETL code with my flavor of SQLUnit:
+
+check out ETL code from tool repo
+clone/pull tests from git repository
+check for existing tests for your ETL or the objects that you will be reusing
+
+if tests exist, you can use and build on them for you testing
+if they dont, write new ones for your ETL
+
+develop ETL AND unit tests simultaneously (cant really do TDD because we are only capable of blackbox testing at this point)
+once ETL/test development is complete, run the unit tests locally before commiting to the repo
+
+if your tests pass
+check in code to tool repo
+commit test and ETL code to repo
+* committing test is a manual process using Git
+* committing ETL code is automated because we must export from tool repo and import into Git using BATT
+
+if your tests fail, iterate through the process again starting with your ETL/test development until the tests pass
+
+When creating new tests, ensure that the name is equal to ${YOUR_OBJECT_NAME}_UT.xml for consistency.
