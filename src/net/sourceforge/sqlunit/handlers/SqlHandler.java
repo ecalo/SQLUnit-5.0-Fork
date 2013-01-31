@@ -20,6 +20,14 @@
  */
 package net.sourceforge.sqlunit.handlers;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import net.sourceforge.sqlunit.ConnectionRegistry;
 import net.sourceforge.sqlunit.HandlerFactory;
 import net.sourceforge.sqlunit.IErrorCodes;
@@ -31,18 +39,8 @@ import net.sourceforge.sqlunit.beans.Param;
 import net.sourceforge.sqlunit.beans.ResultSetBean;
 import net.sourceforge.sqlunit.utils.TypeUtils;
 import net.sourceforge.sqlunit.utils.XMLUtils;
-
 import org.apache.log4j.Logger;
 import org.jdom.Element;
-
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The SqlHandler class processes the contents of an sql tag in the input
@@ -121,6 +119,7 @@ public class SqlHandler implements IHandler {
                 params[i] = (Param) paramHandler.process(elParam);
             }
         }
+        
         return executeSQL(connectionId, stmt, params);
     }
 

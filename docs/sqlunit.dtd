@@ -3,7 +3,6 @@
   $Source: /cvsroot/sqlunit/sqlunit/docs/sqlunit.dtd,v $
   This is the DTD for creating SQLUnit test cases in XML
 -->
-
 <!-- Describing common elements -->
 <!ELEMENT skip (#PCDATA)>
   <!ATTLIST skip
@@ -25,6 +24,12 @@
   <!ATTLIST sql
     id CDATA #IMPLIED
     connection-id CDATA #IMPLIED>
+<!-- Describing the etl element. note: also added to the setup and teardown elements -->
+<!ELEMENT etl EMPTY>
+  <!ATTLIST etl
+    name CDATA #REQUIRED
+    tool CDATA #REQUIRED
+    objectType CDATA #REQUIRED>
 <!ELEMENT call (stmt, (param)*)>
   <!ATTLIST call
     id CDATA #IMPLIED
@@ -118,7 +123,7 @@
     type (sql|call) "sql">
 
 <!-- Describing the setup element -->
-<!ELEMENT setup ((set)*, (funcdef)*, (subdef)*, (((sql)*,(foreach)*)|(include)*))>
+<!ELEMENT setup ((set)*, (funcdef)*, (subdef)*, (((sql)*,(etl)*,(foreach)*)|(include)*))>
 
 <!-- Defining the subparam element -->
 <!ELEMENT subparam EMPTY>
@@ -231,11 +236,10 @@
     param9 CDATA #IMPLIED>
 
 <!-- Describing the teardown element -->
-<!ELEMENT teardown (((sql)*,(foreach)*)|(include)*)>
+<!ELEMENT teardown (((sql)*,(etl)*,(foreach)*)|(include)*)>
 
 <!-- Describing the sqlunit element -->
 <!ELEMENT sqlunit 
     ((connection)+, (setup)*, (test|batchtest|diff|echo|func)+, (teardown)*)>
   <!ATTLIST sqlunit
       name CDATA #IMPLIED>
-
