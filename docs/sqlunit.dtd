@@ -29,7 +29,8 @@
   <!ATTLIST etl
     name CDATA #REQUIRED
     tool CDATA #REQUIRED
-    objectType CDATA #REQUIRED>
+    objectType CDATA #REQUIRED
+    guid CDATA #REQUIRED>
 <!ELEMENT call (stmt, (param)*)>
   <!ATTLIST call
     id CDATA #IMPLIED
