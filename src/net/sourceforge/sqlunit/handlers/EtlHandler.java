@@ -26,8 +26,10 @@ import org.jdom.Element;
  * should go to" required="Yes"
  * @sqlunit.attrib objectType="objectType" description="The type of the ETL
  * being executed" required="Yes"
+ * @sqlunit.attrib guid="guid" description="The guid of the ETL
+ * object being executed" required="Yes"
  * @sqlunit.example name="Example of a simple ETL tag" description=" <etl
- * name="test_job" tool="test_tool" objectType="test_type">{\n} "
+ * name="test_job" tool="test_tool" objectType="test_type" guid="abcdef">{\n} "
  */
 public class EtlHandler implements IHandler {
 
@@ -50,8 +52,9 @@ public class EtlHandler implements IHandler {
         String etlName = XMLUtils.getAttributeValue(elEtl, "name");
         String etlTool = XMLUtils.getAttributeValue(elEtl, "tool");
         String etlObjectType = XMLUtils.getAttributeValue(elEtl, "objectType");
+        String etlGuid = XMLUtils.getAttributeValue(elEtl, "guid");
 
-        return executeETL(etlName, etlObjectType, etlTool);
+        return executeETL(etlName, etlObjectType, etlTool, etlGuid);
     }
 
     /**
@@ -65,8 +68,8 @@ public class EtlHandler implements IHandler {
      * running the ETL.
      */
     protected Object executeETL(final String object, final String objectType,
-            final String tool) throws Exception {
-        LOG.debug("executeETL(" + object + "," + objectType + "," + tool + ")");
+            final String tool, final String guid) throws Exception {
+        LOG.debug("executeETL(" + object + "," + objectType + "," + tool + "," + guid + ")");
 
         System.out.println("Executing ETL...");
 
@@ -75,6 +78,7 @@ public class EtlHandler implements IHandler {
 		    + " --object " + object
                     + " --objectType " + objectType
                     + " --tool " + tool
+                    + " --guid " + guid
                     + " --no-out";
 	    
             String[] args = args_list.split(" ");
