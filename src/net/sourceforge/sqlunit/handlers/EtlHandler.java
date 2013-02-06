@@ -75,9 +75,8 @@ public class EtlHandler implements IHandler {
 		    + " --object " + object
                     + " --objectType " + objectType
                     + " --tool " + tool
-		    + " --environment test_environment"
                     + " --no-out";
-		System.out.println(args_list);
+	    
             String[] args = args_list.split(" ");
             BATT batt = new BATT();
             batt.start(args);
